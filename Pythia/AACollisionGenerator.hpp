@@ -1,5 +1,5 @@
 #ifndef WAC_AACollisionGenerator
-#define WAC_ AACollisionGenerator
+#define WAC_AACollisionGenerator
 #include "TRandom1.h"
 #include "TParticle.h"
 #include "TClonesArray.h"
