@@ -68,6 +68,8 @@
 #pragma link C++ class NuDynTask+;
 #pragma link C++ class NuDynHistos+;
 #pragma link C++ class NuDynDerivedHistos+;
+#pragma link C++ class PTCorrelator+;
+#pragma link C++ class PTHistos+;
 
 #pragma link C++ class TrackAndPairEffects+;
 #pragma link C++ class TrackAndPairConfiguration+;
