@@ -30,7 +30,7 @@ public:
   void calculateR2(TH1* h1, TH1* h2, TH1* hr);
   void calculateR2(TH1* h1_1, TH1* h1_2, TH1* h2_12, TH1* hr);
   void calculateNuDyn(TH1* r2_11, TH1* r2_12, TH1* r2_22, TH1* nudyn);
-  void calculateRatio(TH1 * h1, TH1 * h2, TH1 * ratio);
+  void calculateRatio(TH1 * h1, TH1 * h2, TH1 * ratio, TH1 * ratioOptB=0);
   void calculateMeanAndStd(TH1 * h, int nBins, double &mean, double &typicalError, double &eMean, double &std);
   void fillMeanErrStd(TH1 * h, TH1 * eh,int n);
   void fillHist(TH1 * source, TH1 * target, int n);
@@ -94,6 +94,17 @@ public:
   TH1* r2_12Ratio_vsSub;
   TH1* r2_22Ratio_vsSub;
   TH1* nudyn_12Ratio_vsSub;
+
+  TH1* f1_1RatioOptB_vsSub;
+   TH1* f1_2RatioOptB_vsSub;
+   TH1* f2_11RatioOptB_vsSub;
+   TH1* f2_12RatioOptB_vsSub;
+   TH1* f2_22RatioOptB_vsSub;
+   TH1* r2_11RatioOptB_vsSub;
+   TH1* r2_12RatioOptB_vsSub;
+   TH1* r2_22RatioOptB_vsSub;
+   TH1* nudyn_12RatioOptB_vsSub;
+
 
   TH1* ef1_1_vsSub;
   TH1* ef1_2_vsSub;

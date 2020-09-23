@@ -88,6 +88,7 @@ partName4("U")
   partName2 = particleFilter2->getName();
   partName3 = particleFilter3->getName();
   partName4 = particleFilter4->getName();
+  createIdentical();
 }
 
 //////////////////////////////////////////////////////////////
@@ -112,7 +113,8 @@ void NuDynTask::createHistograms()
   histoName += partName2;
   histoName += partName3;
   histoName += partName4;
-  nuDynHistos = new NuDynHistos(histoName,ac,debugLevel);
+
+  nuDynHistos = new NuDynHistos(histoName,identical,ac,debugLevel);
   if (ac->calculateDerivedHistograms)
     {
     nuDynDerivedHistos = new NuDynDerivedHistos(histoName,ac,debugLevel);
@@ -244,4 +246,25 @@ void NuDynTask::scaleHistograms(double factor)
   if (reportDebug())  cout << "NuDynTask::scaleHistograms(..) Scale all primary histograms by " << factor << endl;
   nuDynHistos->scale(factor);
   if (reportDebug())  cout << "NuDynTask::scale(..) Completed"  << endl;
+}
+
+
+void NuDynTask::createIdentical()
+{
+  identical[0] = 1; //(particleFilter1==particleFilter1) ? 1 : 0;
+  identical[1] = (particleFilter1==particleFilter2) ? 1 : 0;
+  identical[2] = (particleFilter1==particleFilter3) ? 1 : 0;
+  identical[3] = (particleFilter1==particleFilter4) ? 1 : 0;
+  identical[4] = (particleFilter2==particleFilter1) ? 1 : 0;
+  identical[5] = 1; //(particleFilter2==particleFilter2) ? 1 : 0;
+  identical[6] = (particleFilter2==particleFilter3) ? 1 : 0;
+  identical[7] = (particleFilter2==particleFilter4) ? 1 : 0;
+  identical[8] = (particleFilter3==particleFilter1) ? 1 : 0;
+  identical[9] = (particleFilter3==particleFilter2) ? 1 : 0;
+  identical[10] = 1; //(particleFilter3==particleFilter3) ? 1 : 0;
+  identical[11] = (particleFilter3==particleFilter4) ? 1 : 0;
+  identical[12] = (particleFilter4==particleFilter1) ? 1 : 0;
+  identical[13] = (particleFilter4==particleFilter2) ? 1 : 0;
+  identical[14] = (particleFilter4==particleFilter3) ? 1 : 0;
+  identical[15] = 1; //(particleFilter4==particleFilter4) ? 1 : 0;
 }

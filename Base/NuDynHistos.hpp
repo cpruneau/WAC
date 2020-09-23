@@ -16,6 +16,7 @@ class NuDynHistos : public Histograms
 public:
 
   NuDynHistos(const TString & collectionName,
+              int  * identicalUsed,
                       AnalysisConfiguration * analysisConfiguration,
                       LogLevel  debugLevel);
   NuDynHistos(TFile * inputFile,
@@ -27,6 +28,7 @@ public:
   virtual void loadHistograms(TFile * inputFile);
   virtual void fill(double mult, double cent, double * n,  double weight);
 
+  virtual int sameFilter(int i1, int i2);
 
   ////////////////////////////////////////////////////////////////////////////
   // Data Members - Histograms
@@ -74,6 +76,8 @@ public:
   TProfile ** h_f2_vsCent;
   TProfile ** h_f3_vsCent;
   TProfile ** h_f4_vsCent;
+
+  int * identical;
 
   ClassDef(NuDynHistos,0)
 };

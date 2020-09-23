@@ -217,25 +217,7 @@ void EccentricityCalc::reset()
 }
 
 /// Save histograms.
-void EccentricityCalc::save()
-{
-  if (doHistograms)
-    {
-    h_x->Write();
-    h_y->Write();
-    h2_yVsX->Write();
-    h_avg_x->Write();
-    h_avg_y->Write();
-    h_var_x->Write();
-    h_var_y->Write();
-    h_var_xy->Write();
-    h_eps_denom->Write();
-    h_eps_x->Write();
-    h_eps_y->Write();
-    h_eps_mod->Write();
-    h2_eps_xy->Write();
-    }
-}
+ 
 
 
 void EccentricityCalc::calculateAverages()

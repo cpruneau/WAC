@@ -267,7 +267,7 @@
 //}
 
 
-int StatStudyPlots()
+int NuDynPlots()
 {
   TString includesPath = "/Users/claudeapruneau/Documents/GitHub/WAC/Base/";
   gSystem->Load(includesPath+"CanvasCollection.hpp");
@@ -305,64 +305,130 @@ int StatStudyPlots()
   gSystem->Load(includesPath+"NuDynTask.hpp");
   gSystem->Load(includesPath+"NuDynHistos.hpp");
   gSystem->Load(includesPath+"NuDynDerivedHistos.hpp");
-  gSystem->Load(includesPath+"StatStudyHistograms.hpp");
   gSystem->Load(includesPath+"Plotter.hpp");
-  gSystem->Load(includesPath+"StatStudyPlotter.hpp");
+  gSystem->Load(includesPath+"NuDynPlotter.hpp");
   gSystem->Load("libBase.dylib");
 
-  int nSubSamples = 1000;
-
-  HistogramCollection * histogramCollection = new HistogramCollection("Collection",100);
+  HistogramCollection * histogramCollection = new HistogramCollection("Collection",200);
   histogramCollection->setDefaultOptions(1);
   CanvasCollection    * canvasCollection    = new CanvasCollection();
   CanvasConfiguration * canvasConfiguration = new CanvasConfiguration(CanvasConfiguration::Landscape,CanvasConfiguration::Linear);
-  GraphConfiguration  ** graphConfigurations = new GraphConfiguration*[10];
-  for (int iGraph=0;iGraph<10;iGraph++)
+  GraphConfiguration  ** graphConfigurations = new GraphConfiguration*[40];
+  for (int iGraph=0;iGraph<40;iGraph++)
     {
-    graphConfigurations[iGraph] = new GraphConfiguration(1,iGraph);
+    graphConfigurations[iGraph] = new GraphConfiguration(1,iGraph%10);
     }
 
-  TString inputPath = "/Users/claudeapruneau/Documents/GitHub/run/StatStudy/";
-  TString outputPath = "/Users/claudeapruneau/Documents/GitHub/run/StatStudy/";
-  int nModels            = 5;
-  TFile ** inputFiles = new TFile* [nModels];
-  StatStudyHistograms ** statStudy = new StatStudyHistograms*[nModels];
-  StatStudyHistograms ** statStudy2 = new StatStudyHistograms*[nModels];
-  StatStudyPlotter    ** plotter   = new StatStudyPlotter*[nModels];
-  TString nameBase = "StatStudySet";
-  TString name, title;
-  TString ** modelName  = new TString*[nModels];
-  TString ** modelTitle = new TString*[nModels];
-  TString canvasNameBase;
-  //for (int iModel=0;iModel<nModels;iModel++)
-    for (int iModel=0;iModel<nModels;iModel++)
-    {
-    name = nameBase;
-    name += iModel;
-    modelName[iModel]  = new TString(name);
-    canvasNameBase = name;
-    canvasNameBase += "_";
-    title = "Set ";
-    title += iModel;
+  TString inputPath  = "/Users/claudeapruneau/Documents/GitHub/run/NuDynStudies/";
+  TString outputPath = "/Users/claudeapruneau/Documents/GitHub/run/NuDynStudies/";
 
-    modelTitle[iModel]  = new TString(title);
-    inputFiles[iModel] = new TFile(inputPath+name+".root","OLD");;
-    statStudy[iModel]  = new StatStudyHistograms(inputFiles[iModel], name ,MessageLogger::Debug);
-    plotter[iModel]    = new StatStudyPlotter();
-    //plotter[iModel]->makePlots(*modelName[iModel],statStudy[iModel],canvasConfiguration,graphConfigurations);
-    plotter[iModel]->makePlots(canvasNameBase,statStudy[iModel],canvasConfiguration,graphConfigurations);
+
+  int nModels            = 5;
+  TFile ** inputFiles  = new TFile* [nModels];
+  NuDynHistos  ** nuDynHistos = new NuDynHistos*[nModels];
+  NuDynDerivedHistos  ** nuDynDerivedHistos = new NuDynDerivedHistos*[nModels];
+  NuDynPlotter ** plotter      = new NuDynPlotter*[nModels];
+  TString fileBaseName  = "resultsPYTHIA_NuDyn_";
+  TString fileBaseName  = "hardOffPYTHIA_NuDyn_";
+  TString histoName, histoTitle;
+  TString fileName;
+  TString fileName;
+  TString ** setName  = new TString*[nModels];
+  TString ** setTitle = new TString*[nModels];
+  TString ** histoBaseNames    = new TString*[nModels];
+  TString ** histoBaseTitles   = new TString*[nModels];
+
+  histoBaseNames[0] = new TString("HPHPHPHP");
+  histoBaseNames[1] = new TString("HPHPHPHM");
+  histoBaseNames[2] = new TString("HPHPHMHM");
+  histoBaseNames[3] = new TString("HPHMHMHM");
+  histoBaseNames[4] = new TString("HMHMHMHM");
+
+  histoBaseTitles[0] = new TString("h^{+}h^{+}h^{+}h^{+}");
+  histoBaseTitles[1] = new TString("h^{+}h^{+}h^{+}h^{-}");
+  histoBaseTitles[2] = new TString("h^{+}h^{+}h^{-}h^{-}");
+  histoBaseTitles[3] = new TString("h^{+}h^{-}h^{-}h^{-}");
+  histoBaseTitles[4] = new TString("h^{-}h^{-}h^{-}h^{-}");
+
+  AnalysisConfiguration * ac = new AnalysisConfiguration("","","");
+  ac->nuDynVsMult = true;
+  ac->nuDynVsCent = false;
+
+  for (int iModel=0;iModel<nModels;iModel++)
+    //for (int iModel=0;iModel<1;iModel++)
+    {
+    fileName = fileBaseName;
+    fileName += *histoBaseNames[iModel];
+    setName[iModel]    = new TString(fileName);
+    setTitle[iModel]   = histoBaseTitles[iModel];
+    cout << "iModel:" << iModel << " Title:" <<  *setTitle[iModel]  << endl;
+    inputFiles[iModel] = new TFile(inputPath+fileName+"_MB.root ","OLD");
+    if (!inputFiles[iModel])
+      {
+      cout << "<F> Could not open file: " << inputPath+fileName << endl;
+      return 1;
+      }
+    else
+      {
+      cout << "<I> Succesfully opened file: " << inputPath+fileName << endl;
+      }
+    nuDynHistos[iModel]        = new NuDynHistos(inputFiles[iModel], *histoBaseNames[iModel], ac, MessageLogger::Debug);
+    nuDynDerivedHistos[iModel] = new NuDynDerivedHistos(inputFiles[iModel], *histoBaseNames[iModel], ac, MessageLogger::Debug);
+    plotter[iModel]            = new NuDynPlotter(false);
+    plotter[iModel]->makePlots(*setName[iModel],nuDynHistos[iModel],nuDynDerivedHistos[iModel],
+                               canvasConfiguration,graphConfigurations);
     plotter[iModel]->printAllCanvas(outputPath);
     }
 
-  StatStudyPlotter * compPlotter = new StatStudyPlotter();
-  compPlotter->makeComparisonPlots("ModelComparisonSampleSize_", canvasConfiguration,3,statStudy,modelTitle,graphConfigurations);
-  compPlotter->printAllCanvas(outputPath);
+    NuDynPlotter * compPlotter = new NuDynPlotter(false);
+    compPlotter->makeComparisonPlots("ModelComparison_HardOff_", canvasConfiguration,nModels,nuDynHistos,nuDynDerivedHistos,setTitle,graphConfigurations);
+    compPlotter->printAllCanvas(outputPath);
 
-  StatStudyPlotter * compPlotter2 = new StatStudyPlotter();
-  statStudy++;statStudy++;
-  modelTitle++;modelTitle++;
-   compPlotter2->makeComparisonPlots("ModelComparisonPartMult_", canvasConfiguration,3,statStudy,modelTitle,graphConfigurations);
-   compPlotter2->printAllCanvas(outputPath);
+  int index12;
+  index12 = nuDynHistos[0]->index2(0,0);
+  TH1* r2_11 = nuDynDerivedHistos[3]->h_R2_vsMult[index12];
+  if (!r2_11) { cout <<"r2_11 does not exist " << endl; return -1;}
+  index12 = nuDynHistos[0]->index2(0,1);
+  TH1* r2_12 = nuDynDerivedHistos[3]->h_R2_vsMult[index12];
+  if (!r2_12) { cout <<"r2_12 does not exist " << endl; return -1;}
+  index12 = nuDynHistos[0]->index2(1,1);
+  TH1* r2_22 = nuDynDerivedHistos[3]->h_R2_vsMult[index12];
+  if (!r2_22) { cout <<"r2_22 does not exist " << endl; return -1;}
+  index12 = nuDynHistos[0]->index2(0,1);
+  TH1* nuDyn1 = nuDynDerivedHistos[3]->h_nudyn_vsMult[0];
+  if (!nuDyn1) { cout <<"nuDyn does not exist 1" << endl; return -1;}
+  histogramCollection->calculateNudyn(r2_11,r2_12,r2_22,nuDyn1);
+
+  //TCanvas * cc = new TCanvas();
+  //nuDyn->Draw();
+
+  index12 = nuDynHistos[0]->index2(0,0);
+  r2_11 = nuDynDerivedHistos[4]->h_R2_vsMult[index12];
+  index12 = nuDynHistos[0]->index2(0,1);
+  r2_12 = nuDynDerivedHistos[4]->h_R2_vsMult[index12];
+  index12 = nuDynHistos[0]->index2(1,1);
+  r2_22 = nuDynDerivedHistos[4]->h_R2_vsMult[index12];
+  index12 = nuDynHistos[0]->index2(0,1);
+  TH1* nuDyn2 = nuDynDerivedHistos[4]->h_nudyn_vsMult[index12];
+  if (!nuDyn2) { cout <<"nuDyn does not exist 2" << endl; return -1;}
+  histogramCollection->calculateNudyn(r2_11,r2_12,r2_22,nuDyn2);
+  //nuDyn->Draw("SAME");
+
+  TH1** hh = new TH1*[2];
+  hh[0] = nuDyn1;
+  hh[1] = nuDyn2;
+
+  TString ** leg   = new TString*[2];
+  leg[0] = new TString("PM");
+  leg[1] = new TString("MM");
+  Plotter * p  = new Plotter(false);
+  p->plot(2,"NuDynComp_HardOff",canvasConfiguration, graphConfigurations,
+          "Mult", 0.0, 400.0,
+          "#nu_{dyn}", -1.0, 0.0,
+          hh,leg,
+          0.7,0.6, 0.9, 0.85, 0.05);
+  p->printAllCanvas(outputPath);
+  cout << "<I> NuDynPlots() All done...." << endl;
 
   return 0;
 }
