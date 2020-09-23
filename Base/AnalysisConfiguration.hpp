@@ -73,6 +73,8 @@ public:
 
   bool nuDynVsMult;
   bool nuDynVsCent;
+  bool ptCorrelatorVsMult;
+  bool ptCorrelatorVsCent;
   int nBins_mult;  double min_mult; double max_mult;
   int nBins_cent;  double min_cent; double max_cent;
 
