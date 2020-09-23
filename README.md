@@ -13,7 +13,3 @@ _Wayne State Analysis Code Package_
 
 - go to the directory where the present document resides
 - `source set-WAC-PATH`
-- `mkdir build`
-- `cd build`
-- `cmake ../`
-- `make install`
