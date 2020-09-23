@@ -31,7 +31,7 @@ find_library(EGPYTHIA8 EGPythia8)
 
 #---Define useful ROOT functions and macros (e.g. ROOT_GENERATE_DICTIONARY)
 include(${ROOT_USE_FILE})
-include_directories(${CMAKE_SOURCE_DIR} ${ROOT_INCLUDE_DIRS} "Base" "Cluster" "CollisionGeometry" "Ampt" "Epos" "Pythia" "Eccentricity" "Blastwave" 
+include_directories(${CMAKE_SOURCE_DIR} ${ROOT_INCLUDE_DIRS} "Base" "Cluster" "Ampt" "Epos" "Pythia" "Eccentricity" "Blastwave" 
 "/Users/claudeapruneau/Documents/MyProjects/AnalysisCode/buildRoot6.18.04/include" 
 "/Users/claudeapruneau/Documents/MyProjects/AnalysisCode/Pythia/pythia8243/include" 
 "/Users/claudeapruneau/Documents/MyProjects/AnalysisCode/Pythia/pythia8243/include/Pythia8")
@@ -50,7 +50,6 @@ set_target_properties(EGPythiaLib PROPERTIES IMPORTED_LOCATION ${EGPYTHIA8})
 
 add_subdirectory(Base)
 #add_subdirectory(Cluster)
-#add_subdirectory(CollisionGeometry)
 add_subdirectory(Pythia)
 add_subdirectory(Ampt)
 add_subdirectory(Blastwave)

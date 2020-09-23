@@ -13,7 +13,7 @@ NuDynDerivedHistos::NuDynDerivedHistos(const TString & name,
                                        AnalysisConfiguration * configuration,
                                        LogLevel  debugLevel)
 :
-Histograms(name,configuration,600,debugLevel)
+Histograms(name,configuration,400,debugLevel)
 {
   h_F2 = new TH1 * [10];
   h_F3 = new TH1 * [20];
@@ -85,13 +85,13 @@ Histograms(name,configuration,200,debugLevel)
     h_nudyn_vsCent = new TH1 * [10];
     }
 
+
   loadHistograms(inputFile);
 }
 
 NuDynDerivedHistos::~NuDynDerivedHistos()
 {
-  cout << "NuDynDerivedHistos::~NuDynDerivedHistos() was called." << endl;
-
+  //deleteHistograms();
 }
 
 // for now use the same boundaries for eta and y histogram
@@ -336,7 +336,7 @@ void NuDynDerivedHistos::loadHistograms(TFile * inputFile)
   int nPart =4;
   TString histName;
   TString histTitle;
-  for (int i1=0; i1<nPart; i1++)
+  for (int i1=1; i1<nPart; i1++)
     {
     for (int i2=i1; i2<nPart; i2++)
       {
@@ -377,7 +377,7 @@ void NuDynDerivedHistos::loadHistograms(TFile * inputFile)
       h_R2[index12]  = loadH1(inputFile,histName);
       if (ac.nuDynVsMult)
         {
-        histName  = bn + "R2_";
+        histName  = bn + "f2_";
         histName  += i1;
         histName  += i2;
         histName += "_vsMult";
@@ -385,35 +385,12 @@ void NuDynDerivedHistos::loadHistograms(TFile * inputFile)
         }
       if (ac.nuDynVsCent)
         {
-        histName  = bn + "R2_";
+        histName  = bn + "f2_";
         histName  += i1;
         histName  += i2;
         histName += "_vsCent";
         h_R2_vsCent[index12]  = loadH1(inputFile,histName);
         }
-
-      histName  = bn + "nudyn_";
-      histName  += i1;
-      histName  += i2;
-      histTitle = "#nu_{dyn}";
-      h_nudyn[index12]  = loadH1(inputFile,histName);
-      if (ac.nuDynVsMult)
-        {
-        histName  = bn + "nudyn_";
-        histName  += i1;
-        histName  += i2;
-        histName += "_vsMult";
-        h_nudyn_vsMult[index12]  = loadH1(inputFile,histName);
-        }
-      if (ac.nuDynVsCent)
-        {
-        histName  = bn + "nudyn_";
-        histName  += i1;
-        histName  += i2;
-        histName += "_vsCent";
-        h_nudyn_vsCent[index12]  = loadH1(inputFile,histName);
-        }
-
       for (int i3=i2; i3<nPart; i3++)
         {
         int index123 = index3(i1,i2,i3);
@@ -444,7 +421,7 @@ void NuDynDerivedHistos::loadHistograms(TFile * inputFile)
           histName  += i2;
           histName  += i3;
           histName += "_vsCent";
-          h_F3_vsCent[index123]  = loadH1(inputFile,histName);
+          h_F3_vsMult[index123]  = loadH1(inputFile,histName);
           }
         histName  = bn + "R3_";
         histName  += i1;
@@ -473,11 +450,16 @@ void NuDynDerivedHistos::loadHistograms(TFile * inputFile)
           histName  += i2;
           histName  += i3;
           histName += "_vsCent";
-          h_R3_vsCent[index123]  = loadH1(inputFile,histName);
+          h_R3_vsMult[index123]  = loadH1(inputFile,histName);
           }
         for (int i4=i3; i4<nPart; i4++)
           {
           int index1234 = index4(i1,i2,i3,i4);
+          histName  = bn + "F4_";
+          histName  += i1;
+          histName  += i2;
+          histName  += i3;
+          histName  += i4;
           histTitle = "F_{4}";
           histTitle += "^{";
           histTitle += i1;
@@ -485,14 +467,7 @@ void NuDynDerivedHistos::loadHistograms(TFile * inputFile)
           histTitle += i3;
           histTitle += i4;
           histTitle += "}";
-
-          histName  = bn + "F4_";
-          histName  += i1;
-          histName  += i2;
-          histName  += i3;
-          histName  += i4;
-
-          //h_F4[index1234]  = loadH1(inputFile,histName);
+          h_F4[index1234]  = loadH1(inputFile,histName);
           if (ac.nuDynVsMult)
             {
             histName  = bn + "F4_";
@@ -511,9 +486,13 @@ void NuDynDerivedHistos::loadHistograms(TFile * inputFile)
             histName  += i3;
             histName  += i4;
             histName += "_vsCent";
-            //h_F4_vsCent[index1234]  = loadH1(inputFile,histName);
+            h_F4_vsMult[index1234]  = loadH1(inputFile,histName);
             }
-
+          histName  = bn + "R4_";
+          histName  += i1;
+          histName  += i2;
+          histName  += i3;
+          histName  += i4;
           histTitle = "R_{4}";
           histTitle += "^{";
           histTitle += i1;
@@ -521,14 +500,7 @@ void NuDynDerivedHistos::loadHistograms(TFile * inputFile)
           histTitle += i3;
           histTitle += i4;
           histTitle += "}";
-
-          histName  = bn + "R4_";
-          histName  += i1;
-          histName  += i2;
-          histName  += i3;
-          histName  += i4;
-
-          //h_R4[index1234]  = loadH1(inputFile,histName);
+          h_R4[index1234]  = loadH1(inputFile,histName);
           if (ac.nuDynVsMult)
             {
             histName  = bn + "R4_";
@@ -547,13 +519,12 @@ void NuDynDerivedHistos::loadHistograms(TFile * inputFile)
             histName  += i3;
             histName  += i4;
             histName += "_vsCent";
-            //h_R4_vsCent[index1234]  = loadH1(inputFile,histName);
+            h_R4_vsMult[index1234]  = loadH1(inputFile,histName);
             }
           }
         }
       }
     }
-  if (reportInfo()) cout << "Load completed." << endl;
 }
 
 void NuDynDerivedHistos::calculateDerivedHistograms(NuDynHistos * source)
@@ -607,21 +578,18 @@ void NuDynDerivedHistos::calculateDerivedHistograms(NuDynHistos * source)
           int index234 = index3(i2,i3,i4);
           int index1234 = index4(i1,i2,i3,i4);
           calculateF4R4(source->h_f1[i1],source->h_f1[i2],source->h_f1[i3],source->h_f1[i4],
-                        source->h_f2[index12],source->h_f2[index13],source->h_f2[index14],
-                        source->h_f2[index23],source->h_f2[index24],source->h_f2[index34],
+                        source->h_f2[index12],source->h_f2[index13],source->h_f2[index14],source->h_f2[index23],source->h_f2[index24],source->h_f2[index34],
                         source->h_f3[index123],source->h_f3[index124],source->h_f3[index134],source->h_f3[index234],
                         source->h_f4[index1234],
                         h_F4[index1234], h_R4[index1234]);
           if (ac.nuDynVsMult) calculateF4R4(source->h_f1_vsMult[i1],source->h_f1_vsMult[i2],source->h_f1_vsMult[i3],source->h_f1_vsMult[i4],
-                                            source->h_f2_vsMult[index12], source->h_f2_vsMult[index13], source->h_f2_vsMult[index14],
-                                            source->h_f2_vsMult[index23], source->h_f2_vsMult[index24], source->h_f2_vsMult[index34],
+                                            source->h_f2_vsMult[index12],source->h_f2_vsMult[index13],source->h_f2_vsMult[index14],source->h_f2_vsMult[index23],source->h_f2_vsMult[index24],source->h_f2_vsMult[index34],
                                             source->h_f3_vsMult[index123],source->h_f3_vsMult[index124],source->h_f3_vsMult[index134],source->h_f3_vsMult[index234],
                                             source->h_f4_vsMult[index1234],
                                             h_F4_vsMult[index1234], h_R4_vsMult[index1234]);
           if (ac.nuDynVsCent) calculateF4R4(source->h_f1_vsCent[i1],source->h_f1_vsCent[i2],source->h_f1_vsCent[i3],source->h_f1_vsCent[i4],
-                                            source->h_f2_vsCent[index12],  source->h_f2_vsCent[index13], source->h_f2_vsCent[index14],
-                                            source->h_f2_vsCent[index23],  source->h_f2_vsCent[index24], source->h_f2_vsCent[index34],
-                                            source->h_f3_vsCent[index123], source->h_f3_vsCent[index124],source->h_f3_vsCent[index134],source->h_f3_vsCent[index234],
+                                            source->h_f2_vsCent[index12],source->h_f2_vsCent[index13],source->h_f2_vsCent[index14],source->h_f2_vsCent[index23],source->h_f2_vsCent[index24],source->h_f2_vsCent[index34],
+                                            source->h_f3_vsCent[index123],source->h_f3_vsCent[index124],source->h_f3_vsCent[index134],source->h_f3_vsCent[index234],
                                             source->h_f4_vsCent[index1234],
                                             h_F4_vsCent[index1234], h_R4_vsCent[index1234]);
           }
