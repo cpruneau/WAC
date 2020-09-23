@@ -44,7 +44,7 @@ add_library(EGLib SHARED IMPORTED)
 add_library(PythiaLib SHARED IMPORTED)
 add_library(EGPythiaLib SHARED IMPORTED)
 set_target_properties(EGLib PROPERTIES IMPORTED_LOCATION ${EG})
-set_target_properties(PythiaLib PROPERTIES IMPORTED_LOCATION ${PYTHIA8})
+set_target_properties(PythiaLib PROPERTIES IMPORTED_LOCATION ${PYTHIA8_LIB})
 set_target_properties(EGPythiaLib PROPERTIES IMPORTED_LOCATION ${EGPYTHIA8})
 
 
