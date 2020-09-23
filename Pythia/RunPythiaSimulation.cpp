@@ -14,6 +14,8 @@
 #include "ParticleFilter.hpp"
 #include "PythiaEventGenerator.hpp"
 #include "NuDynTask.hpp"
+#include "PTCorrelator.hpp"
+#include "AACollisionGenerator.hpp"
 
 int main()
 {
@@ -35,8 +37,8 @@ int main()
   ac->inputPath = "./";
   ac->configurationFileName = "configuration";
   ac->rootInputFileName = "";
-  ac->outputPath = "/Users/claudeapruneau/Documents/GitHub/run/NuDynStudies/";
-  ac->rootOuputFileName =  "softOff";
+  ac->outputPath = getenv("OUTPUT_PATH");            // check this 
+  ac->rootOuputFileName =  "results";                // and this
   ac->histoBaseName =  "pythia";
 
   ac->nBins_pt    = 40;
@@ -89,19 +91,34 @@ int main()
   ParticleFilter  * particleFilter_PP  = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Positive,ac->min_pt+0.001,ac->max_pt,ac->min_eta,ac->max_eta, ac->min_y,ac->max_y); // +ve only
   ParticleFilter  * particleFilter_PM  = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Negative,ac->min_pt+0.001,ac->max_pt,ac->min_eta,ac->max_eta, ac->min_y,ac->max_y); // +ve only
 
-
+  int order = 4;// order <= particleFilters1 length
+  ParticleFilter * particleFilters1[8];
+  particleFilters1[0] = particleFilter_HP;
+  particleFilters1[1] = particleFilter_HM;
+  particleFilters1[2] = particleFilter_PiP;
+  particleFilters1[3] = particleFilter_PiM;
+  particleFilters1[4] = particleFilter_KP;
+  particleFilters1[5] = particleFilter_KM;
+  particleFilters1[6] = particleFilter_PP;
+  particleFilters1[7] = particleFilter_PM;
+  
   Event * event = Event::getEvent();
   EventLoop * eventLoop = new EventLoop();
-  eventLoop->addTask( new PythiaEventGenerator("PYTHIA",0, event,eventFilter,particleFilter) );
+  //eventLoop->addTask( new PythiaEventGenerator("PYTHIA",0, event,eventFilter,particleFilter) );
+  eventLoop->addTask( new AACollisionGenerator("PYTHIA_PbPbEventGenerator",ac, event,eventFilter,particleFilter, 208) ); // lead has 208 nucleons
 
+  //t->setReportLevel(MessageLogger::Debug);
+  eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM", ac, event, eventFilter, particleFilters1, order, nEventsRequested) );
+  /*
   NuDynTask * t = new NuDynTask("PYTHIA_NuDyn_HPHPHPHP", ac, event, eventFilter,particleFilter_HP,particleFilter_HP,particleFilter_HP,particleFilter_HP);
   //t->setReportLevel(MessageLogger::Debug);
+  
   eventLoop->addTask( t );
   eventLoop->addTask( new NuDynTask("PYTHIA_NuDyn_HPHPHPHM", ac, event, eventFilter,particleFilter_HP,particleFilter_HP,particleFilter_HP,particleFilter_HM) );
   eventLoop->addTask( new NuDynTask("PYTHIA_NuDyn_HPHPHMHM", ac, event, eventFilter,particleFilter_HP,particleFilter_HP,particleFilter_HM,particleFilter_HM) );
   eventLoop->addTask( new NuDynTask("PYTHIA_NuDyn_HPHMHMHM", ac, event, eventFilter,particleFilter_HP,particleFilter_HM,particleFilter_HM,particleFilter_HM) );
   eventLoop->addTask( new NuDynTask("PYTHIA_NuDyn_HMHMHMHM", ac, event, eventFilter,particleFilter_HM,particleFilter_HM,particleFilter_HM,particleFilter_HM) );
-
+  */
   //NuDynTask * nudyn_PiPPiPPiPPiP = new NuDynTask("PYTHIA_NuDyn_PiPi",   ac,  event, eventFilter,particleFilter_PiP,particleFilter_PiM);
   eventLoop->run(nEventsRequested,nEventsReport);
 
