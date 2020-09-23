@@ -9,12 +9,10 @@
 ClassImp(NuDynHistos);
 
 NuDynHistos::NuDynHistos(const TString & name,
-                         int * identicalUsed,
                          AnalysisConfiguration * configuration,
                          LogLevel  debugLevel)
 :
-Histograms(name,configuration,500,debugLevel),
-identical(identicalUsed)
+Histograms(name,configuration,400,debugLevel)
 {
   initialize();
 }
@@ -24,7 +22,7 @@ NuDynHistos::NuDynHistos(TFile * inputFile,
                          AnalysisConfiguration * configuration,
                          LogLevel  debugLevel)
 :
-Histograms(name,configuration,500,debugLevel)
+Histograms(name,configuration,400,debugLevel)
 {
   loadHistograms(inputFile);
 }
@@ -245,7 +243,7 @@ void NuDynHistos::loadHistograms(TFile * inputFile)
   h_f1 = new TProfile * [4];
   h_f2 = new TProfile * [10];
   h_f3 = new TProfile * [20];
-  h_f4 = new TProfile * [35];
+  h_f4 = new TProfile * [25];
 
   if (ac.nuDynVsMult)
      {
@@ -365,7 +363,7 @@ void NuDynHistos::loadHistograms(TFile * inputFile)
           h_f4[index1234]  = loadProfile(inputFile,histName);
           if (ac.nuDynVsMult)
             {
-            histName  = bn + "f4_";
+            histName  = bn + "f3_";
             histName  += i1;
             histName  += i2;
             histName  += i3;
@@ -375,7 +373,7 @@ void NuDynHistos::loadHistograms(TFile * inputFile)
             }
           if (ac.nuDynVsCent)
             {
-            histName  = bn + "f4_";
+            histName  = bn + "f3_";
             histName  += i1;
             histName  += i2;
             histName  += i3;
@@ -413,7 +411,7 @@ void NuDynHistos::fill(double mult, double cent, double * n, double weight)
     {
       int index12 = index2(i1,i2);
     //if (reportDebug()) cout << "NuDynHistos::fill(...) i1:" << i1 << "  i2:" << i2 << " index12:" << index12 << endl;
-    fill = n[i1]* (n[i2] - sameFilter(i1,i2));
+    fill = n[i1]* (n[i2] - (i1==i2?1:0));
      h_f2[index12]->Fill(mult,fill,weight);
      if (ac.nuDynVsMult) h_f2_vsMult[index12]->Fill(mult,fill,weight);
      if (ac.nuDynVsCent) h_f2_vsCent[index12]->Fill(cent,fill,weight);
@@ -421,7 +419,7 @@ void NuDynHistos::fill(double mult, double cent, double * n, double weight)
       {
       int index123 = index3(i1,i2,i3);
      //if (reportDebug()) cout << "NuDynTask::fill(...) i1:" << i1 << "  i2:" << i2 << "  i3:" << i3 << " index123:" << index123 << endl;
-      fill = n[i1]* (n[i2] - sameFilter(i1,i2)) * (n[i3] - sameFilter(i1,i3) - sameFilter(i2,i3));
+      fill = n[i1]* (n[i2] - (i1==i2?1:0)) * (n[i3] - (i1==i3?1:0) - (i2==i3?1:0));
      h_f3[index123]->Fill(mult,fill,weight);
       if (ac.nuDynVsMult) h_f3_vsMult[index123]->Fill(mult,fill,weight);
       if (ac.nuDynVsCent) h_f3_vsCent[index123]->Fill(cent,fill,weight);
@@ -429,7 +427,7 @@ void NuDynHistos::fill(double mult, double cent, double * n, double weight)
         {
            int index1234 = index4(i1,i2,i3,i4);
     //if (reportDebug()) cout << "NuDynTask::fill(...) i1:" << i1 << "  i2:" << i2 << "  i3:" << i3 << "  i4:" << i4 << " index1234:" << index1234 << endl;
-        fill = n[i1] * (n[i2] - sameFilter(i1,i2)) * (n[i3] - sameFilter(i1,i3) - sameFilter(i2,i3)) * ( n[i4] - sameFilter(i1,i4) - sameFilter(i2,i4) - sameFilter(i3,i4)) ;
+        fill = n[i1] * (n[i2] - (i1==i2?1:0)) * (n[i3] - (i1==i3?1:0) - (i2==i3?1:0)) * ( n[i4] - (i1==i4?1:0) - (i2==i4?1:0) - (i3==i4?1:0)) ;
         h_f4[index1234]->Fill(mult,fill,weight);
         if (ac.nuDynVsMult) h_f4_vsMult[index1234]->Fill(mult,fill,weight);
         if (ac.nuDynVsCent) h_f4_vsCent[index1234]->Fill(cent,fill,weight);
@@ -439,10 +437,3 @@ void NuDynHistos::fill(double mult, double cent, double * n, double weight)
   }
 }
 
-int  NuDynHistos::sameFilter(int i1, int i2)
-{
-  if (i1>=0 && i1<=3 && i2>=0 && i2<=3)
-    return identical[4*i1+i2];
-  else
-    return 0;
-}

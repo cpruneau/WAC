@@ -18,11 +18,10 @@
 ClassImp(Plotter);
 
 
-Plotter::Plotter(bool showErrors)
+Plotter::Plotter()
 :
 CanvasCollection(),
-MessageLogger(),
-showErrorBars(showErrors)
+MessageLogger()
 {
   if (reportDebug()) cout << "Plotter::CTOR() No OPS." << endl;
 }
@@ -68,78 +67,35 @@ TCanvas *  Plotter::plot(int nGraphs, TString  canvasName, CanvasConfiguration *
   setProperties(h[0],*gc[0]);
   h[0]->GetXaxis()->SetTitle(xTitle);
   h[0]->GetYaxis()->SetTitle(yTitle);
-  double min = -1.0;
-  double max =  1.0;
   if (yMin < yMax)
     {
-    min = yMin;
-    max = yMax;
+      h[0]->SetMinimum(yMin);
+      h[0]->SetMaximum(yMax);
     }
-  else if (yMin >= yMax)
+  else
     {
-    min =  1.0E100;
-    max = -1.0E100;
-    cout << "Histo: " << h[0]->GetTitle() << endl;
+    double max = -1.0E100;
     for (int iGraph=0; iGraph<nGraphs; iGraph++)
       {
-      double vMax = h[iGraph]->GetBinContent(h[iGraph]->GetMaximumBin());
-      if (vMax>max){max = vMax;}
-      double vMin = h[iGraph]->GetBinContent(h[iGraph]->GetMinimumBin());
-      if (vMin<min){min = vMin;}
+      double v = h[iGraph]->GetMaximum();
+      if (v>max) max = v;
       }
-    cout << "Found min : " << min << " max : " << max << endl;
-    if (max>min)
+    if (max>-1.0E100)
       {
-      if (yMax<0.0)
-        {
-        if (max>0)
-          {
-          max  = fabs(yMax)*max;
-          }
-        else if (max<0)
-          {
-          max  = max/fabs(yMax);
-          }
-        }
-      if (yMin>0.0)
-        {
-        if (min<0)
-          {
-          min = fabs(yMin)*min;
-          }
-        else if (min>0)
-          {
-          min = min/fabs(yMin);
-          }
-        }
-      }
-    else
-      {
-      min = -1.0;
-      max =  1.0;
+
+      h[0]->SetMaximum(1.1*max);
       }
     }
-  cout << "Setting min to : " << min << " max to: " << max << endl;
-  h[0]->SetMinimum(min);
-  h[0]->SetMaximum(max);
-
-
   if (xMin < xMax)
     {
     h[0]->GetXaxis()->SetRangeUser(xMin,xMax);
     }
 
-  if (showErrorBars)
-      h[0]->Draw();
-    else
-      h[0]->Draw("HIST");
+  h[0]->Draw();
   for (int iGraph=1; iGraph<nGraphs; iGraph++)
     {
     setProperties(h[iGraph],*gc[iGraph]);
-    if (showErrorBars)
-      h[iGraph]->Draw("SAME");
-    else
-      h[iGraph]->Draw("HIST SAME");
+    h[iGraph]->Draw("SAME");
     }
   createLegend(nGraphs,h,legendTexts,xMinLeg, yMinLeg, xMaxLeg, yMaxLeg,0, legendSize);
   return canvas;

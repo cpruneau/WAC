@@ -327,43 +327,20 @@ int StatStudyPlots()
   int nModels            = 5;
   TFile ** inputFiles = new TFile* [nModels];
   StatStudyHistograms ** statStudy = new StatStudyHistograms*[nModels];
-  StatStudyHistograms ** statStudy2 = new StatStudyHistograms*[nModels];
   StatStudyPlotter    ** plotter   = new StatStudyPlotter*[nModels];
   TString nameBase = "StatStudySet";
-  TString name, title;
-  TString ** modelName  = new TString*[nModels];
-  TString ** modelTitle = new TString*[nModels];
-  TString canvasNameBase;
-  //for (int iModel=0;iModel<nModels;iModel++)
-    for (int iModel=0;iModel<nModels;iModel++)
+  TString name;
+
+  for (int iModel=0;iModel<nModels;iModel++)
     {
     name = nameBase;
     name += iModel;
-    modelName[iModel]  = new TString(name);
-    canvasNameBase = name;
-    canvasNameBase += "_";
-    title = "Set ";
-    title += iModel;
-
-    modelTitle[iModel]  = new TString(title);
     inputFiles[iModel] = new TFile(inputPath+name+".root","OLD");;
     statStudy[iModel]  = new StatStudyHistograms(inputFiles[iModel], name ,MessageLogger::Debug);
     plotter[iModel]    = new StatStudyPlotter();
-    //plotter[iModel]->makePlots(*modelName[iModel],statStudy[iModel],canvasConfiguration,graphConfigurations);
-    plotter[iModel]->makePlots(canvasNameBase,statStudy[iModel],canvasConfiguration,graphConfigurations);
+    plotter[iModel]->makePlots(name+"_",statStudy[iModel],canvasConfiguration,graphConfigurations);
     plotter[iModel]->printAllCanvas(outputPath);
     }
-
-  StatStudyPlotter * compPlotter = new StatStudyPlotter();
-  compPlotter->makeComparisonPlots("ModelComparisonSampleSize_", canvasConfiguration,3,statStudy,modelTitle,graphConfigurations);
-  compPlotter->printAllCanvas(outputPath);
-
-  StatStudyPlotter * compPlotter2 = new StatStudyPlotter();
-  statStudy++;statStudy++;
-  modelTitle++;modelTitle++;
-   compPlotter2->makeComparisonPlots("ModelComparisonPartMult_", canvasConfiguration,3,statStudy,modelTitle,graphConfigurations);
-   compPlotter2->printAllCanvas(outputPath);
-
   return 0;
 }
 

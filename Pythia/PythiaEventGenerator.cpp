@@ -53,7 +53,7 @@ void PythiaEventGenerator::initialize()
   pythia8->ReadString("Next:numberShowProcess = 0");         // print process record n times
   pythia8->ReadString("Next:numberShowEvent = 0");
 
-  pythia8->ReadString("SoftQCD:all = off");                   // Allow total sigma = elastic/SD/DD/ND
+  pythia8->ReadString("SoftQCD:all = on");                   // Allow total sigma = elastic/SD/DD/ND
                                                              // Optionally only study one or a few processes at a time.
                                                              //  pythia8->ReadString("SoftQCD:elastic = on");               // Elastic
                                                              //  pythia8->ReadString("SoftQCD:singleDiffractive = on");     // Single diffractive

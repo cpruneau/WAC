@@ -70,7 +70,7 @@ void StatStudyHistograms::createHistograms()
   nudyn_12Ratio = createHistogram(bn+"nudyn_12Ratio",nBins,0.00,  2.00, "#nu_{dyn}^{(12,eff)}/#nu_{dyn}^{(12)}", "Counts");
 
   ///
-  nBins = nSubSamples+20;
+  nBins = nSubSamples+3;
 
   f1_1_vsSub     = createProfile(bn+"f1_1_vsSub",    nBins,0.0,  double(nBins),  "sub-sample","f_{1}^{(1)}");
   f1_2_vsSub     = createProfile(bn+"f1_2_vsSub",    nBins,0.0,  double(nBins),  "sub-sample","f_{1}^{(2)}");
@@ -101,17 +101,6 @@ void StatStudyHistograms::createHistograms()
   r2_12Ratio_vsSub    = createHistogram(bn+"r2_12Ratio_vsSub",   nBins,0.0,  double(nBins),  "sub-sample","R_{2}^{(12,eff)}/R_{2}^{(12)}");
   r2_22Ratio_vsSub    = createHistogram(bn+"r2_22Ratio_vsSub",   nBins,0.0,  double(nBins),  "sub-sample","R_{2}^{(22,eff)}/R_{2}^{(22)}");
   nudyn_12Ratio_vsSub = createHistogram(bn+"nudyn_12Ratio_vsSub",nBins,0.0,  double(nBins),  "sub-sample","#nu_{dyn}^{(12,eff)}/#nu_{dyn}^{(12)}");
-
-  f1_1RatioOptB_vsSub     = createHistogram(bn+"f1_1RatioOptB_vsSub",    nBins,0.0,  double(nBins),  "sub-sample","f_{1}^{(1,eff)}/f_{1}^{(1))");
-  f1_2RatioOptB_vsSub     = createHistogram(bn+"f1_2RatioOptB_vsSub",    nBins,0.0,  double(nBins),  "sub-sample","f_{1}^{(2,eff)}/f_{1}^{(2)}");
-  f2_11RatioOptB_vsSub    = createHistogram(bn+"f2_11RatioOptB_vsSub",   nBins,0.0,  double(nBins),  "sub-sample","f_{2}^{(11,eff)}/f_{2}^{(11)}");
-  f2_12RatioOptB_vsSub    = createHistogram(bn+"f2_12RatioOptB_vsSub",   nBins,0.0,  double(nBins),  "sub-sample","f_{2}^{(12,eff)}/f_{2}^{(12)}");
-  f2_22RatioOptB_vsSub    = createHistogram(bn+"f2_22RatioOptB_vsSub",   nBins,0.0,  double(nBins),  "sub-sample","f_{2}^{(22,eff)}/f_{2}^{(22)}");
-  r2_11RatioOptB_vsSub    = createHistogram(bn+"r2_11RatioOptB_vsSub",   nBins,0.0,  double(nBins),  "sub-sample","R_{2}^{(11,eff)}/R_{2}^{(11)}");
-  r2_12RatioOptB_vsSub    = createHistogram(bn+"r2_12RatioOptB_vsSub",   nBins,0.0,  double(nBins),  "sub-sample","R_{2}^{(12,eff)}/R_{2}^{(12)}");
-  r2_22RatioOptB_vsSub    = createHistogram(bn+"r2_22RatioOptB_vsSub",   nBins,0.0,  double(nBins),  "sub-sample","R_{2}^{(22,eff)}/R_{2}^{(22)}");
-  nudyn_12RatioOptB_vsSub = createHistogram(bn+"nudyn_12RatioOptB_vsSub",nBins,0.0,  double(nBins),  "sub-sample","#nu_{dyn}^{(12,eff)}/#nu_{dyn}^{(12)}");
-
 
   ef1_1_vsSub     = createHistogram(bn+"ef1_1_vsSub",    nBins,0.0,  double(nBins),  "sub-sample","#delta(f_{1}^{(1)})");
   ef1_2_vsSub     = createHistogram(bn+"ef1_2_vsSub",    nBins,0.0,  double(nBins),  "sub-sample","#delta(f_{1}^{(2)})");
@@ -211,17 +200,6 @@ void StatStudyHistograms::loadHistograms(TFile * inputFile)
   r2_22Ratio_vsSub    = loadH1(inputFile,  bn+"r2_22Ratio_vsSub");
   nudyn_12Ratio_vsSub = loadH1(inputFile,  bn+"nudyn_12Ratio_vsSub");
 
-  f1_1RatioOptB_vsSub     = loadH1(inputFile,  bn+"f1_1RatioOptB_vsSub");
-  f1_2RatioOptB_vsSub     = loadH1(inputFile,  bn+"f1_2RatioOptB_vsSub");
-  f2_11RatioOptB_vsSub    = loadH1(inputFile,  bn+"f2_11RatioOptB_vsSub");
-  f2_12RatioOptB_vsSub    = loadH1(inputFile,  bn+"f2_12RatioOptB_vsSub");
-  f2_22RatioOptB_vsSub    = loadH1(inputFile,  bn+"f2_22RatioOptB_vsSub");
-  r2_11RatioOptB_vsSub    = loadH1(inputFile,  bn+"r2_11RatioOptB_vsSub");
-  r2_12RatioOptB_vsSub    = loadH1(inputFile,  bn+"r2_12RatioOptB_vsSub");
-  r2_22RatioOptB_vsSub    = loadH1(inputFile,  bn+"r2_22RatioOptB_vsSub");
-  nudyn_12RatioOptB_vsSub = loadH1(inputFile,  bn+"nudyn_12RatioOptB_vsSub");
-
-
   ef1_1_vsSub     = loadH1(inputFile,  bn+"ef1_1_vsSub");
   ef1_2_vsSub     = loadH1(inputFile,  bn+"ef1_2_vsSub");
   ef2_11_vsSub    = loadH1(inputFile,  bn+"ef2_11_vsSub");
@@ -314,24 +292,14 @@ void StatStudyHistograms::saveHistograms(TFile * outputFile)
   nudyn_12Eff_vsSub->Write();
 
   f1_1Ratio_vsSub->Write();
-   f1_2Ratio_vsSub->Write();
-   f2_11Ratio_vsSub->Write();
-   f2_12Ratio_vsSub->Write();
-   f2_22Ratio_vsSub->Write();
-   r2_11Ratio_vsSub->Write();
-   r2_12Ratio_vsSub->Write();
-   r2_22Ratio_vsSub->Write();
-   nudyn_12Ratio_vsSub->Write();
-
-  f1_1RatioOptB_vsSub->Write();
-  f1_2RatioOptB_vsSub->Write();
-  f2_11RatioOptB_vsSub->Write();
-  f2_12RatioOptB_vsSub->Write();
-  f2_22RatioOptB_vsSub->Write();
-  r2_11RatioOptB_vsSub->Write();
-  r2_12RatioOptB_vsSub->Write();
-  r2_22RatioOptB_vsSub->Write();
-  nudyn_12RatioOptB_vsSub->Write();
+  f1_2Ratio_vsSub->Write();
+  f2_11Ratio_vsSub->Write();
+  f2_12Ratio_vsSub->Write();
+  f2_22Ratio_vsSub->Write();
+  r2_11Ratio_vsSub->Write();
+  r2_12Ratio_vsSub->Write();
+  r2_22Ratio_vsSub->Write();
+  nudyn_12Ratio_vsSub->Write();
 
   ef1_1_vsSub->Write();
   ef1_2_vsSub->Write();
@@ -409,15 +377,15 @@ void StatStudyHistograms::computeDerivedHistograms()
   calculateR2(f1_2Eff_vsSub,     f2_22Eff_vsSub,  r2_22Eff_vsSub);
   calculateNuDyn(r2_11Eff_vsSub, r2_12Eff_vsSub,  r2_22Eff_vsSub,  nudyn_12Eff_vsSub);
 
-  calculateRatio(f1_1Eff_vsSub, f1_1_vsSub,  f1_1Ratio_vsSub,   f1_1RatioOptB_vsSub);
-  calculateRatio(f1_2Eff_vsSub, f1_2_vsSub,  f1_2Ratio_vsSub,   f1_2RatioOptB_vsSub);
-  calculateRatio(f2_11Eff_vsSub,f2_11_vsSub, f2_11Ratio_vsSub,  f2_11RatioOptB_vsSub);
-  calculateRatio(f2_12Eff_vsSub,f2_12_vsSub, f2_12Ratio_vsSub,  f2_12RatioOptB_vsSub);
-  calculateRatio(f2_22Eff_vsSub,f2_22_vsSub, f2_22Ratio_vsSub,  f2_22RatioOptB_vsSub);
-  calculateRatio(r2_11Eff_vsSub,r2_11_vsSub, r2_11Ratio_vsSub,  r2_11RatioOptB_vsSub);
-  calculateRatio(r2_12Eff_vsSub,r2_12_vsSub, r2_12Ratio_vsSub,  r2_12RatioOptB_vsSub);
-  calculateRatio(r2_22Eff_vsSub,r2_22_vsSub, r2_12Ratio_vsSub,  r2_12RatioOptB_vsSub);
-  calculateRatio(nudyn_12Eff_vsSub, nudyn_12_vsSub, nudyn_12Ratio_vsSub, nudyn_12RatioOptB_vsSub);
+  calculateRatio(f1_1Eff_vsSub, f1_1_vsSub,  f1_1Ratio_vsSub);
+  calculateRatio(f1_2Eff_vsSub, f1_2_vsSub,  f1_2Ratio_vsSub);
+  calculateRatio(f2_11Eff_vsSub,f2_11_vsSub, f2_11Ratio_vsSub);
+  calculateRatio(f2_12Eff_vsSub,f2_12_vsSub, f2_12Ratio_vsSub);
+  calculateRatio(f2_22Eff_vsSub,f2_22_vsSub, f2_22Ratio_vsSub);
+  calculateRatio(r2_11Eff_vsSub,r2_11_vsSub, r2_11Ratio_vsSub);
+  calculateRatio(r2_12Eff_vsSub,r2_12_vsSub, r2_12Ratio_vsSub);
+  calculateRatio(r2_22Eff_vsSub,r2_22_vsSub, r2_22Ratio_vsSub);
+  calculateRatio(nudyn_12Eff_vsSub, nudyn_12_vsSub, nudyn_12Ratio_vsSub);
 
   fillHist(r2_11_vsSub, r2_11, nSubSamples);
   fillHist(r2_12_vsSub, r2_12, nSubSamples);
@@ -626,25 +594,22 @@ void StatStudyHistograms::scaleHistograms(double scalingFactor1,double scalingFa
      }
  }
  // Calculate r = h2/h1
- void StatStudyHistograms::calculateRatio(TH1 * h1, TH1 * h2, TH1 * ratio, TH1 * ratioOptB)
+ void StatStudyHistograms::calculateRatio(TH1 * h1, TH1 * h2, TH1 * ratio)
  {
- ratio->Divide(h1, h2, 1.0, 1.0, "");
- if (ratioOptB) ratioOptB->Divide(h1, h2, 1.0, 1.0, "B");
+   double v1, ev1, v2, ev2, r, er;
+   int nBins = h1->GetNbinsX();
+   for (int iBin = 1; iBin <=nBins; iBin++)
+     {
+     v1   = h1->GetBinContent(iBin);
+     ev1  = h1->GetBinError(iBin);
+     v2   = h2->GetBinContent(iBin);
+     ev2  = h2->GetBinError(iBin);
+     calculateRatio(v1,ev1,v2,ev2,r,er);
 
-//   double v1, ev1, v2, ev2, r, er;
-//   int nBins = h1->GetNbinsX();
-//   for (int iBin = 1; iBin <=nBins; iBin++)
-//     {
-//     v1   = h1->GetBinContent(iBin);
-//     ev1  = h1->GetBinError(iBin);
-//     v2   = h2->GetBinContent(iBin);
-//     ev2  = h2->GetBinError(iBin);
-//     calculateRatio(v1,ev1,v2,ev2,r,er);
-//
-//     //cout << ratio->GetName() << " iBin:" << iBin << "  r:" << r << "   er:" << er << endl;
-//     ratio->SetBinContent(iBin, r);
-//     ratio->SetBinError  (iBin, er);
-//     }
+     //cout << ratio->GetName() << " iBin:" << iBin << "  r:" << r << "   er:" << er << endl;
+     ratio->SetBinContent(iBin, r);
+     ratio->SetBinError  (iBin, er);
+     }
  }
 
  void StatStudyHistograms::calculateMeanAndStd(TH1 * h, int nBins, double &mean, double &typicalError, double &eMean, double &std)
@@ -684,7 +649,7 @@ void StatStudyHistograms::scaleHistograms(double scalingFactor1,double scalingFa
    for (int i=2; i<=n; i++)
      {
      calculateMeanAndStd(h, i, mean,  typicalError,  errorOnMean, std);
-     eh->SetBinContent(i,std/fabs(mean)); eh->SetBinError(i,0);
+     eh->SetBinContent(i,std/mean); h->SetBinError(i,0);
      }
 
    cout << "         histo:" << h->GetName() << endl;
@@ -692,9 +657,9 @@ void StatStudyHistograms::scaleHistograms(double scalingFactor1,double scalingFa
    cout << "  typicalError:" << typicalError << endl;
    cout << "   errorOnMean:" << errorOnMean << endl;
    cout << "           std:" << std << endl;
-   h->SetBinContent(n+5,mean); h->SetBinError(n+5,typicalError);
-   h->SetBinContent(n+10,mean); h->SetBinError(n+10,errorOnMean);
-   h->SetBinContent(n+15,mean); h->SetBinError(n+15,std);
+   h->SetBinContent(n+1,mean); h->SetBinError(n+1,typicalError);
+   h->SetBinContent(n+2,mean); h->SetBinError(n+2,errorOnMean);
+   h->SetBinContent(n+3,mean); h->SetBinError(n+3,std);
  }
 
  void StatStudyHistograms::fillHist(TH1 * source, TH1 * target, int n)

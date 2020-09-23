@@ -221,7 +221,7 @@ void CanvasConfiguration::setFormat(CanvasFormat format)
       height   = 500;
       leftMargin   = 0.15;
       topMargin    = 0.05;
-      rightMargin  = 0.1;
+      rightMargin  = 0.05;
       bottomMargin = 0.15;
       break;
       case LandscapeWide:
@@ -229,7 +229,7 @@ void CanvasConfiguration::setFormat(CanvasFormat format)
       height   = 500;
       leftMargin   = 0.2;
       topMargin    = 0.1;
-      rightMargin  = 0.15;
+      rightMargin  = 0.1;
       bottomMargin = 0.2;
       break;
     };
