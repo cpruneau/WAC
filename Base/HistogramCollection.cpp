@@ -3667,7 +3667,8 @@ void HistogramCollection::calculateF3R3(TH1* h_f1_1, TH1* h_f1_2, TH1* h_f1_3,
 }
 
 void HistogramCollection::calculateF4R4(TH1* h_f1_1, TH1* h_f1_2, TH1* h_f1_3, TH1* h_f1_4,
-                                        TH1* h_f2_12, TH1* h_f2_13, TH1* h_f2_14, TH1* h_f2_23, TH1* h_f2_24, TH1* h_f2_34,
+                                        TH1* h_f2_12, TH1* h_f2_13, TH1* h_f2_14,
+                                        TH1* h_f2_23, TH1* h_f2_24, TH1* h_f2_34,
                                         TH1* h_f3_123, TH1* h_f3_124, TH1* h_f3_134, TH1* h_f3_234,
                                         TH1* h_f4_1234,
                                         TH1* h_F4_1234, TH1* h_R4_1234)
@@ -3696,7 +3697,8 @@ void HistogramCollection::calculateF4R4(TH1* h_f1_1, TH1* h_f1_2, TH1* h_f1_3, T
     f3_234  = h_f3_234->GetBinContent(iBin); ef3_234 =  h_f3_234->GetBinError(iBin);
     f4_1234 = h_f4_1234->GetBinContent(iBin);ef4_1234 =  h_f4_1234->GetBinError(iBin);
     calculateF4R4(f1_1,ef1_1,f1_2,ef1_2,f1_3,ef1_3,f1_4,ef1_4,
-                  f2_12,ef2_12, f2_13,ef2_13, f2_14,ef2_14, f2_23,ef2_23, f2_24,ef2_24, f2_34,ef2_34,
+                  f2_12,ef2_12, f2_13,ef2_13, f2_14,ef2_14,
+                  f2_23,ef2_23, f2_24,ef2_24, f2_34,ef2_34,
                   f3_123,ef3_123, f3_124,ef3_124, f3_134,ef3_134, f3_234,ef3_234,
                   f4_1234,ef4_1234,
                   F4_1234,eF4_1234,R4_1234,eR4_1234);
@@ -3799,8 +3801,8 @@ void HistogramCollection::calculateF4R4(double f1_1,double ef1_1,double f1_2,dou
     {
 
     F4_1234   = f4_1234 - f3_123*f1_4 - f3_124*f1_3 - f3_134*f1_2 - f3_234*f1_1
-    - 2.0*f2_12*f2_34 - 2.0*f2_13*f2_24 - 2.0*f2_14*f2_23
-    + 4.0*f2_12*f1_3*f1_4 + 4.0*f2_13*f1_2*f1_4 + 4.0*f2_14*f1_2*f1_3
+    - f2_12*f2_34 - f2_13*f2_24 - f2_14*f2_23
+    + 4.0*(f2_12*f1_3*f1_4 + f2_13*f1_2*f1_4 + f2_14*f1_2*f1_3)
     - 6.0*f1_1*f1_2*f1_3*f1_4;
     ref1_1    = ef1_1/f1_1;
     ref1_2    = ef1_2/f1_2;
@@ -3828,9 +3830,9 @@ void HistogramCollection::calculateF4R4(double f1_1,double ef1_1,double f1_2,dou
     + 16.0*f2_14*f2_14*f2_23*f2_23*(ref2_14*ref2_14 + ef2_23*ef2_23);
     // neglect singles term for now...
     eF4_1234   = sqrt(eF4_1234);
-    reF4_1234  = eF4_1234/F4_1234;
+    reF4_1234  = 0.0; //eF4_1234/F4_1234;
     R4_1234    = F4_1234/(f1_1*f1_2*f1_3*f1_4);
-    eR4_1234   = R4_1234*reF4_1234;
+    eR4_1234   = 0.0; //R4_1234*reF4_1234;
     }
 }
 

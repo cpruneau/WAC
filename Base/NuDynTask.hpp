@@ -44,6 +44,8 @@ public:
   virtual void scaleHistograms(double factor);
   virtual void calculateDerivedHistograms();
 
+  virtual void createIdentical();
+
   //////////////////////////////////////////////////////////////
   // Data Members
   //////////////////////////////////////////////////////////////
@@ -58,6 +60,8 @@ public:
   TString partName2;
   TString partName3;
   TString partName4;
+
+  int identical[16];
 
   ClassDef(NuDynTask,0)
 };

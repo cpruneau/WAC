@@ -32,11 +32,11 @@ void StatStudyModel::generate(double & nPlus, double & nMinus, double & nPlusEff
    double nPlusMinus;
    double nMinusMinus;
 
-  nPlus       = int( gRandom->Gaus(nPlusAvg,sqrt(nPlusAvg))            );
-  nMinus      = int( gRandom->Gaus(nMinusAvg,sqrt(nMinusAvg))          );
-  nPlusPlus   = int( gRandom->Gaus(nPlusPlusAvg,sqrt(nPlusPlusAvg))    );
-  nPlusMinus  = int( gRandom->Gaus(nPlusMinusAvg,sqrt(nPlusMinusAvg))  );
-  nMinusMinus = int( gRandom->Gaus(nMinusMinusAvg,sqrt(nMinusMinusAvg)));
+  nPlus       = int( gRandom->Gaus(nPlusAvg,sqrt(nPlusAvg))    +0.5        );
+  nMinus      = int( gRandom->Gaus(nMinusAvg,sqrt(nMinusAvg))     +0.5     );
+  nPlusPlus   = int( gRandom->Gaus(nPlusPlusAvg,sqrt(nPlusPlusAvg)) +0.5   );
+  nPlusMinus  = int( gRandom->Gaus(nPlusMinusAvg,sqrt(nPlusMinusAvg))+0.5  );
+  nMinusMinus = int( gRandom->Gaus(nMinusMinusAvg,sqrt(nMinusMinusAvg))+0.5);
   nPlus  += 2.0*nPlusPlus;
   nPlus  += nPlusMinus;
   nMinus += 2.0*nMinusMinus;

@@ -14,6 +14,13 @@ public:
                  CanvasConfiguration * canvasConfigurationUsed,
                  GraphConfiguration  ** graphConfigurationsUsed);
 
+  void makeComparisonPlots(const TString & canvasNameBase,
+                           CanvasConfiguration * canvasConfiguration,
+                           int nGraphs,
+                           StatStudyHistograms ** statStudyHistograms,
+                           TString ** hLegends,
+                           GraphConfiguration  ** graphConfigurations);
+
   ClassDef(StatStudyPlotter,0)
 };
 
