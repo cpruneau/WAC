@@ -15,7 +15,8 @@ add_executable(RunPythiaSimulation RunPythiaSimulation.cpp)
 target_include_directories(RunPythiaSimulation PUBLIC Base WacPythia ${EXTRA_INCLUDES})
 target_link_libraries(RunPythiaSimulation Base WacPythia  EGLib PythiaLib EGPythiaLib   ${ROOT_LIBRARIES} ${EXTRA_LIBS} ${CMAKE_DL_LIBS})
 
-install(FILES  "${CMAKE_CURRENT_BINARY_DIR}/libPythia.rootmap" "${CMAKE_CURRENT_BINARY_DIR}/libPythia_rdict.pcm" DESTINATION /Users/claudeapruneau/opt/WAC/lib)
-install(TARGETS WacPythia  LIBRARY DESTINATION /Users/claudeapruneau/opt/WAC/lib) 
-install(TARGETS RunPythiaSimulation DESTINATION /Users/claudeapruneau/opt/WAC/bin) 
+install(FILES  "${CMAKE_CURRENT_BINARY_DIR}/libPythia.rootmap" "${CMAKE_CURRENT_BINARY_DIR}/libPythia_rdict.pcm" DESTINATION $ENV{WAC_LIB})
+install(TARGETS WacPythia  LIBRARY DESTINATION $ENV{WAC_LIB}) 
+install(TARGETS RunPythiaSimulation DESTINATION $ENV{WAC_BIN}) 
+
 
