@@ -25,16 +25,16 @@ list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 #---Locate the ROOT package and defines a number of variables (e.g. ROOT_INCLUDE_DIRS)
 find_package(ROOT REQUIRED COMPONENTS MathCore RIO Hist Tree Net )
 find_library(EG EG )
-find_library(PYTHIA8 pythia8 PATHS $ENV{PYTHIA8}/lib)
+find_library(PYTHIA8_LIB pythia8 PATHS $ENV{PYTHIA8}/lib)
 find_library(EGPYTHIA8 EGPythia8)
 
 
 #---Define useful ROOT functions and macros (e.g. ROOT_GENERATE_DICTIONARY)
 include(${ROOT_USE_FILE})
 include_directories(${CMAKE_SOURCE_DIR} ${ROOT_INCLUDE_DIRS} "Base" "Cluster" "CollisionGeometry" "Ampt" "Epos" "Pythia" "Eccentricity" "Blastwave" 
-"/Users/claudeapruneau/Documents/MyProjects/AnalysisCode/buildRoot6.18.04/include" 
-"/Users/claudeapruneau/Documents/MyProjects/AnalysisCode/Pythia/pythia8243/include" 
-"/Users/claudeapruneau/Documents/MyProjects/AnalysisCode/Pythia/pythia8243/include/Pythia8")
+"$ENV{ROOTSYS}/include" 
+"$ENV{PYTHIA8}/include" 
+"$ENV{PYTHIA8}/include/Pythia8")
 add_definitions(${ROOT_CXX_FLAGS})
 
 add_library(EG SHARED IMPORTED)
