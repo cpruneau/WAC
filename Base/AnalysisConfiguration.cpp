@@ -53,6 +53,8 @@ fillQ3D(false),
 fillY(true),
 nuDynVsMult(true),
 nuDynVsCent(false),
+ptCorrelatorVsMult(true),
+ptCorrelatorVsCent(false),
 nBins_mult(20),  min_mult(0.0), max_mult(200.0),
 nBins_cent(20),  min_cent(0.0), max_cent(100.0)
 {
