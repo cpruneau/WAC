@@ -8,6 +8,7 @@
 #include "EventFilter.hpp"
 #include "ParticleFilter.hpp"
 #include "PythiaEventGenerator.hpp"
+#include "CollisionGeometry.hpp"
 
 class AACollisionGenerator : public Task
 {
@@ -18,11 +19,12 @@ public:
   // CTOR
   //////////////////////////////////////////////////////////////
   AACollisionGenerator(const TString & name,
-    TaskConfiguration * configuration,
-    Event * event,
-    EventFilter * ef,
-    ParticleFilter * pf,
-    int nuc);
+  TaskConfiguration * configuration,
+  Event * event,
+  EventFilter * ef,
+  ParticleFilter * pf,
+  CollisionGeometry * collisionGeo,
+  int* maxCollisions);
   virtual ~AACollisionGenerator();
   virtual void initialize();
   virtual void finalize();
@@ -38,8 +40,9 @@ public:
 
   int nMax;
   int nCollisions;
+  int* nCollisionsMax;
 
-  int nucleons; // #of nucleons in atom
+  CollisionGeometry * collisionGeometry;
 
   TPythia8* pythia8; 
 

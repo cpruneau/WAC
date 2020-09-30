@@ -9,14 +9,17 @@ AACollisionGenerator::AACollisionGenerator(const TString & name,
 	Event * event,
 	EventFilter * ef,
 	ParticleFilter * pf,
-	int nuc)
+	CollisionGeometry * collisionGeo,
+  int* maxCollisions)
 :
 Task(name, configuration, event),
 eventFilter(ef),
 particleFilter(pf),
-nCollisions(0),
-nucleons(nuc)
+nCollisions(40000),
+collisionGeometry(collisionGeo),
+nCollisionsMax(maxCollisions)
 {
+  setReportLevel(MessageLogger::Debug);
 	if (reportDebug()) cout << "AACollisionGenerator::AACollisionGenerator(...) No ops" << endl;
 }
 
@@ -29,26 +32,12 @@ void AACollisionGenerator::initialize()
 {
 	if (reportDebug()) cout << "AACollisionGenerator::initialize() Started" << endl;
 
-	g = new TRandom1(0);
-	double impactParam = sqrt(g->Uniform()); //random impact parameter linearly distributed from 0 - 1 (fraction of atomic diameter)
+  *nCollisionsMax = 0;
 
-	double theta = TMath::ACos(impactParam);
-	nCollisions = TMath::CeilNint( ( ( theta - 0.5 * TMath::Sin(2 * theta) ) / TMath::Pi() ) * 2 * nucleons );// number of collisions determined by 2D geometrical overlap;
-	
-	AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
-	ac->max_mult *= nCollisions;
-	ac->min_mult *= nCollisions;
+  nMax = 10000 ;
+  particles = new TClonesArray("TParticle", nMax );
+  pythia8 = new TPythia8();
 
-
-	if (reportInfo()) cout << "AACollisionGenerator::initialize() processing " << nCollisions << " collisions." << endl;
-
-	Particle::factorySize *= nCollisions;
-	Factory<Particle> * particleFactory = Particle::getFactory();
-	particleFactory -> initialize(Particle::factorySize);
-
-	nMax = 10000;
-	particles = new TClonesArray("TParticle", nMax );
-	pythia8 = new TPythia8();
 
   //pythia8->ReadString("Init:showMultipartonInteractions = off"); // don't list multiparton interaction initialization
   //pythia8->ReadString("Init:showProcesses = off");            // don't list initialization info
@@ -90,7 +79,7 @@ void AACollisionGenerator::initialize()
   //  pythia8->ReadString("MultipartonInteractions:bProfile = 2");
   //  pythia8->ReadString("MultipartonInteractions:coreRadius = 0.4");
   //  pythia8->ReadString("MultipartonInteractions:coreFraction = 0.5");
-  //  pythia8->ReadString("ultipartonInteractions:expPow = 1.");
+  //  pythia8->ReadString("MultipartonInteractions:expPow = 1.");
 
   // use a reproducible seed: always the same results for the tutorial.
   pythia8->ReadString("Random:setSeed = on");
@@ -108,59 +97,72 @@ void AACollisionGenerator::execute()
 {
 	if (reportDebug()) cout << "AACollisionGenerator::execute() Started" << endl;
 
-	event->nParticles = 0;
-	event->multiplicity = 0;
+  nCollisions = collisionGeometry->nBinary;
 
-	for(int i = 0; i < nCollisions; i++)
-	{
-		Factory<Particle> * particleFactory = Particle::getFactory();
-		int nparts;
-		bool seekingEvent = true;
-		while (seekingEvent)
-		{
-			pythia8->GenerateEvent();
-			if (reportDebug()) pythia8->EventListing();
-			if (reportDebug()) cout << "AACollisionGenerator::execute() Calling pythia8->ImportParticles()" << endl;
+  *nCollisionsMax = nCollisions> *nCollisionsMax? nCollisions: *nCollisionsMax;
 
-			pythia8->ImportParticles(particles,"Final");
-			if (reportDebug()) cout << "AACollisionGenerator::execute() pythia8->ImportParticles() completed" << endl;
+  Factory<Particle> * particleFactory = Particle::getFactory();
 
-			nparts = particles->GetEntriesFast();
-			if (reportDebug()) cout << "AACollisionGenerator::execute() with nparts:" << nparts << endl;
+  if(nCollisions != 0)
+  {
+    particleFactory -> initialize(Particle::factorySize * nCollisions);
+  }
 
-			if (nparts>2) seekingEvent = false;
-		}
+  if (reportDebug()) cout << "AACollisionGenerator::execute() processing " << nCollisions << " collisions." << endl;
 
-		if (nparts>nMax)
-		{
-			if (reportError()) cout << " ARRAY TOO SMALL np>nMax. nparts:" << nparts << " nMax:" << nMax << endl;
-			postTaskFatal();
+  event->nParticles = 0;
+  event->multiplicity = 0;
+
+  for(int i = 0; i < nCollisions; i++)
+  {
+    int nparts;
+    bool seekingEvent = true;
+    while (seekingEvent)
+    {
+     pythia8->GenerateEvent();
+     if (reportDebug()) pythia8->EventListing();
+     if (reportDebug()) cout << "AACollisionGenerator::execute() Calling pythia8->ImportParticles()" << endl;
+
+     pythia8->ImportParticles(particles,"Final");
+     if (reportDebug()) cout << "AACollisionGenerator::execute() pythia8->ImportParticles() completed" << endl;
+
+     nparts = particles->GetEntriesFast();
+     if (reportDebug()) cout << "AACollisionGenerator::execute() with nparts:" << nparts << endl;
+
+     if (nparts>2) seekingEvent = false;
+   }
+
+   if (nparts>nMax)
+   {
+     if (reportError()) cout << " ARRAY TOO SMALL np>nMax. nparts:" << nparts << " nMax:" << nMax << endl;
+     postTaskFatal();
     //exit(0);
-		}
+   }
 
-		int thePid;
-		double charge, mass, p_x, p_y, p_z, p_e;
-		Particle * particle;
-		int particleAccepted = 0;
-		int particleCounted = 0;
+
+   int thePid;
+   double charge, mass, p_x, p_y, p_z, p_e;
+   Particle * particle;
+   int particleAccepted = 0;
+   int particleCounted = 0;
 
   //------------------- Randomizing the particle phi --------------Starts
-		double eventAngle= TMath::TwoPi() * gRandom->Rndm();
-		double cosPhi = cos(eventAngle);
-		double sinPhi = sin(eventAngle);
+   double eventAngle= TMath::TwoPi() * gRandom->Rndm();
+   double cosPhi = cos(eventAngle);
+   double sinPhi = sin(eventAngle);
 
   // load particles from TClone storage and copy into event.
-		Particle aParticle;
+   Particle aParticle;
   //if (reportDebug()) cout << "AACollisionGenerator::execute() starting copy loop into event..." << endl;
 
-		for (int iParticle = 0; iParticle < nparts; iParticle++)
-		{
-			TParticle & part = * (TParticle*) particles->At(iParticle);
-			int ist = part.GetStatusCode();
+   for (int iParticle = 0; iParticle < nparts; iParticle++)
+   {
+     TParticle & part = * (TParticle*) particles->At(iParticle);
+     int ist = part.GetStatusCode();
     //if (reportDebug()) cout << "AACollisionGenerator::execute() ist: " << ist << endl;
-			if (ist <= 0) continue;
-			int pdg = part.GetPdgCode();
-			mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
+     if (ist <= 0) continue;
+     int pdg = part.GetPdgCode();
+     mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
     		if (mass<0.002) continue;  // no photons, electrons...
     		charge = TDatabasePDG::Instance()->GetParticle(pdg)->Charge();
     		p_x  = cosPhi*part.Px() - sinPhi*part.Py();
@@ -190,11 +192,11 @@ void AACollisionGenerator::execute()
     if (reportDebug()) cout << "AACollisionGenerator::execute() No of accepted Particles : "<< event->nParticles<<endl;
     if (reportDebug()) cout << "AACollisionGenerator::execute() No of counted Particles : "<< event->multiplicity <<endl;
     if (reportDebug()) cout << "AACollisionGenerator::execute() event completed!" << endl;
-}
+  }
 
-void AACollisionGenerator::finalize()
-{
-	if (reportDebug()) cout << "AACollisionGenerator::finalize() started" << endl;
+  void AACollisionGenerator::finalize()
+  {
+   if (reportDebug()) cout << "AACollisionGenerator::finalize() started" << endl;
 	if (reportInfo()) //pythia8->PrintStatistics();
 	if (reportDebug()) cout << "AACollisionGenerator::finalize() completed" << endl;
 }

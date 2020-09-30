@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
+#include <chrono>
 #include <fstream>
 #include <TStyle.h>
 #include <TROOT.h>
@@ -16,9 +17,14 @@
 #include "NuDynTask.hpp"
 #include "PTCorrelator.hpp"
 #include "AACollisionGenerator.hpp"
+#include "CollisionGeometryGenerator.hpp"
+#include "CollisionGeometry.hpp"
+#include "NucleusGenerator.hpp"
 
 int main()
 {
+  auto start = chrono::high_resolution_clock::now(); 
+
   cout << "<INFO> PYTHIA Model Analysis - Starting" << endl;
 
 //  long nEventsRequested = 100;
@@ -38,7 +44,7 @@ int main()
   ac->configurationFileName = "configuration";
   ac->rootInputFileName = "";
   ac->outputPath = getenv("OUTPUT_PATH");            // check this 
-  ac->rootOuputFileName =  "results";                // and this
+  ac->rootOuputFileName =  "/Pythia";                // and this
   ac->histoBaseName =  "pythia";
 
   ac->nBins_pt    = 40;
@@ -101,14 +107,55 @@ int main()
   particleFilters1[5] = particleFilter_KM;
   particleFilters1[6] = particleFilter_PP;
   particleFilters1[7] = particleFilter_PM;
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+  CollisionGeometryConfiguration * ac1 = new CollisionGeometryConfiguration("PYTHIACollisionGeometry","PYTHIACollisionGeometry","1.0");
+
+  ac1->nProtonsA  = 82;
+  ac1->nNeutronsA = 208-82;
+  ac1->nProtonsB  = 82;
+  ac1->nNeutronsB = 208-82;
+  ac1->outputPath = getenv("OUTPUT_PATH"); 
+  ac1->rootOuputFileName =  "/CollisionGeometry";
+  ac1->histoBaseName =  "geom";
+  ac1->minB = 0.0;
+  ac1->maxB = 18.0;
+  ac1->nnCrossSection = 4.5;  // in fm^2
+
+  ac1->nBins_b = 100;
+  ac1->min_b   = 0.0;
+  ac1->max_b   = 18.0;
+  ac1->nBins_nPart = 450;
+  ac1->min_nPart   = 0;
+  ac1->max_nPart   = 450;
+  ac1->nBins_nBinary = 400;
+  ac1->min_nBinary   = 0;
+  ac1->max_nBinary   = 2000;
+
+  CollisionGeometry * collisionGeometry = new CollisionGeometry(ac1->nProtonsA,ac1->nNeutronsA, ac1->nProtonsB, ac1->nNeutronsB); //Pb(208) has 82 protons and 126 neutrons 
+  NucleusGenerator * nucGenA = new NucleusGenerator("PYTHIA_PbPbNucleusGeneratorA", NucleusGenerator::WoodsSaxon, 7.1, 0.535, 0.0, 10000,0.0,8.0);
+  NucleusGenerator * nucGenB = new NucleusGenerator("PYTHIA_PbPbNucleusGeneratorB", NucleusGenerator::WoodsSaxon, 7.1, 0.535, 0.0, 10000,0.0,8.0);
+
   
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
   Event * event = Event::getEvent();
   EventLoop * eventLoop = new EventLoop();
-  //eventLoop->addTask( new PythiaEventGenerator("PYTHIA",0, event,eventFilter,particleFilter) );
-  eventLoop->addTask( new AACollisionGenerator("PYTHIA_PbPbEventGenerator",ac, event,eventFilter,particleFilter, 208) ); // lead has 208 nucleons
 
-  //t->setReportLevel(MessageLogger::Debug);
-  eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM", ac, event, eventFilter, particleFilters1, order, nEventsRequested) );
+  int x = 0;
+  int* nCollisionsMax = &(x);
+
+  //eventLoop->addTask( new PythiaEventGenerator("PYTHIA",0, event,eventFilter,particleFilter) );
+  eventLoop->addTask( new CollisionGeometryGenerator("PYTHIA_PbPbCollisionGeometryGenerator",ac1, collisionGeometry,nucGenA,nucGenB) );
+  eventLoop->addTask( new AACollisionGenerator("PYTHIA_PbPbEventGenerator",ac, event,eventFilter,particleFilter, collisionGeometry, nCollisionsMax) );
+
+  eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM", ac, event, eventFilter, particleFilters1, order, nEventsRequested, nCollisionsMax) );
+
   /*
   NuDynTask * t = new NuDynTask("PYTHIA_NuDyn_HPHPHPHP", ac, event, eventFilter,particleFilter_HP,particleFilter_HP,particleFilter_HP,particleFilter_HP);
   //t->setReportLevel(MessageLogger::Debug);
@@ -119,10 +166,19 @@ int main()
   eventLoop->addTask( new NuDynTask("PYTHIA_NuDyn_HPHMHMHM", ac, event, eventFilter,particleFilter_HP,particleFilter_HM,particleFilter_HM,particleFilter_HM) );
   eventLoop->addTask( new NuDynTask("PYTHIA_NuDyn_HMHMHMHM", ac, event, eventFilter,particleFilter_HM,particleFilter_HM,particleFilter_HM,particleFilter_HM) );
   */
+
   //NuDynTask * nudyn_PiPPiPPiPPiP = new NuDynTask("PYTHIA_NuDyn_PiPi",   ac,  event, eventFilter,particleFilter_PiP,particleFilter_PiM);
+
   eventLoop->run(nEventsRequested,nEventsReport);
 
   cout << "<INFO> PYTHIA Analysis - Completed" << endl;
+
+  auto stop = chrono::high_resolution_clock::now(); 
+  auto duration = chrono::duration_cast<chrono::seconds>(stop - start);
+  int hours = (int)(duration.count()/3600);
+  int minutes = (int)((duration.count() - 3600 * hours)/60);
+  double seconds = duration.count() - 60 * minutes - 3600 * hours;
+  cout << "<INFO> Total Time elapsed "<< (hours) << ":" << (minutes ) << ":" << seconds << endl; 
 
 }
 

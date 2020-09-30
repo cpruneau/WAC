@@ -21,7 +21,8 @@ PTCorrelator::PTCorrelator(const TString &  name,
 	EventFilter * ef,
 	ParticleFilter ** pf,
 	int ord,
-	int events)
+	int events,
+	int * maxCollisions)
 :
 Task(name,configuration,event),
 histos(NULL),
@@ -38,8 +39,10 @@ multiplicity(new double [events]),
 centrality(new double [events]),
 S(new double * [events]),
 avgpT(new double [ord]()),
-counts(new int * [events])
+counts(new int * [events]),
+nCollisionsMax(maxCollisions)
 {
+	setReportLevel(MessageLogger::Debug);
 	if (reportDebug())  cout << "PTCorrelator::CTOR(...) Started." << endl;
 
 	if (!eventFilter)
@@ -217,7 +220,7 @@ void PTCorrelator::execute()
 
 	if(eventsProcessed == maxEvents)
 	{
-		
+		histos->resetHistoRanges(*nCollisionsMax);
 		histos->fillDerivedHistos(acceptances, multiplicity, centrality, avgCounts, avgpT, S, counts, maxEvents);
 	}
 

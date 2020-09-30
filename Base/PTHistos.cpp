@@ -427,7 +427,7 @@ void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * 
 
 	auto stop = chrono::high_resolution_clock::now(); 
 	auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
-	cout << " Time taken to calculate derived histos: " << duration.count() << " microseconds"<< endl;
+	if (reportInfo()) cout << "Time taken to calculate derived histos: " << duration.count() << " microseconds"<< endl;
 	if (reportDebug())  cout << "PTHistos::fillDerivedHistos(...) Completed." << endl;
 
 
@@ -807,3 +807,12 @@ int PTHistos::getSubsetNumber(int * subset, int lenSub, int * mainset, int lenSe
 	return num ;
 }
 
+void PTHistos::resetHistoRanges(int n)
+{
+	for(int iHisto = 0; iHisto < nHistograms; iHisto++)
+	{
+		int xmin = histograms[iHisto]->GetXaxis()->GetXmin();
+		int xmax = histograms[iHisto]->GetXaxis()->GetXmax();
+		histograms[iHisto]->GetXaxis()->SetLimits(xmin * n, xmax * n);
+	}
+}
