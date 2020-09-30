@@ -42,7 +42,6 @@ avgpT(new double [ord]()),
 counts(new int * [events]),
 nCollisionsMax(maxCollisions)
 {
-	setReportLevel(MessageLogger::Debug);
 	if (reportDebug())  cout << "PTCorrelator::CTOR(...) Started." << endl;
 
 	if (!eventFilter)

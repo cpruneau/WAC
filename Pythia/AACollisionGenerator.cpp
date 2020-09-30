@@ -19,7 +19,6 @@ nCollisions(40000),
 collisionGeometry(collisionGeo),
 nCollisionsMax(maxCollisions)
 {
-  setReportLevel(MessageLogger::Debug);
 	if (reportDebug()) cout << "AACollisionGenerator::AACollisionGenerator(...) No ops" << endl;
 }
 
