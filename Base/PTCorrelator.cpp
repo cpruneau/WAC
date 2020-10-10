@@ -331,7 +331,14 @@ void PTCorrelator::fillSValues(int depth, int filterIndex, int * filters, int & 
 	{
 		filters[maxOrder - depth- 1] = i;
 		count = 0;
-		correlators = calculateS(filters, maxOrder - depth, 0, count, particles);
+		switch(maxOrder - depth)
+		{
+			case 1: correlators = calculateS1(filters, count); break;
+			case 2: correlators = calculateS2(filters, count); break;
+			case 3: correlators = calculateS3(filters, count); break;
+			case 4: correlators = calculateS4(filters, count); break;
+		}
+		//correlators = calculateS(filters, maxOrder - depth, 0, count, particles);
 
 		S[eventsProcessed][correlatorIndex] = correlators;
 
@@ -346,6 +353,119 @@ void PTCorrelator::fillSValues(int depth, int filterIndex, int * filters, int & 
 			fillSValues(depth - 1, i , filters, count, particles);
 		}
 	}
+}
+
+double PTCorrelator::calculateS1(int * filters, int & count)
+{
+	double sum = 0;
+	for(int iParticle1 = 0; iParticle1<event->nParticles; iParticle1++)
+	{
+		Particle & particle1 = * event->getParticleAt(iParticle1);
+		double deviation1 = (particle1.pt - eventAveragept);
+		if(particleFilters[filters[0]]->accept(particle1))
+		{
+			sum +=  deviation1;
+			count++;
+		}
+	}
+	return sum;
+}
+
+double PTCorrelator::calculateS2(int * filters, int & count)
+{
+	double sum = 0;
+	for(int iParticle1 = 0; iParticle1<event->nParticles; iParticle1++)
+	{
+		Particle & particle1 = * event->getParticleAt(iParticle1);
+		double deviation1 = (particle1.pt - eventAveragept);
+		if(particleFilters[filters[0]]->accept(particle1))
+		{
+			for(int iParticle2 = 0; iParticle2<event->nParticles; iParticle2++)
+			{
+				Particle & particle2 = * event->getParticleAt(iParticle2);
+				double deviation2 = (particle2.pt - eventAveragept);
+				if(particleFilters[filters[1]]->accept(particle2) && iParticle1 != iParticle2)
+				{
+					sum +=  deviation1 * deviation2;
+					count++;
+				}
+			}
+		}
+	}
+	return sum;
+
+}
+
+double PTCorrelator::calculateS3(int * filters, int & count)
+{
+	double sum = 0;
+	for(int iParticle1 = 0; iParticle1<event->nParticles; iParticle1++)
+	{
+		Particle & particle1 = * event->getParticleAt(iParticle1);
+		double deviation1 = (particle1.pt - eventAveragept);
+		if(particleFilters[filters[0]]->accept(particle1))
+		{
+			for(int iParticle2 = 0; iParticle2<event->nParticles; iParticle2++)
+			{
+				Particle & particle2 = * event->getParticleAt(iParticle2);
+				double deviation2 = (particle2.pt - eventAveragept);
+				if(particleFilters[filters[1]]->accept(particle2) && iParticle1 != iParticle2)
+				{
+					for(int iParticle3 = 0; iParticle3<event->nParticles; iParticle3++)
+					{
+						Particle & particle3 = * event->getParticleAt(iParticle3);
+						double deviation3 = (particle3.pt - eventAveragept);
+						if(particleFilters[filters[2]]->accept(particle3) && iParticle1 != iParticle3 && iParticle2!= iParticle3)
+						{
+							sum +=  deviation1 * deviation2 * deviation3;
+							count++;
+						}
+					}
+				}
+			}
+		}
+	}
+	return sum;
+}
+
+double PTCorrelator::calculateS4(int * filters, int & count)
+{
+	double sum = 0;
+	for(int iParticle1 = 0; iParticle1<event->nParticles; iParticle1++)
+	{
+		Particle & particle1 = * event->getParticleAt(iParticle1);
+		double deviation1 = (particle1.pt - eventAveragept);
+		if(particleFilters[filters[0]]->accept(particle1))
+		{
+			for(int iParticle2 = 0; iParticle2<event->nParticles; iParticle2++)
+			{
+				Particle & particle2 = * event->getParticleAt(iParticle2);
+				double deviation2 = (particle2.pt - eventAveragept);
+				if(particleFilters[filters[1]]->accept(particle2) && iParticle1 != iParticle2)
+				{
+					for(int iParticle3 = 0; iParticle3<event->nParticles; iParticle3++)
+					{
+						Particle & particle3 = * event->getParticleAt(iParticle3);
+						double deviation3 = (particle3.pt - eventAveragept);
+						if(particleFilters[filters[2]]->accept(particle3) && iParticle1 != iParticle3 && iParticle2!= iParticle3)
+						{
+							for(int iParticle4 = 0; iParticle4<event->nParticles; iParticle4++)
+							{
+								Particle & particle4 = * event->getParticleAt(iParticle4);
+								double deviation4 = (particle4.pt - eventAveragept);
+								if(particleFilters[filters[3]]->accept(particle4) && iParticle1 != iParticle4 && iParticle2!= iParticle4 && iParticle3!= iParticle4)
+								{
+									sum +=  deviation1 * deviation2 * deviation3 * deviation4;
+									count++;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return sum;
 }
 
 
