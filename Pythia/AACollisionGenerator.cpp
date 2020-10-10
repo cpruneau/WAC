@@ -1,6 +1,7 @@
 #include "AACollisionGenerator.hpp"
 #include "TDatabasePDG.h"
 #include "AnalysisConfiguration.hpp"
+#include "HeavyIonConfiguration.hpp"
 #include "Nucleon.hpp"
 
 ClassImp(AACollisionGenerator);
@@ -10,15 +11,13 @@ AACollisionGenerator::AACollisionGenerator(const TString & name,
   Event * event,
   EventFilter * ef,
   ParticleFilter * pf,
-  CollisionGeometry * collisionGeo,
-  int* maxCollisions)
+  CollisionGeometry * collisionGeo)
 :
 Task(name, configuration, event),
 eventFilter(ef),
 particleFilter(pf),
 nCollisions(40000),
-collisionGeometry(collisionGeo),
-nCollisionsMax(maxCollisions)
+collisionGeometry(collisionGeo)
 {
   if (reportDebug()) cout << "AACollisionGenerator::AACollisionGenerator(...) No ops" << endl;
 }
@@ -31,8 +30,6 @@ AACollisionGenerator::~AACollisionGenerator()
 void AACollisionGenerator::initialize()
 {
   if (reportDebug()) cout << "AACollisionGenerator::initialize() Started" << endl;
-
-  *nCollisionsMax = 0;
 
   nMax = 10000 ;
   particles = new TClonesArray("TParticle", nMax );
@@ -96,17 +93,21 @@ void AACollisionGenerator::initialize()
 void AACollisionGenerator::execute()
 {
   if (reportDebug()) cout << "AACollisionGenerator::execute() Started" << endl;
+  
+  AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
+  HeavyIonConfiguration * hc = (HeavyIonConfiguration *) ac;
 
   nCollisions = collisionGeometry->nBinary; //get the number of binary collisions
 
   Factory<Particle> * particleFactory = Particle::getFactory();
 
-  if(nCollisions > *nCollisionsMax)
+  if(nCollisions > hc->nCollisionsMax)
   {
     particleFactory -> initialize(Particle::factorySize * nCollisions); //resize the particleFactory only if the size is too small
   }
 
-  *nCollisionsMax = nCollisions> *nCollisionsMax? nCollisions: *nCollisionsMax; //set the max number of binary collisions per event, to set the size of the histos later
+
+  hc->nCollisionsMax = nCollisions> hc->nCollisionsMax? nCollisions: hc->nCollisionsMax; //set the max number of binary collisions per event, to set the size of the histos later
 
   if (reportDebug()) cout << "AACollisionGenerator::execute() processing " << nCollisions << " collisions." << endl;
 
@@ -154,8 +155,12 @@ void AACollisionGenerator::execute()
 
    double transverseR = TMath::Sqrt(x_col*x_col + y_col*y_col);
    double phi = TMath::ATan2(y_col,x_col);
-   double param_b = 1; // exponent of order 1
-   //double param_a = hardBoost? 0.1 : 0.05;
+   if(x_col < 0) phi += TMath::Pi()/2;
+   double param_b = hc->param_b; // exponent of order 1
+   double param_a = hc->param_a;
+   double beta = param_a * TMath::Power(transverseR, param_b);
+   double betax = beta * TMath::Cos(phi);
+   double betay = beta * TMath::Sin(phi);
 
   ///////////////////////////////////////////////////////////////////////////////////////// 
   // load particles from TClone storage and copy into event.

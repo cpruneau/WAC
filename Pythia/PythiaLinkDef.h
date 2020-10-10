@@ -7,5 +7,6 @@
 #pragma link C++ class PythiaEventReader+;
 #pragma link C++ class PythiaEventGenerator+;
 #pragma link C++ class AACollisionGenerator+;
+#pragma link C++ class HeavyIonConfiguration+;
 
 #endif

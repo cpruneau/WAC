@@ -7,6 +7,7 @@
 #include <chrono>
 #include "PTCorrelator.hpp"
 #include "AnalysisConfiguration.hpp"
+#include "HeavyIonConfiguration.hpp"
 
 
 ClassImp(PTCorrelator);
@@ -19,30 +20,32 @@ PTCorrelator::PTCorrelator(const TString &  name,
 	TaskConfiguration * configuration,
 	Event * event,
 	EventFilter * ef,
-	ParticleFilter ** pf,
-	int ord,
-	int events,
-	int * maxCollisions)
+	ParticleFilter ** pf)
 :
 Task(name,configuration,event),
 histos(NULL),
 eventFilter(ef),
 particleFilters(pf),
-partNames(new TString[ord]),
-maxOrder(ord),
+maxOrder(0),
 eventAveragept(0),
 correlatorIndex(0),
-maxEvents(events),
-pT(new double * [events]),
-acceptances(new bool **[events]),
-multiplicity(new double [events]),
-centrality(new double [events]),
-S(new double * [events]),
-avgpT(new double [ord]()),
-counts(new int * [events]),
-nCollisionsMax(maxCollisions)
+maxEvents(0)
 {
 	if (reportDebug())  cout << "PTCorrelator::CTOR(...) Started." << endl;
+	AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
+	HeavyIonConfiguration * hc = (HeavyIonConfiguration *) ac;
+
+
+	maxEvents      = hc->totEvents;
+	maxOrder      = hc->maxOrder;
+	partNames     = new TString[maxOrder];
+	pT            = new double * [maxEvents];
+	acceptances   = new bool **[maxEvents];
+	multiplicity  = new double [maxEvents];
+	centrality    = new double [maxEvents];
+	S             = new double * [maxEvents];
+	avgpT         = new double [maxOrder]();
+	counts        = new int * [maxEvents];
 
 	if (!eventFilter)
 	{
@@ -219,7 +222,15 @@ void PTCorrelator::execute()
 
 	if(eventsProcessed == maxEvents)
 	{
-		histos->resetHistoRanges(*nCollisionsMax);
+		try
+		{
+			HeavyIonConfiguration * hc = (HeavyIonConfiguration *) ac;
+			histos->resetHistoRanges(hc->nCollisionsMax);
+		}
+		catch(...)
+		{
+			if(reportInfo()) cout << "The configuration was not a HeavyIonConfiguration, so the histograms were not resized" << endl;
+		}
 		histos->fillDerivedHistos(acceptances, multiplicity, centrality, avgCounts, avgpT, S, counts, maxEvents);
 	}
 

@@ -23,8 +23,7 @@ public:
   Event * event,
   EventFilter * ef,
   ParticleFilter * pf,
-  CollisionGeometry * collisionGeo,
-  int* maxCollisions);
+  CollisionGeometry * collisionGeo);
   virtual ~AACollisionGenerator();
   virtual void initialize();
   virtual void finalize();
@@ -40,7 +39,6 @@ public:
 
   int nMax;
   int nCollisions;
-  int* nCollisionsMax;
 
   CollisionGeometry * collisionGeometry;
 

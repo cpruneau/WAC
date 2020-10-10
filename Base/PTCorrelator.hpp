@@ -20,10 +20,7 @@ public:
             TaskConfiguration * configuration,
             Event * event,
             EventFilter * eventFilter,
-            ParticleFilter ** particleFilter1,
-            int order,
-            int events,
-            int * maxCollisions);
+            ParticleFilter ** particleFilter1);
   virtual ~PTCorrelator();
   virtual void execute();
   virtual void createHistograms();
@@ -84,8 +81,6 @@ public:
   // store the S values for all the events. NOT IN ORDER (They are in "recursive order")
   //first index is event number, second index is correlator number(in "recursive order")
   double ** S;
-
-  int * nCollisionsMax;
 
 
 

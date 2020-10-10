@@ -2,12 +2,12 @@
 # Project WAC/Pythia
 ################################################################################################
 
-ROOT_GENERATE_DICTIONARY(G__Pythia PythiaEventGenerator.hpp AACollisionGenerator.hpp LINKDEF PythiaLinkDef.h)
+ROOT_GENERATE_DICTIONARY(G__Pythia PythiaEventGenerator.hpp AACollisionGenerator.hpp HeavyIonConfiguration.hpp LINKDEF PythiaLinkDef.h)
 
 ################################################################################################
 # Create a shared library with geneated dictionary
 ################################################################################################
-add_library(WacPythia SHARED PythiaEventGenerator.cpp  AACollisionGenerator.cpp G__Pythia.cxx)
+add_library(WacPythia SHARED PythiaEventGenerator.cpp  AACollisionGenerator.cpp HeavyIonConfiguration.cpp G__Pythia.cxx)
 target_link_libraries(WacPythia Blastwave Base EGLib PythiaLib EGPythiaLib  ${ROOT_LIBRARIES} ${EXTRA_LIBS} )
 target_include_directories(WacPythia  PUBLIC Blastwave Base Pythia ${EXTRA_INCLUDES})
 

@@ -20,6 +20,8 @@
 #include "CollisionGeometryGenerator.hpp"
 #include "CollisionGeometry.hpp"
 #include "NucleusGenerator.hpp"
+#include "HeavyIonConfiguration.hpp"
+
 
 int main()
 {
@@ -28,20 +30,20 @@ int main()
   cout << "<INFO> PYTHIA Model Analysis - Starting" << endl;
 
 //  long nEventsRequested = 100;
-  long nEventsRequested = 10;
+  long nEventsRequested = 5;
   int  nEventsReport    = 1;
 
 
 
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Analysis Configuration Parameters
+  // Heavy Ion and Analysis Configuration Parameters
   ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
 
-  AnalysisConfiguration * ac = new AnalysisConfiguration("PYTHIA","PYTHIA","1.0");
+  HeavyIonConfiguration * ac = new HeavyIonConfiguration("PYTHIA","PYTHIA","1.0");
   ac->loadHistograms  = false;
   ac->createHistograms  = true;
   ac->scaleHistograms  = true;
@@ -95,6 +97,13 @@ int main()
   ac->min_cent     = 0.0;
   ac->max_cent     = 100.0;
 
+  ac->hardBoost      = false;
+  ac->nCollisionsMax = 0;
+  ac->param_a        = ac->hardBoost? 0.1 : 0.05;
+  ac->param_b        = 1;
+  ac->maxOrder       = 4; // order <= particleFilters1 length
+  ac->totEvents      = nEventsRequested;
+
 
 
 
@@ -117,7 +126,7 @@ int main()
   ParticleFilter  * particleFilter_PP  = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Positive,ac->min_pt+0.001,ac->max_pt,ac->min_eta,ac->max_eta, ac->min_y,ac->max_y); // +ve only
   ParticleFilter  * particleFilter_PM  = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Negative,ac->min_pt+0.001,ac->max_pt,ac->min_eta,ac->max_eta, ac->min_y,ac->max_y); // +ve only
 
-  int order = 4;// order <= particleFilters1 length
+
   ParticleFilter * particleFilters1[8];
   particleFilters1[0] = particleFilter_HP;
   particleFilters1[1] = particleFilter_HM;
@@ -184,8 +193,8 @@ int main()
 
   //eventLoop->addTask( new PythiaEventGenerator("PYTHIA",0, event,eventFilter,particleFilter) );
   eventLoop->addTask( new CollisionGeometryGenerator("PYTHIA_PbPbCollisionGeometryGenerator",ac1, collisionGeometry,nucGenA,nucGenB) );
-  eventLoop->addTask( new AACollisionGenerator("PYTHIA_PbPbEventGenerator",ac, event,eventFilter,particleFilter, collisionGeometry, nCollisionsMax) );
-  eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM", ac, event, eventFilter, particleFilters1, order, nEventsRequested, nCollisionsMax) );
+  eventLoop->addTask( new AACollisionGenerator("PYTHIA_PbPbEventGenerator",ac, event,eventFilter,particleFilter, collisionGeometry) );
+  eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM", ac, event, eventFilter, particleFilters1) );
 
   /*
   NuDynTask * t = new NuDynTask("PYTHIA_NuDyn_HPHPHPHP", ac, event, eventFilter,particleFilter_HP,particleFilter_HP,particleFilter_HP,particleFilter_HP);
