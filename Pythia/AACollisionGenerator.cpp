@@ -1,15 +1,16 @@
 #include "AACollisionGenerator.hpp"
 #include "TDatabasePDG.h"
 #include "AnalysisConfiguration.hpp"
+#include "Nucleon.hpp"
 
 ClassImp(AACollisionGenerator);
 
 AACollisionGenerator::AACollisionGenerator(const TString & name,
-	TaskConfiguration * configuration,
-	Event * event,
-	EventFilter * ef,
-	ParticleFilter * pf,
-	CollisionGeometry * collisionGeo,
+  TaskConfiguration * configuration,
+  Event * event,
+  EventFilter * ef,
+  ParticleFilter * pf,
+  CollisionGeometry * collisionGeo,
   int* maxCollisions)
 :
 Task(name, configuration, event),
@@ -19,17 +20,17 @@ nCollisions(40000),
 collisionGeometry(collisionGeo),
 nCollisionsMax(maxCollisions)
 {
-	if (reportDebug()) cout << "AACollisionGenerator::AACollisionGenerator(...) No ops" << endl;
+  if (reportDebug()) cout << "AACollisionGenerator::AACollisionGenerator(...) No ops" << endl;
 }
 
 AACollisionGenerator::~AACollisionGenerator()
 {
-	if (reportDebug()) cout << "AACollisionGenerator::~AACollisionGenerator(...) No ops" << endl;
+  if (reportDebug()) cout << "AACollisionGenerator::~AACollisionGenerator(...) No ops" << endl;
 }
 
 void AACollisionGenerator::initialize()
 {
-	if (reportDebug()) cout << "AACollisionGenerator::initialize() Started" << endl;
+  if (reportDebug()) cout << "AACollisionGenerator::initialize() Started" << endl;
 
   *nCollisionsMax = 0;
 
@@ -94,26 +95,31 @@ void AACollisionGenerator::initialize()
 
 void AACollisionGenerator::execute()
 {
-	if (reportDebug()) cout << "AACollisionGenerator::execute() Started" << endl;
+  if (reportDebug()) cout << "AACollisionGenerator::execute() Started" << endl;
 
-  nCollisions = collisionGeometry->nBinary;
-
-  *nCollisionsMax = nCollisions> *nCollisionsMax? nCollisions: *nCollisionsMax;
+  nCollisions = collisionGeometry->nBinary; //get the number of binary collisions
 
   Factory<Particle> * particleFactory = Particle::getFactory();
 
-  if(nCollisions != 0)
+  if(nCollisions > *nCollisionsMax)
   {
-    particleFactory -> initialize(Particle::factorySize * nCollisions);
+    particleFactory -> initialize(Particle::factorySize * nCollisions); //resize the particleFactory only if the size is too small
   }
+
+  *nCollisionsMax = nCollisions> *nCollisionsMax? nCollisions: *nCollisionsMax; //set the max number of binary collisions per event, to set the size of the histos later
 
   if (reportDebug()) cout << "AACollisionGenerator::execute() processing " << nCollisions << " collisions." << endl;
 
-  event->nParticles = 0;
-  event->multiplicity = 0;
 
   for(int i = 0; i < nCollisions; i++)
   {
+
+
+    ///////////////////////////////////////////////
+    // call PYTHIA and move particles into the TCloneArray
+    //////////////////////////////////////////////
+
+
     int nparts;
     bool seekingEvent = true;
     while (seekingEvent)
@@ -138,9 +144,27 @@ void AACollisionGenerator::execute()
     //exit(0);
    }
 
+   //////////////////////////////////////////////////////////////////////
+   // Calculate the boost for the particles
+   //////////////////////////////////////////////////////////////////////
+   double x_col, y_col, z_col;
+   x_col = collisionGeometry->x[i];
+   y_col = collisionGeometry->y[i];
+   z_col = collisionGeometry->z[i];
+
+   double transverseR = TMath::Sqrt(x_col*x_col + y_col*y_col);
+   double phi = TMath::ATan2(y_col,x_col);
+   double param_b = 1; // exponent of order 1
+   //double param_a = hardBoost? 0.1 : 0.05;
+
+  ///////////////////////////////////////////////////////////////////////////////////////// 
+  // load particles from TClone storage and copy into event.
+  /////////////////////////////////////////////////////////////////////////////////////////
+
 
    int thePid;
    double charge, mass, p_x, p_y, p_z, p_e;
+
    Particle * particle;
    int particleAccepted = 0;
    int particleCounted = 0;
@@ -150,9 +174,8 @@ void AACollisionGenerator::execute()
    double cosPhi = cos(eventAngle);
    double sinPhi = sin(eventAngle);
 
-  // load particles from TClone storage and copy into event.
    Particle aParticle;
-  //if (reportDebug()) cout << "AACollisionGenerator::execute() starting copy loop into event..." << endl;
+   if (reportDebug()) cout << "AACollisionGenerator::execute() starting copy loop into event..." << endl;
 
    for (int iParticle = 0; iParticle < nparts; iParticle++)
    {
@@ -162,31 +185,34 @@ void AACollisionGenerator::execute()
      if (ist <= 0) continue;
      int pdg = part.GetPdgCode();
      mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
-    		if (mass<0.002) continue;  // no photons, electrons...
-    		charge = TDatabasePDG::Instance()->GetParticle(pdg)->Charge();
-    		p_x  = cosPhi*part.Px() - sinPhi*part.Py();
-    		p_y  = sinPhi*part.Px() + cosPhi*part.Py();
-    		p_z  = part.Pz();
-    		p_e  = part.Energy();
-    		aParticle.setPidPxPyPzE(pdg, charge, p_x,p_y,p_z,p_e);
-   		 	//aParticle.printProperties(cout);
-    		//if (reportDebug()) cout << "AACollisionGenerator::execute() calling filter " << endl;
-    		particleCounted++;
-    		if (!particleFilter->accept(aParticle)) continue;
-    		particle = particleFactory->getNextObject();
-    		*particle = aParticle;
-    		particleAccepted++;
-    		//    if (true)
-    		//      {
-    		//      cout << "AACollisionGenerator::execute() particle: " << iParticle << " / " << particleAccepted << endl;
-    		//      particle->printProperties(cout);
-    		//      }
-    	}
+        if (mass<0.002) continue;  // no photons, electrons...
+        charge = TDatabasePDG::Instance()->GetParticle(pdg)->Charge();
+        p_x  = cosPhi*part.Px() - sinPhi*part.Py();
+        p_y  = sinPhi*part.Px() + cosPhi*part.Py();
+        p_z  = part.Pz();
+        p_e  = part.Energy();
+        aParticle.setPidPxPyPzE(pdg, charge, p_x,p_y,p_z,p_e);
 
-    	event->nParticles += particleAccepted;
-    	event->multiplicity += particleCounted;
-    	if (reportDebug()) cout << "Generated Event " << eventsProcessed + 1 << ":" << i + 1 << endl;
-    }
+
+        aParticle.boost(1.0,1.0,1.0);
+        //aParticle.printProperties(cout);
+        //if (reportDebug()) cout << "AACollisionGenerator::execute() calling filter " << endl;
+        particleCounted++;
+        if (!particleFilter->accept(aParticle)) continue;
+        particle = particleFactory->getNextObject();
+        *particle = aParticle;
+        particleAccepted++;
+        //    if (true)
+        //      {
+        //      cout << "AACollisionGenerator::execute() particle: " << iParticle << " / " << particleAccepted << endl;
+        //      particle->printProperties(cout);
+        //      }
+      }
+
+      event->nParticles += particleAccepted;
+      event->multiplicity += particleCounted;
+      if (reportDebug()) cout << "Generated Event " << eventsProcessed + 1 << ":" << i + 1 << endl;
+    } 
     eventsProcessed++;
     if (reportDebug()) cout << "AACollisionGenerator::execute() No of accepted Particles : "<< event->nParticles<<endl;
     if (reportDebug()) cout << "AACollisionGenerator::execute() No of counted Particles : "<< event->multiplicity <<endl;
@@ -196,14 +222,14 @@ void AACollisionGenerator::execute()
   void AACollisionGenerator::finalize()
   {
    if (reportDebug()) cout << "AACollisionGenerator::finalize() started" << endl;
-	if (reportInfo()) //pythia8->PrintStatistics();
-	if (reportDebug()) cout << "AACollisionGenerator::finalize() completed" << endl;
+  if (reportInfo()) //pythia8->PrintStatistics();
+  if (reportDebug()) cout << "AACollisionGenerator::finalize() completed" << endl;
 }
 
 void AACollisionGenerator::reset()
 {
-	if (reportDebug()) cout << "AACollisionGenerator::reset() Started" << endl;
-	event->reset();
-	Particle::getFactory()->reset();
-	if (reportDebug()) cout << "AACollisionGenerator::reset() Completed" << endl;
+  if (reportDebug()) cout << "AACollisionGenerator::reset() Started" << endl;
+  event->reset();
+  Particle::getFactory()->reset();
+  if (reportDebug()) cout << "AACollisionGenerator::reset() Completed" << endl;
 }

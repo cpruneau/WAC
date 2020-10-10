@@ -28,8 +28,18 @@ int main()
   cout << "<INFO> PYTHIA Model Analysis - Starting" << endl;
 
 //  long nEventsRequested = 100;
-  long nEventsRequested = 10000000;
-  int  nEventsReport    = 100000;
+  long nEventsRequested = 10;
+  int  nEventsReport    = 1;
+
+
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Analysis Configuration Parameters
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
   AnalysisConfiguration * ac = new AnalysisConfiguration("PYTHIA","PYTHIA","1.0");
   ac->loadHistograms  = false;
@@ -85,6 +95,16 @@ int main()
   ac->min_cent     = 0.0;
   ac->max_cent     = 100.0;
 
+
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Particle and Event Filter Parameters
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
   EventFilter     * eventFilter      = new EventFilter(EventFilter::MinBias,0.0,0.0);
 
   ParticleFilter  * particleFilter     = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Charged,ac->min_pt+0.001,ac->max_pt,ac->min_eta,ac->max_eta, ac->min_y,ac->max_y); // +ve only
@@ -109,7 +129,13 @@ int main()
   particleFilters1[7] = particleFilter_PM;
 
 
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Collision Geometry Configuration Parameters
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 
   CollisionGeometryConfiguration * ac1 = new CollisionGeometryConfiguration("PYTHIACollisionGeometry","PYTHIACollisionGeometry","1.0");
@@ -139,9 +165,15 @@ int main()
   NucleusGenerator * nucGenA = new NucleusGenerator("PYTHIA_PbPbNucleusGeneratorA", NucleusGenerator::WoodsSaxon, 7.1, 0.535, 0.0, 10000,0.0,8.0);
   NucleusGenerator * nucGenB = new NucleusGenerator("PYTHIA_PbPbNucleusGeneratorB", NucleusGenerator::WoodsSaxon, 7.1, 0.535, 0.0, 10000,0.0,8.0);
 
-  
 
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Run Events
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
 
   Event * event = Event::getEvent();
@@ -153,7 +185,6 @@ int main()
   //eventLoop->addTask( new PythiaEventGenerator("PYTHIA",0, event,eventFilter,particleFilter) );
   eventLoop->addTask( new CollisionGeometryGenerator("PYTHIA_PbPbCollisionGeometryGenerator",ac1, collisionGeometry,nucGenA,nucGenB) );
   eventLoop->addTask( new AACollisionGenerator("PYTHIA_PbPbEventGenerator",ac, event,eventFilter,particleFilter, collisionGeometry, nCollisionsMax) );
-
   eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM", ac, event, eventFilter, particleFilters1, order, nEventsRequested, nCollisionsMax) );
 
   /*
@@ -173,6 +204,16 @@ int main()
 
   cout << "<INFO> PYTHIA Analysis - Completed" << endl;
 
+
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Timer
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
   auto stop = chrono::high_resolution_clock::now(); 
   auto duration = chrono::duration_cast<chrono::seconds>(stop - start);
   int hours = (int)(duration.count()/3600);
@@ -182,9 +223,5 @@ int main()
 
 }
 
-//  TwoPartCorrelationAnalyzer  * ana1 = new TwoPartCorrelationAnalyzer ("PYTHIA_TPCA_ALL",  ac,  event, eventFilter,particleFilter_HP,particleFilter_HM);
-//  TwoPartCorrelationAnalyzer  * ana2 = new TwoPartCorrelationAnalyzer ("PYTHIA_TPCA_PiPi", ac,  event, eventFilter,particleFilter_PiP,particleFilter_PiM);
-//  TwoPartCorrelationAnalyzer  * ana3 = new TwoPartCorrelationAnalyzer ("PYTHIA_TPCA_KK",   ac,  event, eventFilter,particleFilter_KP,particleFilter_KM);
-//  TwoPartCorrelationAnalyzer  * ana4 = new TwoPartCorrelationAnalyzer ("PYTHIA_TPCA_PP",   ac,  event, eventFilter,particleFilter_PP,particleFilter_PM);
 
 
