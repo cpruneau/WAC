@@ -222,15 +222,6 @@ void PTCorrelator::execute()
 
 	if(eventsProcessed == maxEvents)
 	{
-		try
-		{
-			HeavyIonConfiguration * hc = (HeavyIonConfiguration *) ac;
-			histos->resetHistoRanges(hc->nCollisionsMax);
-		}
-		catch(...)
-		{
-			if(reportInfo()) cout << "The configuration was not a HeavyIonConfiguration, so the histograms were not resized" << endl;
-		}
 		histos->fillDerivedHistos(acceptances, multiplicity, centrality, avgCounts, avgpT, S, counts, maxEvents);
 	}
 

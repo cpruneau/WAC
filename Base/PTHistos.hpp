@@ -39,7 +39,6 @@ public:
   virtual int* getSubset(char* subset, int * set, int len, int& lenSub);
   virtual int* getComplementarySubset(char* subset, int * set, int len, int& lenSub);
   virtual int getSubsetNumber(int * subset, int lenSub, int * mainset, int lenSet);
-  virtual void resetHistoRanges(int n);
 
 
 

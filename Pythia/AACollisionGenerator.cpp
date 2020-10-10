@@ -110,6 +110,8 @@ void AACollisionGenerator::execute()
   hc->nCollisionsMax = nCollisions> hc->nCollisionsMax? nCollisions: hc->nCollisionsMax; //set the max number of binary collisions per event, to set the size of the histos later
 
   if (reportInfo()) cout << "AACollisionGenerator::execute() processing " << nCollisions << " collisions." << endl;
+  event->nParticles = 0;
+  event->multiplicity = 0;
 
 
   for(int i = 0; i < nCollisions; i++)
@@ -166,8 +168,6 @@ void AACollisionGenerator::execute()
   // load particles from TClone storage and copy into event.
   /////////////////////////////////////////////////////////////////////////////////////////
 
-   event->nParticles = 0;
-   event->multiplicity = 0;
 
    int thePid;
    double charge, mass, p_x, p_y, p_z, p_e;

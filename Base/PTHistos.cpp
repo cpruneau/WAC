@@ -1,4 +1,6 @@
 #include "PTHistos.hpp"
+#include "HeavyIonConfiguration.hpp"
+#include "TH1.h"
 
 ClassImp(PTHistos);
 
@@ -40,8 +42,9 @@ PTHistos::~PTHistos()
 void PTHistos::createHistograms()
 {
 	if (reportDebug())  cout << "PTHistos::createHistograms(...) started"<< endl;
-	AnalysisConfiguration & ac = *getConfiguration();
+	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)( *getConfiguration());
 	TString bn = getHistoBaseName();
+	TH1::SetDefaultBufferSize(ac.totEvents);
 
 	// ================================================================================
 	// Naming convention
@@ -81,9 +84,9 @@ void PTHistos::createHistograms()
 
 	orders = new int [size];
 
-	h_events   = createHistogram(bn+TString("Nevents"),1,ac.min_mult,  ac.max_mult,  "mult","n_{Events}");
-	if (ac.ptCorrelatorVsMult) h_events_vsMult = createHistogram(bn+TString("Nevents_vsMult"),ac.nBins_mult,ac.min_mult,  ac.max_mult,  "mult","n_{Events}");
-	if (ac.ptCorrelatorVsCent) h_events_vsCent = createHistogram(bn+TString("Nevents_vsCent"),ac.nBins_cent,ac.min_cent,  ac.max_cent,  "cent","n_{Events}");
+	h_events   = createHistogram(bn+TString("Nevents"),1, ac.max_mult, ac.min_mult,  "mult","n_{Events}");
+	if (ac.ptCorrelatorVsMult) h_events_vsMult = createHistogram(bn+TString("Nevents_vsMult"),ac.nBins_mult, ac.max_mult, ac.min_mult,  "mult","n_{Events}");
+	if (ac.ptCorrelatorVsCent) h_events_vsCent = createHistogram(bn+TString("Nevents_vsCent"),ac.nBins_cent, ac.max_mult, ac.min_mult,  "cent","n_{Events}");
 
 	TString * baseName = new TString[2 * numFunc + 1];
 	baseName[0] = bn + "S_";
@@ -247,23 +250,23 @@ void PTHistos::createHistogramRec(TString * baseName, TString * baseTitle, int d
 			histoTitle[iFunc + numFunc] = (depth == maxOrder - 1) ? baseTitle[iFunc + numFunc] + (i + 1) : baseTitle[iFunc + numFunc] + ", " + (i + 1);
 			
 			
-			hS[iFunc][histoIndex] = createProfile( histoName[iFunc], 1,ac.min_mult,ac.max_mult,"mult",histoTitle[iFunc] + "}" );
-			if (ac.ptCorrelatorVsMult)	hS_vsMult[iFunc][histoIndex] = createProfile(histoName[iFunc] + "_vsMult",ac.nBins_mult,ac.min_mult,  ac.max_mult, "mult", histoTitle[iFunc] + "}");
-			if (ac.ptCorrelatorVsCent)	hS_vsCent[iFunc][histoIndex] = createProfile(histoName[iFunc] + "_vsCent",ac.nBins_cent,ac.min_cent,  ac.max_cent, "cent", histoTitle[iFunc] + "}");
+			hS[iFunc][histoIndex] = createProfile( histoName[iFunc], 1, ac.max_mult, ac.min_mult,"mult",histoTitle[iFunc] + "}" );
+			if (ac.ptCorrelatorVsMult)	hS_vsMult[iFunc][histoIndex] = createProfile(histoName[iFunc] + "_vsMult",ac.nBins_mult, ac.max_mult, ac.min_mult, "mult", histoTitle[iFunc] + "}");
+			if (ac.ptCorrelatorVsCent)	hS_vsCent[iFunc][histoIndex] = createProfile(histoName[iFunc] + "_vsCent",ac.nBins_cent,ac.max_cent,  ac.min_cent, "cent", histoTitle[iFunc] + "}");
 			
 			
-			hC[iFunc][histoIndex] = createHistogram( histoName[iFunc + numFunc], 1,ac.min_mult,ac.max_mult,"mult",histoTitle[iFunc + numFunc] + "}" );
-			if (ac.ptCorrelatorVsMult)	hC_vsMult[iFunc][histoIndex] = createHistogram(histoName[iFunc + numFunc] + "_vsMult",ac.nBins_mult,ac.min_mult,  ac.max_mult, "mult", histoTitle[iFunc + numFunc] + "}");
-			if (ac.ptCorrelatorVsCent)	hC_vsCent[iFunc][histoIndex] = createHistogram(histoName[iFunc + numFunc] + "_vsCent",ac.nBins_cent,ac.min_cent,  ac.max_cent, "cent", histoTitle[iFunc + numFunc] + "}");
+			hC[iFunc][histoIndex] = createHistogram( histoName[iFunc + numFunc], 1, ac.max_mult, ac.min_mult,"mult",histoTitle[iFunc + numFunc] + "}" );
+			if (ac.ptCorrelatorVsMult)	hC_vsMult[iFunc][histoIndex] = createHistogram(histoName[iFunc + numFunc] + "_vsMult",ac.nBins_mult, ac.max_mult, ac.min_mult, "mult", histoTitle[iFunc + numFunc] + "}");
+			if (ac.ptCorrelatorVsCent)	hC_vsCent[iFunc][histoIndex] = createHistogram(histoName[iFunc + numFunc] + "_vsCent",ac.nBins_cent,ac.max_cent,  ac.min_cent, "cent", histoTitle[iFunc + numFunc] + "}");
 		}
 
 		
 		histoName[2 * numFunc]  = baseName[2 * numFunc] + (i + 1);
 		histoTitle[2 * numFunc] = (depth == maxOrder - 1) ? baseTitle[2 * numFunc] + (i + 1) : baseTitle[2 * numFunc] + ", " + (i + 1);
 
-		h_counts[histoIndex]         = createProfile(histoName[2 * numFunc], 1,ac.min_mult,ac.max_mult,"mult", histoTitle[2 * numFunc] + "}" );
-		if (ac.ptCorrelatorVsMult)	h_counts_vsMult[histoIndex]  = createProfile(histoName[2 * numFunc] + "_vsMult",ac.nBins_mult,ac.min_mult,  ac.max_mult, "mult", histoTitle[2 * numFunc] + "}");
-		if (ac.ptCorrelatorVsCent)	h_counts_vsCent[histoIndex]  = createProfile(histoName[2 * numFunc] + "_vsCent",ac.nBins_cent,ac.min_cent,  ac.max_cent, "cent",histoTitle[2 * numFunc] + "}");
+		h_counts[histoIndex]         = createProfile(histoName[2 * numFunc], 1, ac.max_mult, ac.min_mult,"mult", histoTitle[2 * numFunc] + "}" );
+		if (ac.ptCorrelatorVsMult)	h_counts_vsMult[histoIndex]  = createProfile(histoName[2 * numFunc] + "_vsMult",ac.nBins_mult, ac.max_mult, ac.min_mult, "mult", histoTitle[2 * numFunc] + "}");
+		if (ac.ptCorrelatorVsCent)	h_counts_vsCent[histoIndex]  = createProfile(histoName[2 * numFunc] + "_vsCent",ac.nBins_cent,ac.max_cent,  ac.min_cent, "cent",histoTitle[2 * numFunc] + "}");
 
 		orders[histoIndex] = maxOrder - depth;
 
@@ -805,14 +808,4 @@ int PTHistos::getSubsetNumber(int * subset, int lenSub, int * mainset, int lenSe
 		}
 	}
 	return num ;
-}
-
-void PTHistos::resetHistoRanges(int n)
-{
-	for(int iHisto = 0; iHisto < nHistograms; iHisto++)
-	{
-		int xmin = histograms[iHisto]->GetXaxis()->GetXmin();
-		int xmax = histograms[iHisto]->GetXaxis()->GetXmax();
-		histograms[iHisto]->GetXaxis()->SetLimits(xmin * n, xmax * n);
-	}
 }

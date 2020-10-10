@@ -30,7 +30,7 @@ int main()
   cout << "<INFO> PYTHIA Model Analysis - Starting" << endl;
 
 //  long nEventsRequested = 100;
-  long nEventsRequested = 100000;
+  long nEventsRequested = 10;
   int  nEventsReport    = 1000;
 
 
