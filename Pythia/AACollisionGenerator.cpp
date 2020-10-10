@@ -161,6 +161,8 @@ void AACollisionGenerator::execute()
   // load particles from TClone storage and copy into event.
   /////////////////////////////////////////////////////////////////////////////////////////
 
+   event->nParticles = 0;
+   event->multiplicity = 0;
 
    int thePid;
    double charge, mass, p_x, p_y, p_z, p_e;
@@ -194,7 +196,7 @@ void AACollisionGenerator::execute()
         aParticle.setPidPxPyPzE(pdg, charge, p_x,p_y,p_z,p_e);
 
 
-        aParticle.boost(1.0,1.0,1.0);
+        //aParticle.boost(1.0,1.0,1.0);
         //aParticle.printProperties(cout);
         //if (reportDebug()) cout << "AACollisionGenerator::execute() calling filter " << endl;
         particleCounted++;
