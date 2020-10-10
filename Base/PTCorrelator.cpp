@@ -208,7 +208,7 @@ void PTCorrelator::execute()
 	int *filters = new int [maxOrder];
 	int *particles = new int [maxOrder];
 
-	histos->fillEventHistos( event->multiplicity, event->centrality, 1.0);
+	histos->fillEventHistos( event->multiplicity, event->centrality, 1.0); 
 	fillSValues(maxOrder - 1, 0, filters, count, particles);
 	storeEventInfo();
 

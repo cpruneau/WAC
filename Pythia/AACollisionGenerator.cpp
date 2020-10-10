@@ -93,7 +93,7 @@ void AACollisionGenerator::initialize()
 void AACollisionGenerator::execute()
 {
   if (reportDebug()) cout << "AACollisionGenerator::execute() Started" << endl;
-  
+
   AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
   HeavyIonConfiguration * hc = (HeavyIonConfiguration *) ac;
 
@@ -109,7 +109,7 @@ void AACollisionGenerator::execute()
 
   hc->nCollisionsMax = nCollisions> hc->nCollisionsMax? nCollisions: hc->nCollisionsMax; //set the max number of binary collisions per event, to set the size of the histos later
 
-  if (reportDebug()) cout << "AACollisionGenerator::execute() processing " << nCollisions << " collisions." << endl;
+  if (reportInfo()) cout << "AACollisionGenerator::execute() processing " << nCollisions << " collisions." << endl;
 
 
   for(int i = 0; i < nCollisions; i++)
