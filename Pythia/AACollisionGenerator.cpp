@@ -97,7 +97,7 @@ void AACollisionGenerator::execute()
   AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
   HeavyIonConfiguration * hc = (HeavyIonConfiguration *) ac;
 
-  nCollisions = 2;//collisionGeometry->nBinary; //get the number of binary collisions
+  nCollisions = collisionGeometry->nBinary; //get the number of binary collisions
 
   Factory<Particle> * particleFactory = Particle::getFactory();
 
