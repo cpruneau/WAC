@@ -30,7 +30,7 @@ int main()
   cout << "<INFO> PYTHIA Model Analysis - Starting" << endl;
 
 //  long nEventsRequested = 100;
-  long nEventsRequested = 1000;
+  long nEventsRequested = 20;
   int  nEventsReport    = 1000;
 
 
@@ -56,7 +56,7 @@ int main()
   ac->configurationFileName = "configuration";
   ac->rootInputFileName = "";
   ac->outputPath = getenv("OUTPUT_PATH");            // check this 
-  ac->rootOuputFileName =  "/Pythia";                // and this
+  ac->rootOuputFileName =  "/Pythia2";                // and this
   ac->histoBaseName =  "pythia";
 
   ac->nBins_pt    = 40;
@@ -98,7 +98,7 @@ int main()
   ac->max_cent     = 100.0;
 
   ac->hardBoost      = false;
-  ac->nCollisionsMax = 0;
+  ac->nCollisionsMax = 1;
   ac->param_a        = ac->hardBoost? 0.1 : 0.05;
   ac->param_b        = 1;
   ac->maxOrder       = 4; // order <= particleFilters1 length
@@ -187,9 +187,6 @@ int main()
 
   Event * event = Event::getEvent();
   EventLoop * eventLoop = new EventLoop();
-
-  int x = 0;
-  int* nCollisionsMax = &(x);
 
   //eventLoop->addTask( new PythiaEventGenerator("PYTHIA",0, event,eventFilter,particleFilter) );
   eventLoop->addTask( new CollisionGeometryGenerator("PYTHIA_PbPbCollisionGeometryGenerator",ac1, collisionGeometry,nucGenA,nucGenB) );

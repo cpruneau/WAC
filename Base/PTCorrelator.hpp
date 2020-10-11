@@ -30,10 +30,10 @@ public:
   //  virtual void addHistogramsToExtList(TList *list, bool all=false);
   virtual void scaleHistograms(double factor);
   virtual void calculateAverage();
-  virtual double calculateS1(int * filters, int & count);
-  virtual double calculateS2(int * filters, int & count);
-  virtual double calculateS3(int * filters, int & count);
-  virtual double calculateS4(int * filters, int & count);
+  inline virtual double calculateS1(int * filters, int & count);
+  inline virtual double calculateS2(int * filters, int & count);
+  inline virtual double calculateS3(int * filters, int & count);
+  inline virtual double calculateS4(int * filters, int & count);
   virtual double calculateS(int * filters, int order, int curFilterIndex, int & count, int * particles);
   virtual void fillSValues(int depth, int filterIndex, int * filters, int & count, int *particles);
   virtual void storeEventInfo();

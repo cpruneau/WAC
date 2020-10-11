@@ -91,7 +91,7 @@ PTCorrelator::~PTCorrelator()
 void PTCorrelator::createHistograms()
 {
 	if (reportDebug())  cout << "PTCorrelator::createHistograms(...) started"<< endl;
-	AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
+	HeavyIonConfiguration * ac = (HeavyIonConfiguration *) getTaskConfiguration();
 	LogLevel debugLevel = getReportLevel();
 
 	TString histoName;

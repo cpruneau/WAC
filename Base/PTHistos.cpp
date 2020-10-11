@@ -66,6 +66,11 @@ void PTHistos::createHistograms()
 	hC_vsMult = new TH1 ** [numFunc];
 	hC_vsCent = new TH1 ** [numFunc];
 
+	names = new TString* [numFunc];
+	titles = new TString *[numFunc];
+	names2 = new TString* [numFunc];
+	titles2 = new TString *[numFunc];
+
 	for(int i = 0; i < numFunc; i++)
 	{	
 		hS[i] = new TProfile * [size];
@@ -75,6 +80,11 @@ void PTHistos::createHistograms()
 		hC[i] = new TH1 * [size];
 		hC_vsMult[i] = new TH1 * [size];
 		hC_vsCent[i] = new TH1 * [size];
+
+		names[i] = new TString [size];
+		titles[i] = new TString [size];
+		names2[i] = new TString [size];
+		titles2[i] = new TString [size];
 	}
 
 	h_counts = new TProfile*  [size];
@@ -98,13 +108,13 @@ void PTHistos::createHistograms()
 	baseName[6] = bn + "Counts_";
 
 	TString * baseTitle = new TString[2 * numFunc + 1];
-	baseTitle[0] = "S_";
-	baseTitle[1] = "s_";
-	baseTitle[2] = "s*_";
-	baseTitle[3] = "C_";
-	baseTitle[4] = "c_";
-	baseTitle[5] = "c*_";
-	baseTitle[6] = "Counts_";
+	baseTitle[0] = "S_{";
+	baseTitle[1] = "s_{";
+	baseTitle[2] = "s*_{";
+	baseTitle[3] = "C_{";
+	baseTitle[4] = "c_{";
+	baseTitle[5] = "c*_{";
+	baseTitle[6] = "Counts_{";
 
 	histoIndex = 0;
 	createHistogramRec(baseName, baseTitle, maxOrder - 1, 0);
@@ -198,7 +208,7 @@ void PTHistos::saveHistograms(TFile * outputFile, bool saveAll)
 	if (ac.ptCorrelatorVsMult) numTypes++;
 	if (ac.ptCorrelatorVsCent) numTypes++;
 
-	for (int k=0; k<3; k++)
+	for (int k=0; k<numTypes; k++)
 	{
 		if ((isSaved[k] || saveAll)) histograms[k]->Write();
 	}
@@ -209,9 +219,26 @@ void PTHistos::saveHistograms(TFile * outputFile, bool saveAll)
 		{
 			for (int k=numTypes; k<nHistograms; k++)
 			{
-				int orderIndex = (k - numTypes)/(numTypes * (2 * numFunc + 1));
-				int funcIndex = (k - numTypes)/numTypes - ( (2 * numFunc + 1)) * ((k - numTypes)/(numTypes * (2 * numFunc + 1)));
-				if ((isSaved[k] || saveAll) && (orders[orderIndex] == i) && ((funcIndex) % (2 * numFunc + 1) == iFunc)) histograms[k]->Write();
+				if(k < size * numTypes + numTypes && iFunc == 2 * numFunc)
+				{
+					int k1 = (k - numTypes);
+					int orderIndex = k1 / numTypes;
+					if ((isSaved[k] || saveAll) && (orders[orderIndex] == i)) histograms[k]->Write();
+				}
+				if(k >= size * numTypes + numTypes && k < size * (numFunc + 1) * numTypes + numTypes && iFunc < numFunc)
+				{
+					int k1 = k - size * numTypes - numTypes;
+					int orderIndex = (k1 )/(numTypes * (numFunc ));
+					int funcIndex = (k1 )/numTypes - ( (numFunc )) * ((k1)/(numTypes * (numFunc )));
+					if ((isSaved[k] || saveAll) && (orders[orderIndex] == i) && ((funcIndex) % ( numFunc) == (iFunc % ( numFunc)))) histograms[k]->Write();
+				}
+				if(k >= size * (numFunc + 1) * numTypes + numTypes && iFunc >= numFunc && iFunc < 2 * numFunc)
+				{
+					int k1 = k - size * (numFunc + 1) * numTypes - numTypes;
+					int orderIndex = (k1 )/(numTypes * (numFunc ));
+					int funcIndex = (k1 )/numTypes - ( (numFunc )) * ((k1)/(numTypes * (numFunc )));
+					if ((isSaved[k] || saveAll) && (orders[orderIndex] == i) && ((funcIndex) % ( numFunc) == (iFunc - ( numFunc)))) histograms[k]->Write();
+				}
 			}
 		}
 	}
@@ -249,15 +276,18 @@ void PTHistos::createHistogramRec(TString * baseName, TString * baseTitle, int d
 			histoName[iFunc + numFunc]  = baseName[iFunc + numFunc] + (i + 1);
 			histoTitle[iFunc + numFunc] = (depth == maxOrder - 1) ? baseTitle[iFunc + numFunc] + (i + 1) : baseTitle[iFunc + numFunc] + ", " + (i + 1);
 			
-			
-			hS[iFunc][histoIndex] = createProfile( histoName[iFunc], 1, ac.max_mult, ac.min_mult,"mult",histoTitle[iFunc] + "}" );
+			names[iFunc][histoIndex] = histoName[iFunc];
+			titles[iFunc][histoIndex] = histoTitle[iFunc];
+
+			/*hS[iFunc][histoIndex] = createProfile( histoName[iFunc], 1, ac.max_mult, ac.min_mult,"mult",histoTitle[iFunc] + "}" );
 			if (ac.ptCorrelatorVsMult)	hS_vsMult[iFunc][histoIndex] = createProfile(histoName[iFunc] + "_vsMult",ac.nBins_mult, ac.max_mult, ac.min_mult, "mult", histoTitle[iFunc] + "}");
-			if (ac.ptCorrelatorVsCent)	hS_vsCent[iFunc][histoIndex] = createProfile(histoName[iFunc] + "_vsCent",ac.nBins_cent,ac.max_cent,  ac.min_cent, "cent", histoTitle[iFunc] + "}");
+			if (ac.ptCorrelatorVsCent)	hS_vsCent[iFunc][histoIndex] = createProfile(histoName[iFunc] + "_vsCent",ac.nBins_cent,ac.max_mult, ac.min_mult, "cent", histoTitle[iFunc] + "}");*/
 			
-			
-			hC[iFunc][histoIndex] = createHistogram( histoName[iFunc + numFunc], 1, ac.max_mult, ac.min_mult,"mult",histoTitle[iFunc + numFunc] + "}" );
-			if (ac.ptCorrelatorVsMult)	hC_vsMult[iFunc][histoIndex] = createHistogram(histoName[iFunc + numFunc] + "_vsMult",ac.nBins_mult, ac.max_mult, ac.min_mult, "mult", histoTitle[iFunc + numFunc] + "}");
-			if (ac.ptCorrelatorVsCent)	hC_vsCent[iFunc][histoIndex] = createHistogram(histoName[iFunc + numFunc] + "_vsCent",ac.nBins_cent,ac.max_cent,  ac.min_cent, "cent", histoTitle[iFunc + numFunc] + "}");
+			names2[iFunc][histoIndex] = histoName[iFunc + numFunc];
+			titles2[iFunc][histoIndex] = histoTitle[iFunc + numFunc];
+			/*hC[iFunc][histoIndex] = createHistogram( histoName[iFunc + numFunc], 1, ac.min_mult, ac.max_mult,"mult",histoTitle[iFunc + numFunc] + "}" );
+			if (ac.ptCorrelatorVsMult)	hC_vsMult[iFunc][histoIndex] = createHistogram(histoName[iFunc + numFunc] + "_vsMult",ac.nBins_mult,ac.min_mult, ac.max_mult, "mult", histoTitle[iFunc + numFunc] + "}");
+			if (ac.ptCorrelatorVsCent)	hC_vsCent[iFunc][histoIndex] = createHistogram(histoName[iFunc + numFunc] + "_vsCent",ac.nBins_cent,ac.min_mult, ac.max_mult, "cent", histoTitle[iFunc + numFunc] + "}");*/
 		}
 
 		
@@ -334,7 +364,8 @@ void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * 
 {
 	if (reportDebug())  cout << "PTHistos::fillDerivedHistos(...) Starting." << endl;
 	auto start = chrono::high_resolution_clock::now(); 
-	AnalysisConfiguration & ac = *getConfiguration();
+	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)*getConfiguration();
+	double max = ac.nCollisionsMax;
 
 	//fill SValues
 	//fill SValues normalized by counts and average pT's
@@ -342,6 +373,15 @@ void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * 
 	{
 		for(int iHisto = 0; iHisto <size; iHisto++)
 		{
+			if(iEvent == 0)
+			{
+				for (int iFunc = 0; iFunc < numFunc; ++iFunc)
+				{
+					hS[iFunc][iHisto] = createProfile( names[iFunc][iHisto], 1, ac.min_mult * max, ac.max_mult * max,"mult",titles[iFunc][iHisto] + "}" );
+					if (ac.ptCorrelatorVsMult)	hS_vsMult[iFunc][iHisto] = createProfile(names[iFunc][iHisto] + "_vsMult",ac.nBins_mult,ac.min_mult * max, ac.max_mult * max, "mult", titles[iFunc][iHisto] + "}");
+					if (ac.ptCorrelatorVsCent)	hS_vsCent[iFunc][iHisto] = createProfile(names[iFunc][iHisto] + "_vsCent",ac.nBins_mult,ac.min_mult * max, ac.max_mult * max, "cent", titles[iFunc][iHisto] + "}");
+				}
+			}
 			if(counts[iEvent][iHisto] != 0)
 			{
 				hS[0][iHisto]->Fill(mults[iEvent], SValues[iEvent][iHisto], 1.0);//weight is always 1.0
@@ -376,6 +416,12 @@ void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * 
 
 	for(int iHisto = 0; iHisto <size; iHisto++)
 	{
+		for (int i = 0; i < numFunc; ++i)
+		{
+			hC[i][iHisto] = createHistogram( names2[i][iHisto], 1, ac.min_mult * max, ac.max_mult * max,"mult",titles2[i][iHisto] + "}" );
+			if (ac.ptCorrelatorVsMult)	hC_vsMult[i][iHisto] = createHistogram(names2[i][iHisto] + "_vsMult",ac.nBins_mult,ac.min_mult * max, ac.max_mult * max, "mult", titles2[i][iHisto] + "}");
+			if (ac.ptCorrelatorVsCent)	hC_vsCent[i][iHisto] = createHistogram(names2[i][iHisto] + "_vsCent",ac.nBins_cent,ac.min_mult * max, ac.max_mult * max, "cent", titles2[i][iHisto] + "}");
+		}
 		int nBins = 1;
 		for(int iBin = 1; iBin <=nBins; iBin++)
 		{
@@ -522,7 +568,7 @@ void PTHistos::fillNormalizedPTValues( int depth, int partIndex, double product,
 //////////////////////////////////////////
 void PTHistos::calculateCumulants(TProfile ** SHistos, TH1 **CHistos, int nBins, double min, double max)
 {	
-	AnalysisConfiguration & ac = *getConfiguration();
+	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)( *getConfiguration());
 
 	TProfile ** newSHistos = new TProfile *[size];
 	int counter = 0;

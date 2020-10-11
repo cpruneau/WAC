@@ -101,6 +101,14 @@ public:
   //keep track of which index in "recursive order" corresponds to which index in normal order
   int * reorder;
 
+  TString** names;
+
+TString* *titles;
+
+TString** names2;
+
+TString* *titles2;
+
   ClassDef(PTHistos,0)
 };
 

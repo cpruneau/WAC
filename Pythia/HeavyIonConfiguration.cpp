@@ -9,7 +9,7 @@ HeavyIonConfiguration::HeavyIonConfiguration(const TString & name,
 :
 AnalysisConfiguration(name,type,version),
 hardBoost(true),
-nCollisionsMax(0),
+nCollisionsMax(1),
 param_a(0.5), param_b(1),
 maxOrder(0), totEvents(0)
 {
