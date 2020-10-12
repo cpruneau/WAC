@@ -19,6 +19,7 @@ particleFilter(pf),
 nCollisions(40000),
 collisionGeometry(collisionGeo)
 {
+  setReportLevel(MessageLogger::Debug);
   if (reportDebug()) cout << "AACollisionGenerator::AACollisionGenerator(...) No ops" << endl;
 }
 
@@ -97,7 +98,7 @@ void AACollisionGenerator::execute()
   AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
   HeavyIonConfiguration * hc = (HeavyIonConfiguration *) ac;
 
-  nCollisions = 2;//collisionGeometry->nBinary; //get the number of binary collisions
+  nCollisions = collisionGeometry->nBinary; //get the number of binary collisions
 
   Factory<Particle> * particleFactory = Particle::getFactory();
 
@@ -128,7 +129,7 @@ void AACollisionGenerator::execute()
     while (seekingEvent)
     {
      pythia8->GenerateEvent();
-     if (reportDebug()) pythia8->EventListing();
+     //if (reportDebug()) pythia8->EventListing();
      if (reportDebug()) cout << "AACollisionGenerator::execute() Calling pythia8->ImportParticles()" << endl;
 
      pythia8->ImportParticles(particles,"Final");
@@ -156,11 +157,12 @@ void AACollisionGenerator::execute()
    z_col = collisionGeometry->z[i];
 
    double transverseR = TMath::Sqrt(x_col*x_col + y_col*y_col);
-   double phi = TMath::ATan2(y_col,x_col);
+   double phi = TMath::ATan(y_col/x_col);
    if(x_col < 0) phi += TMath::Pi()/2;
    double param_b = hc->param_b; // exponent of order 1
    double param_a = hc->param_a;
    double beta = param_a * TMath::Power(transverseR, param_b);
+   if(beta > 1 - TMath::Power(10, -8)) beta = 1 - TMath::Power(10, -8);
    double betax = beta * TMath::Cos(phi);
    double betay = beta * TMath::Sin(phi);
 
@@ -201,7 +203,8 @@ void AACollisionGenerator::execute()
         aParticle.setPidPxPyPzE(pdg, charge, p_x,p_y,p_z,p_e);
 
 
-        //aParticle.boost(1.0,1.0,1.0);
+        aParticle.boost(betax,betay,0.0);
+
         //aParticle.printProperties(cout);
         //if (reportDebug()) cout << "AACollisionGenerator::execute() calling filter " << endl;
         particleCounted++;

@@ -32,9 +32,15 @@ public:
   virtual void fillNormalizedPTValues( int depth, int partIndex, double product, double * SValues, double  mult, double  cent, double *avgpT);
   virtual void fillNormalizedPTValues( int depth, int partIndex, double product, TH1 *** values, int* reorder, int*  nBin, int  totEvents, double *avgpT);
   virtual void calculateCumulants(TProfile ** Shistos, TH1 **CHistos, int nBins, double min, double max);
+  virtual void calcRecSum(TH1 **CHistos, int iBin, double& absESq, double curRelESq, int* iHisto, int* Subset, int len,  int * set, int lenSet, double productC, double* used, int& curInd, int productS, double& sum);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  //Helper Functions
+  ////////////////////////////////////////////////////////////////////////////
+
   virtual int convert(int * num, int len);
   virtual int* convert(int num, int & len);
-  virtual void calcRecSum(TH1 **CHistos, int iBin, double& absESq, double curRelESq, int* iHisto, int* Subset, int len,  int * set, int lenSet, double productC, double* used, int& curInd, int productS, double& sum);
   virtual void convertToBinary(int num, char*str, int len );
   virtual int* getSubset(char* subset, int * set, int len, int& lenSub);
   virtual int* getComplementarySubset(char* subset, int * set, int len, int& lenSub);
