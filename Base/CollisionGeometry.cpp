@@ -33,7 +33,10 @@ y(0),
 z(0),
 t(0),
 nBinary(0),
-nParticipant(0)
+nParticipant(0),
+nPP(0),
+nPN(0),
+nNN(0)
 {
   nucleusA = new Nucleus(nProtonsA,nNeutronsA);
   nucleusB = new Nucleus(nProtonsB,nNeutronsB);
@@ -73,6 +76,9 @@ void CollisionGeometry::reset()
 //    }
   nBinary = 0;
   nParticipant = 0;
+  nPP = 0;
+  nPN = 0;
+  nNN = 0;
 }
 
 void CollisionGeometry::addNNCollision(Nucleon* nucleonA,Nucleon* nucleonB, double xAvg, double yAvg, double zAvg, double tAvg)
@@ -89,6 +95,21 @@ void CollisionGeometry::addNNCollision(Nucleon* nucleonA,Nucleon* nucleonB, doub
   z[nBinary] = zAvg;
   t[nBinary] = tAvg;
   nBinary++;
+  if (nucleonA->isProton())
+    {
+    if (nucleonB->isProton())
+      nPP++;
+    else
+      nPN++;
+    }
+  else
+    {
+    if (nucleonB->isProton())
+      nPN++;
+    else
+      nNN++;
+    }
+
 }
 
 

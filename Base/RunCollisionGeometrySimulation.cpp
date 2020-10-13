@@ -17,7 +17,7 @@ int main()
   cout << "<I> RunCollisionGeometrySimulation() - Starting" << endl;
 
 //  long nEventsRequested = 100;
-  long nEventsRequested = 100000;
+  long nEventsRequested = 10000000;
   int  nEventsReport    = 10000;
 
   CollisionGeometryConfiguration * ac = new CollisionGeometryConfiguration("CollisionGeometry","CollisionGeometry","1.0");
@@ -50,20 +50,26 @@ int main()
   ac->rootOuputFileName =  "CollisionGeometry";
   ac->histoBaseName =  "geom";
   ac->minB = 0.0;
-  ac->maxB = 18.0;
-  //ac->nnCrossSection = 4.5;  // in fm^2 -- nominal value
-  //ac->nnCrossSection = 4.2;  // in fm^2 -- Config B
-  ac->nnCrossSection = 4.8;  // in fm^2 -- Config C
-
-  ac->nBins_b = 100;
+  ac->maxB = 21.0;
+  // RHIC Values
+//  //ac->nnCrossSection = 4.5;  // in fm^2 -- nominal value
+//  //ac->nnCrossSection = 4.2;  // in fm^2 -- Config B
+//  ac->nnCrossSection = 4.8;  // in fm^2 -- Config C
+  // LHC Values -- ALICE. PHYSICAL REVIEW C 88, 044909 (2013)
+  //ac->nnCrossSection = 6.4;  // in fm^2 -- nominal value  gives a totol PbPb xSect of 761.632
+  //ac->nnCrossSection = 5.9;  // in fm^2 -- Config B
+    ac->nnCrossSection = 6.9;  // in fm^2 -- Config C
+  ac->nBins_b = 120;
   ac->min_b   = 0.0;
-  ac->max_b   = 18.0;
-  ac->nBins_nPart = 60;
+  ac->max_b   = 24.0;
+  ac->nBins_nPart = 100;
   ac->min_nPart   = 0;
-  ac->max_nPart   = 240;
-  ac->nBins_nBinary = 400;
+  ac->max_nPart   = 500;
+  ac->nBins_nBinary = 600;
   ac->min_nBinary   = 0;
-  ac->max_nBinary   = 2000;
+  ac->max_nBinary   = 3000;
+
+
 
   ac->calculateDerivedHistograms = true;
 
@@ -71,10 +77,10 @@ int main()
                                                                  ac->nNeutronsA,
                                                                  ac->nProtonsB,
                                                                  ac->nNeutronsB);
-  NucleusGenerator * nucleusGeneratorA = new NucleusGenerator("PbWS1",NucleusGenerator::WoodsSaxon, 7.1, 0.535, 0.0, 10000,0.0,8.0);
-  NucleusGenerator * nucleusGeneratorB = new NucleusGenerator("PbWS2",NucleusGenerator::WoodsSaxon, 7.1, 0.535, 0.0, 10000,0.0,8.0);
+  NucleusGenerator * nucleusGeneratorA = new NucleusGenerator("PbWS1",NucleusGenerator::WoodsSaxon, 6.62 , 0.546, 0.0, 11000,0.0,11.0);
+  NucleusGenerator * nucleusGeneratorB = new NucleusGenerator("PbWS2",NucleusGenerator::WoodsSaxon, 6.62 , 0.546, 0.0, 11000,0.0,11.0);
   CollisionGeometryGenerator * collisionGeometryGenerator = new CollisionGeometryGenerator("PbPbWSGen",ac, collisionGeometry, nucleusGeneratorA, nucleusGeneratorB);
-  CollisionGeometryAnalyzer  * collisionGeometryAnalyzer  = new CollisionGeometryAnalyzer("PbPbWS", ac, collisionGeometry);
+  CollisionGeometryAnalyzer  * collisionGeometryAnalyzer  = new CollisionGeometryAnalyzer("PbPbWS-ConfigC", ac, collisionGeometry);
 
   EventLoop * eventLoop = new EventLoop();
   eventLoop->addTask( collisionGeometryGenerator );

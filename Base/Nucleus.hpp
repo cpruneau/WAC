@@ -29,6 +29,7 @@ public:
   int nProtons;
   int nNeutrons;
   int nNucleons;
+  double x, y, z;
 
 protected:
 

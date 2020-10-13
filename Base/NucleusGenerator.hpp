@@ -44,6 +44,12 @@ public:
   TH1 * rProfile;
   TH1 * rProfileGen;
 
+  bool useRecentering;
+  bool useNucleonExclusion;
+  double exclusionRadius;
+  double exclusionRadiusSq;
+
+
   NucleusGenerator(const TString & _generatorName,
                    GeneratorType _generatorType, double _parA, double _parB, double _parC,
                    int _nR, double _minR, double _maxR);

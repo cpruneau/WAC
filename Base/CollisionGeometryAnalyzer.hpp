@@ -26,7 +26,7 @@ public:
   virtual void saveHistograms(TFile * outputFile);
   void execute();
   virtual void calculateDerivedHistograms();
-
+ 
   CollisionGeometry * collisionGeometry;
   CollisionGeometryHistograms * collisionGeometryHistograms;
 

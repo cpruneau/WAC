@@ -15,6 +15,8 @@
  */
 
 #include "NucleusGenerator.hpp"
+#include <iostream>
+using namespace std;
 
 ClassImp(NucleusGenerator);
 
@@ -32,7 +34,11 @@ parB(_parB),
 parC(_parC),
 rDensity(0),
 rProfile(0),
-rProfileGen(0)
+rProfileGen(0),
+useRecentering(1),
+useNucleonExclusion(1),
+exclusionRadius(0.4), // fm
+exclusionRadiusSq(0.4*0.4)
 {
   initialize();
 }
@@ -97,16 +103,76 @@ void NucleusGenerator::generate(Nucleus * nucleus)
   double r, cosTheta, phi;
   int nProtons  = nucleus->nProtons;
   int nNucleons = nucleus->nNucleons;
-  for (int iNucleon=0; iNucleon<nNucleons; iNucleon++)
+  double xMean=0.0;
+  double yMean=0.0;
+  double zMean=0.0;
+
+  int iNucleon = 0;
+  while (iNucleon < nNucleons)
     {
+    //cout << "iNucleon : " << iNucleon << endl;
+
     Nucleon * nucleon = nucleus->getNucleon(iNucleon);
     generate(r, cosTheta, phi);
     nucleon->setRCosThetaPhi(r, cosTheta, phi);
+
+    // check if this
+    int sanityCheck = 0;
+    if (useNucleonExclusion)
+      {
+      bool reject = false;
+      for (int jNucleon=0; jNucleon<iNucleon; jNucleon++)
+        {
+        //cout << "jNucleon : " << jNucleon << endl;
+
+        Nucleon * otherNucleon = nucleus->getNucleon(jNucleon);
+        if (nucleon->distanceXYZSq(otherNucleon) < exclusionRadiusSq)
+          {
+          reject = true;
+          break;
+          }
+        }
+      if (reject)
+        {
+        sanityCheck++;
+        if (sanityCheck>200)
+          {
+          cout << "Nucleon rejected > 200 times" << endl;
+          return;
+          }
+        //cout << "reject  sanityCheck:" << sanityCheck << endl;
+        continue;
+        }
+      }
+
+    xMean += nucleon->x;
+    yMean += nucleon->y;
+    zMean += nucleon->z;
     if (iNucleon<nProtons)
       nucleon->setNucleonType(Nucleon::Proton);
     else
       nucleon->setNucleonType(Nucleon::Neutron);
+    iNucleon++;
     }
+
+  xMean /= double(nNucleons);
+  yMean /= double(nNucleons);
+  zMean /= double(nNucleons);
+  nucleus->x = xMean;
+  nucleus->y = yMean;
+  nucleus->z = zMean;
+
+  // center of mass, recenter
+  if (useRecentering)
+    {
+    for (int iNucleon=0; iNucleon<nNucleons; iNucleon++)
+      {
+      Nucleon * nucleon = nucleus->getNucleon(iNucleon);
+      nucleon->shift( -xMean, -yMean, -zMean);
+      }
+    }
+
+  //cout << "Nucleus complted" << endl;
 }
 
 void NucleusGenerator::generate(double & r, double & cosTheta, double & phi)

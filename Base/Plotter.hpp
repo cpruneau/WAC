@@ -62,6 +62,8 @@ public:
   void setProperties(TGraph * g, const GraphConfiguration & graphConfiguration, const TString & xTitle, const TString & yTitle);
 
   TLatex  * createLabel(double x, double y, int color, int fontType, double fontSize, const TString & text, bool doDraw=true);
+  TLatex  * createLabel(double x, double y, double angle, int color, int fontType, double fontSize, const TString & text, bool doDraw=true);
+
   TLegend * createLegend(float x1, float y1, float x2, float y2, int fontType, float fontSize);
   TLegend * createLegend(TH1 * h, TString & legendText,
                          float x1, float y1, float x2, float y2, int fontType, float fontSize, bool doDraw=true);

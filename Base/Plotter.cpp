@@ -139,7 +139,15 @@ TCanvas *  Plotter::plot(int nGraphs, TString  canvasName, CanvasConfiguration *
     plotOption = gc[iGraph]->plotOption;
     h[iGraph]->Draw(plotOption+" SAME");
     }
-  createLegend(nGraphs,h,legendTexts,xMinLeg, yMinLeg, xMaxLeg, yMaxLeg,0, legendSize);
+  if (nGraphs<6)
+    createLegend(nGraphs,h,legendTexts,xMinLeg, yMinLeg, xMaxLeg, yMaxLeg,0, legendSize);
+  else
+    {
+    int n1 = nGraphs/2;
+    int n2 = nGraphs - n1;
+    createLegend(n1,h,legendTexts,xMinLeg, yMinLeg, xMaxLeg, yMaxLeg,0, legendSize);
+    createLegend(n2,h+n1,legendTexts+n1,xMinLeg+0.2, yMinLeg, xMaxLeg+0.2, yMaxLeg,0, legendSize);
+    }
   return canvas;
 }
 
@@ -158,6 +166,20 @@ TLatex * Plotter::createLabel(double x, double y, int color, int fontType, doubl
   if (doDraw) label->Draw();
   return label;
 }
+
+TLatex * Plotter::createLabel(double x, double y, double angle, int color, int fontType, double fontSize, const TString & text, bool doDraw)
+{
+  TLatex * label;
+  label = new TLatex(x,y,text);
+  label->SetTextColor(color);
+  label->SetTextAngle(angle);
+  fontType=0; // to avoid warnings.
+              //label->SetTextFont(fontType);
+  label->SetTextSize(fontSize);
+  if (doDraw) label->Draw();
+  return label;
+}
+
 
 ////////////////////////////////////////////////////
 // Create standard legend

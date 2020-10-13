@@ -37,8 +37,11 @@ public:
   double * y;
   double * z;
   double * t;
-  int nBinary;
-  int nParticipant;
+  int nBinary;       // number of binary collisions
+  int nParticipant;  // number of participants
+  int nPP;           // number of proton-proton collisions
+  int nPN;           // number of proton-neutron collisions
+  int nNN;           // number of neutron-neutron collisions
 
   CollisionGeometry(int nProtonsA, int nNeutronsA, int nProtonsB, int nNeutronsB);
 
