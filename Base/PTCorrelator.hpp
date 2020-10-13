@@ -65,6 +65,10 @@ public:
   int correlatorIndex;
 
 
+  //stores the number of particles in each event
+  int * numParticles;
+
+
   //store the transverse momentum of all the particles
   //first index is event number, second index is particle number
   double ** pT;
@@ -73,8 +77,6 @@ public:
   //first index is event number, second number is filter number, third is particle number
   bool *** acceptances;
 
-  //store the overall event avgpT of each of the particle filters
-  double * avgpT;
 
   //store the multiplicty of all the events
   double * multiplicity;

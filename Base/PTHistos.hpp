@@ -24,16 +24,16 @@ public:
 
   virtual void createHistograms();
   virtual void loadHistograms(TFile * inputFile);
-  virtual void fillDerivedHistos(bool *** acceptances, double * mults, double * cents, double * avgCounts, double * avgpT, double ** SValues, int ** counts, int totEvents);
+  virtual void fillDerivedHistos(bool *** acceptances, double * mults, double * cents, int * numParticles, double ** pT, double ** SValues, int ** counts);
   virtual void saveHistograms(TFile * outputFile, bool saveAll=false);
   virtual void createHistogramRec(TString * baseName, TString * baseTitle, int depth, int partIndex);
   virtual void loadHistogramRec(TString * baseName, int depth, int partIndex, TFile * inputFile);
   virtual void fillEventHistos(double mult, double cent, double weight);
   virtual void fillNormalizedPTValues( int depth, int partIndex, double product, double * SValues, double  mult, double  cent, double *avgpT);
-  virtual void fillNormalizedPTValues( int depth, int partIndex, double product, TH1 *** values, int* reorder, int*  nBin, int  totEvents, double *avgpT);
+  virtual void fillNormalizedPTValues( int depth, int partIndex, double product, TH1 *** values, int* reorder, int*  nBin, double *avgpT);
   virtual void calculateCumulants(TProfile ** Shistos, TH1 **CHistos, int nBins, double min, double max);
   virtual void calcRecSum(TH1 **CHistos, int iBin, double& absESq, double curRelESq, int* iHisto, int* Subset, int len,  int * set, int lenSet, double productC, double* used, int& curInd, int productS, double& sum);
-
+  virtual void calculateInclusivePtAverage(bool *** acceptances, int * numParticles, double ** pT, double * avgpT);
 
   ////////////////////////////////////////////////////////////////////////////
   //Helper Functions
@@ -106,6 +106,11 @@ public:
 
   //keep track of which index in "recursive order" corresponds to which index in normal order
   int * reorder;
+
+  int totEvents;
+
+  //store the inclusive avgpT of each of the particle filters
+  double * avgpT;
 
   TString** names;
 

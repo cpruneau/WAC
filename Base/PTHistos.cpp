@@ -46,6 +46,7 @@ void PTHistos::createHistograms()
 	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)( *getConfiguration());
 	TString bn = getHistoBaseName();
 	TH1::SetDefaultBufferSize(ac.totEvents);
+	totEvents =ac.totEvents;
 
 	// ================================================================================
 	// Naming convention
@@ -361,13 +362,15 @@ void PTHistos::loadHistogramRec(TString * baseName, int depth, int partIndex, TF
 	if (reportDebug())  cout << "PTHistos::loadHistogramRec(...) Completed." << endl;
 }
 
-void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * cents, double * avgCounts, double * avgpT, double ** SValues, int ** counts, int totEvents)
+void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * cents, int * numParticles, double ** pT, double ** SValues, int ** counts)
 {
 	if (reportDebug())  cout << "PTHistos::fillDerivedHistos(...) Starting." << endl;
 	auto start = chrono::high_resolution_clock::now(); 
 	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)*getConfiguration();
 	double max = ac.nCollisionsMax;
 
+	double * avgpT = new double  [maxOrder];
+	calculateInclusivePtAverage(acceptances, numParticles, pT, avgpT);
 	//fill SValues
 	//fill SValues normalized by counts and average pT's
 	for(int iEvent = 0; iEvent < totEvents;iEvent++)
@@ -389,9 +392,9 @@ void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * 
 				if (ac.ptCorrelatorVsMult)	hS_vsMult[0][iHisto]->Fill(mults[iEvent], SValues[iEvent][iHisto] , 1.0);
 				if (ac.ptCorrelatorVsCent)	hS_vsCent[0][iHisto]->Fill(cents[iEvent], SValues[iEvent][iHisto] , 1.0);
 
-				hS[1][iHisto]->Fill(mults[iEvent], (SValues[iEvent][iHisto] / avgCounts[iHisto]), 1.0);
-				if (ac.ptCorrelatorVsMult)  hS_vsMult[1][iHisto]->Fill(mults[iEvent], (SValues[iEvent][iHisto] / avgCounts[iHisto]), 1.0);
-				if (ac.ptCorrelatorVsCent)	hS_vsCent[1][iHisto]->Fill(cents[iEvent], (SValues[iEvent][iHisto] / avgCounts[iHisto]), 1.0);
+				//hS[1][iHisto]->Fill(mults[iEvent], (SValues[iEvent][iHisto] / avgCounts[iHisto]), 1.0);
+				//if (ac.ptCorrelatorVsMult)  hS_vsMult[1][iHisto]->Fill(mults[iEvent], (SValues[iEvent][iHisto] / avgCounts[iHisto]), 1.0);
+				//if (ac.ptCorrelatorVsCent)	hS_vsCent[1][iHisto]->Fill(cents[iEvent], (SValues[iEvent][iHisto] / avgCounts[iHisto]), 1.0);
 			}
 
 			h_counts[iHisto]->Fill(mults[iEvent], counts[iEvent][iHisto], 1.0);//weight is always 1.0
@@ -473,7 +476,7 @@ void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * 
 
 	}
 
-	fillNormalizedPTValues(maxOrder - 1, 0, 1,  newhCValues, reorder, new int[3]{1,ac.nBins_mult, ac.nBins_cent} ,totEvents, avgpT);
+	fillNormalizedPTValues(maxOrder - 1, 0, 1,  newhCValues, reorder, new int[3]{1,ac.nBins_mult, ac.nBins_cent} , avgpT);
 
 	auto stop = chrono::high_resolution_clock::now(); 
 	auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
@@ -512,7 +515,7 @@ void PTHistos::fillNormalizedPTValues( int depth, int partIndex, double product,
 	if (reportDebug())  cout << "PTHistos::fillNormalizedPTValues(...) Completed." << endl;
 }
 
-void PTHistos::fillNormalizedPTValues( int depth, int partIndex, double product, TH1 *** values, int* reorder, int*  nBin, int  totEvents, double *avgpT)
+void PTHistos::fillNormalizedPTValues( int depth, int partIndex, double product, TH1 *** values, int* reorder, int*  nBin, double *avgpT)
 {
 	if (reportDebug())  cout << "PTHistos::fillNormalizedPTValues(...) Starting." << endl;
 	AnalysisConfiguration & ac = *getConfiguration();
@@ -559,7 +562,7 @@ void PTHistos::fillNormalizedPTValues( int depth, int partIndex, double product,
 		
 		if(histoIndex != size - 1)	histoIndex++;
 
-		if(depth != 0)	fillNormalizedPTValues(depth - 1, i, newProduct, values, reorder, nBin, totEvents, avgpT);
+		if(depth != 0)	fillNormalizedPTValues(depth - 1, i, newProduct, values, reorder, nBin, avgpT);
 	}
 	if (reportDebug())  cout << "PTHistos::fillNormalizedPTValues(...) Completed." << endl;
 }
@@ -715,7 +718,26 @@ void PTHistos::calcRecSum(TH1 **CHistos, int iBin, double& absESq, double curRel
 
 
 
-
+void PTHistos::calculateInclusivePtAverage(bool *** acceptances, int * numParticles, double ** pT, double * avgpT)
+{
+	for(int iFilter = 0; iFilter < maxOrder; iFilter++)
+	{
+		double sumPt = 0;
+		double totParts = 0;
+		for(int iEvent = 0; iEvent < totEvents; iEvent++)
+		{
+			for (int iParticle = 0; iParticle < numParticles[iEvent]; ++iParticle)
+			{
+				if(acceptances[iEvent][iFilter][iParticle])
+				{
+					sumPt += pT[iEvent][iParticle];
+					totParts += 1;
+				}
+			}
+		}
+		avgpT[iFilter] = sumPt/totParts;
+	}
+}
 
 
 
