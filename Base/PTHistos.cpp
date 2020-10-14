@@ -15,7 +15,7 @@ histoIndex(0),
 size(0),
 numFunc(3)
 {
-	  setReportLevel(MessageLogger::Debug);
+	setReportLevel(MessageLogger::Debug);
 	initialize();
 }
 
@@ -362,15 +362,35 @@ void PTHistos::loadHistogramRec(TString * baseName, int depth, int partIndex, TF
 	if (reportDebug())  cout << "PTHistos::loadHistogramRec(...) Completed." << endl;
 }
 
-void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * cents, int * numParticles, double ** pT, double ** SValues, int ** counts)
+void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * cents, int * numParticles, double ** pT, double ** SValues)
 {
 	if (reportDebug())  cout << "PTHistos::fillDerivedHistos(...) Starting." << endl;
 	auto start = chrono::high_resolution_clock::now(); 
 	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)*getConfiguration();
 	double max = ac.nCollisionsMax;
 
-	double * avgpT = new double  [maxOrder];
+	reorder = new int[size];
+	int counter = 0;
+	for(int iOrd = 1; iOrd <= maxOrder; iOrd++)
+	{
+		for(int iHisto = 0; iHisto < size; iHisto++)
+		{
+			if(orders[iHisto] == iOrd)
+			{
+				reorder[iHisto] = counter;
+				counter++;
+
+			}
+		}
+	}
+
+	avgpT = new double  [maxOrder];
 	calculateInclusivePtAverage(acceptances, numParticles, pT, avgpT);
+
+	avgCounts = new double [size]();
+	counts = new int * [totEvents]();
+	calculateInclusiveYieldsAverage(acceptances, numParticles, avgCounts, counts);
+
 	//fill SValues
 	//fill SValues normalized by counts and average pT's
 	for(int iEvent = 0; iEvent < totEvents;iEvent++)
@@ -392,9 +412,9 @@ void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * 
 				if (ac.ptCorrelatorVsMult)	hS_vsMult[0][iHisto]->Fill(mults[iEvent], SValues[iEvent][iHisto] , 1.0);
 				if (ac.ptCorrelatorVsCent)	hS_vsCent[0][iHisto]->Fill(cents[iEvent], SValues[iEvent][iHisto] , 1.0);
 
-				//hS[1][iHisto]->Fill(mults[iEvent], (SValues[iEvent][iHisto] / avgCounts[iHisto]), 1.0);
-				//if (ac.ptCorrelatorVsMult)  hS_vsMult[1][iHisto]->Fill(mults[iEvent], (SValues[iEvent][iHisto] / avgCounts[iHisto]), 1.0);
-				//if (ac.ptCorrelatorVsCent)	hS_vsCent[1][iHisto]->Fill(cents[iEvent], (SValues[iEvent][iHisto] / avgCounts[iHisto]), 1.0);
+				hS[1][iHisto]->Fill(mults[iEvent], (SValues[iEvent][iHisto] / avgCounts[iHisto]), 1.0);
+				if (ac.ptCorrelatorVsMult)  hS_vsMult[1][iHisto]->Fill(mults[iEvent], (SValues[iEvent][iHisto] / avgCounts[iHisto]), 1.0);
+				if (ac.ptCorrelatorVsCent)	hS_vsCent[1][iHisto]->Fill(cents[iEvent], (SValues[iEvent][iHisto] / avgCounts[iHisto]), 1.0);
 			}
 
 			h_counts[iHisto]->Fill(mults[iEvent], counts[iEvent][iHisto], 1.0);//weight is always 1.0
@@ -411,8 +431,6 @@ void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * 
 	{
 		newhCValues[iHisto] = new TH1*[size];
 	}
-
-	reorder = new int[size];
 
 	calculateCumulants(hS[0], newhCValues[0], 1 ,ac.min_mult,  ac.max_mult);
 	if (ac.ptCorrelatorVsMult)	calculateCumulants(hS_vsMult[0], newhCValues[1], ac.nBins_mult,ac.min_mult,  ac.max_mult);
@@ -572,6 +590,8 @@ void PTHistos::fillNormalizedPTValues( int depth, int partIndex, double product,
 //////////////////////////////////////////
 void PTHistos::calculateCumulants(TProfile ** SHistos, TH1 **CHistos, int nBins, double min, double max)
 {	
+	if (reportDebug())  cout << "PTHistos::calculateCumulants(...) Starting." << endl;
+
 	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)( *getConfiguration());
 
 	TProfile ** newSHistos = new TProfile *[size];
@@ -583,7 +603,6 @@ void PTHistos::calculateCumulants(TProfile ** SHistos, TH1 **CHistos, int nBins,
 			if(orders[iHisto] == iOrd)
 			{
 				newSHistos[counter] = SHistos[iHisto];
-				reorder[iHisto] = counter;
 				counter++;
 
 			}
@@ -720,6 +739,8 @@ void PTHistos::calcRecSum(TH1 **CHistos, int iBin, double& absESq, double curRel
 
 void PTHistos::calculateInclusivePtAverage(bool *** acceptances, int * numParticles, double ** pT, double * avgpT)
 {
+	if (reportDebug())  cout << "PTHistos::calculateInclusivePtAverage(...) Starting." << endl;
+
 	for(int iFilter = 0; iFilter < maxOrder; iFilter++)
 	{
 		double sumPt = 0;
@@ -737,9 +758,108 @@ void PTHistos::calculateInclusivePtAverage(bool *** acceptances, int * numPartic
 		}
 		avgpT[iFilter] = sumPt/totParts;
 	}
+	if (reportDebug())  cout << "PTHistos::calculateInclusivePtAverage(...) Completed." << endl;
+
 }
 
+void PTHistos::calculateInclusiveYieldsAverage(bool *** acceptances, int * numParticles, double * avgCounts, int ** counts)
+{
+	if (reportDebug())  cout << "PTHistos::calculateInclusiveYieldsAverage(...) Starting." << endl;
 
+	int ** tempCounts = new int *[totEvents];
+	double * tempAvgCounts = new double [size];
+	for(int iEvent = 0; iEvent < totEvents; iEvent++)
+	{
+		int *n = new int [maxOrder]();
+		int counter = 0;
+		tempCounts[iEvent] = new int [size]();
+		counts[iEvent] = new int [size];
+		for(int iFilter = 0; iFilter < maxOrder; iFilter++)
+		{
+			for(int iParticle = 0; iParticle < numParticles[iEvent]; iParticle++ )
+			{
+				if(acceptances[iEvent][iFilter][iParticle]) n[iFilter]++;
+			}
+		}
+
+		for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
+		{
+			if(n[iFilter1] > 0 ) tempCounts[iEvent][counter] = n[iFilter1];
+			tempAvgCounts[counter] += tempCounts[iEvent][counter];
+			counter++;
+		}
+
+		for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
+		{
+			for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
+			{
+				int same1 = iFilter2 == iFilter1? 1 : 0;
+				if(n[iFilter1] > 0 && (n[iFilter2] - same1) > 0) tempCounts[iEvent][counter] = n[iFilter1]*(n[iFilter2] - same1);
+				tempAvgCounts[counter] += tempCounts[iEvent][counter];
+				counter++;
+			}
+		}
+
+		for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
+		{
+			for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
+			{
+				int same12 = iFilter2 == iFilter1? 1 : 0;
+				for(int iFilter3 = iFilter2; iFilter3 < maxOrder; iFilter3++)
+				{
+					int same13 = iFilter3 == iFilter1? 1 : 0;
+					int same23 = iFilter2 == iFilter3? 1 : 0;
+					if(n[iFilter1] > 0 && (n[iFilter2] - same12) > 0 && (n[iFilter3] - same13 - same23) > 0) tempCounts[iEvent][counter] = n[iFilter1]*(n[iFilter2] - same12)*(n[iFilter3] - same13 - same23);
+					tempAvgCounts[counter] += tempCounts[iEvent][counter];
+					counter++;
+				}
+			}
+		}
+
+		for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
+		{
+			for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
+			{
+				for(int iFilter3 = iFilter2; iFilter3 < maxOrder; iFilter3++)
+				{
+					int same12 = iFilter2 == iFilter1? 1 : 0;
+					int same13 = iFilter3 == iFilter1? 1 : 0;
+					int same23 = iFilter2 == iFilter3? 1 : 0;
+					for(int iFilter4 = iFilter3; iFilter4 < maxOrder; iFilter4++)
+					{
+						int same14 = iFilter4 == iFilter1? 1 : 0;
+						int same24 = iFilter2 == iFilter4? 1 : 0;
+						int same34 = iFilter3 == iFilter4? 1 : 0;
+						if(n[iFilter1] > 0 && (n[iFilter2] - same12) > 0 && (n[iFilter3] - same13 - same23) > 0 && (n[iFilter4] - same14 - same24 - same34) > 0) tempCounts[iEvent][counter] = n[iFilter1]*(n[iFilter2] - same12)*(n[iFilter3] - same13 - same23)*(n[iFilter4] - same14 - same24 - same34);
+						tempAvgCounts[counter] += tempCounts[iEvent][counter];
+						counter++;
+					}
+				}
+			}
+		}
+		delete [] n;
+	}
+
+	for (int i = 0; i < size; ++i)
+	{
+		tempAvgCounts[i] /= totEvents;
+	}
+
+	for(int iEvent = 0; iEvent < totEvents; iEvent++)
+	{
+		for(int iHisto = 0; iHisto < size; iHisto++)
+		{
+			counts[iEvent][iHisto] = tempCounts[iEvent][reorder[iHisto]];
+		}
+	}
+
+	for(int iHisto = 0; iHisto < size; iHisto++)
+	{
+		avgCounts[iHisto] = tempAvgCounts[reorder[iHisto]];
+	}
+	if (reportDebug())  cout << "PTHistos::calculateInclusiveYieldsAverage(...) Completed." << endl;
+
+}
 
 ////////////////////////////////////////////////////////////////////////////
 //Helper Functions

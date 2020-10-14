@@ -24,7 +24,7 @@ public:
 
   virtual void createHistograms();
   virtual void loadHistograms(TFile * inputFile);
-  virtual void fillDerivedHistos(bool *** acceptances, double * mults, double * cents, int * numParticles, double ** pT, double ** SValues, int ** counts);
+  virtual void fillDerivedHistos(bool *** acceptances, double * mults, double * cents, int * numParticles, double ** pT, double ** SValues);
   virtual void saveHistograms(TFile * outputFile, bool saveAll=false);
   virtual void createHistogramRec(TString * baseName, TString * baseTitle, int depth, int partIndex);
   virtual void loadHistogramRec(TString * baseName, int depth, int partIndex, TFile * inputFile);
@@ -34,6 +34,7 @@ public:
   virtual void calculateCumulants(TProfile ** Shistos, TH1 **CHistos, int nBins, double min, double max);
   virtual void calcRecSum(TH1 **CHistos, int iBin, double& absESq, double curRelESq, int* iHisto, int* Subset, int len,  int * set, int lenSet, double productC, double* used, int& curInd, int productS, double& sum);
   virtual void calculateInclusivePtAverage(bool *** acceptances, int * numParticles, double ** pT, double * avgpT);
+  virtual void calculateInclusiveYieldsAverage(bool *** acceptances, int * numParticles, double * avgCounts, int ** counts);
 
   ////////////////////////////////////////////////////////////////////////////
   //Helper Functions
@@ -110,7 +111,16 @@ public:
   int totEvents;
 
   //store the inclusive avgpT of each of the particle filters
-  double * avgpT;
+  double * avgpT; 
+  
+  //store the inclusive average yields of each combination of particle filters (1, 2 ... 4, 11, 12, ... 44 ...)
+  //calculated in normal order, but then changed into recursive order.
+  double * avgCounts;
+
+  //store the yields of each combination of particle filters (1, 2 ... 4, 11, 12, ... 44 ...) per event
+  //first index is event number
+  //calculated in normal order, but then changed into recursive order.
+  int ** counts;
 
   TString** names;
 

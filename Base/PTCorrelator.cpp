@@ -224,7 +224,7 @@ void PTCorrelator::execute()
 
 	if(eventsProcessed == maxEvents)
 	{
-		histos->fillDerivedHistos(acceptances, multiplicity, centrality, numParticles, pT, S, counts);
+		histos->fillDerivedHistos(acceptances, multiplicity, centrality, numParticles, pT, S);
 	}
 
 	if (reportDebug()) cout << "PTCorrelator::execute() Completed" << endl;
@@ -331,9 +331,6 @@ void PTCorrelator::fillSValues(int depth, int filterIndex, int * filters, int & 
 		//correlators = calculateS(filters, maxOrder - depth, 0, count, particles);
 
 		S[eventsProcessed][correlatorIndex] = correlators;
-
-		counts[eventsProcessed][correlatorIndex] = count;
-		avgCounts[correlatorIndex] = (avgCounts[correlatorIndex] * eventsProcessed + count )/(eventsProcessed + 1);
 
 		count = 0;
 		correlatorIndex++;

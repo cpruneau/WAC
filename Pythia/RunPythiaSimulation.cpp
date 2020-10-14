@@ -56,7 +56,7 @@ int main()
   ac->configurationFileName = "configuration";
   ac->rootInputFileName = "";
   ac->outputPath = getenv("OUTPUT_PATH");            // check this 
-  ac->rootOuputFileName =  "/Pythia3";                // and this
+  ac->rootOuputFileName =  "/Pythia4";                // and this
   ac->histoBaseName =  "pythia";
 
   ac->nBins_pt    = 40;
