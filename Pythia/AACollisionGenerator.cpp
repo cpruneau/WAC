@@ -19,7 +19,6 @@ particleFilter(pf),
 nCollisions(40000),
 collisionGeometry(collisionGeo)
 {
-  setReportLevel(MessageLogger::Debug);
   if (reportDebug()) cout << "AACollisionGenerator::AACollisionGenerator(...) No ops" << endl;
 }
 
@@ -110,7 +109,7 @@ void AACollisionGenerator::execute()
 
   hc->nCollisionsMax = nCollisions> hc->nCollisionsMax? nCollisions: hc->nCollisionsMax; //set the max number of binary collisions per event, to set the size of the histos later
 
-  if (reportInfo()) cout << "AACollisionGenerator::execute() processing " << nCollisions << " collisions." << endl;
+  if (reportDebug()) cout << "AACollisionGenerator::execute() processing " << nCollisions << " collisions." << endl;
   event->nParticles = 0;
   event->multiplicity = 0;
 

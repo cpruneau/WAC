@@ -31,7 +31,6 @@ eventAveragept(0),
 correlatorIndex(0),
 maxEvents(0)
 {
-	setReportLevel(MessageLogger::Debug);
 	if (reportDebug())  cout << "PTCorrelator::CTOR(...) Started." << endl;
 	AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
 	HeavyIonConfiguration * hc = (HeavyIonConfiguration *) ac;
@@ -44,7 +43,6 @@ maxEvents(0)
 	acceptances   = new bool **[maxEvents];
 	multiplicity  = new double [maxEvents];
 	centrality    = new double [maxEvents];
-	S             = new double * [maxEvents];
 	counts        = new int * [maxEvents];
 	numParticles  = new int [maxEvents];
 
@@ -106,11 +104,8 @@ void PTCorrelator::createHistograms()
 	
 
 
-	avgCounts = new double[histos->size]();
-
 	for(int i = 0; i < maxEvents; i++)
 	{
-		S[i] = new double[histos->size];
 		counts[i] = new int[histos->size];
 	}
 
@@ -142,15 +137,11 @@ void PTCorrelator::loadHistograms(TFile * inputFile)
 
 	histos = new PTHistos(inputFile,histoName,ac,MessageLogger::Error, maxOrder);
 
-	avgCounts = new double[histos->size]();
-
 	for(int i = 0; i < maxEvents; i++)
 	{
-		S[i] = new double[histos->size];
 		counts[i] = new int[histos->size];
 	}
 	if (reportDebug())  cout << "PTCorrelator::loadHistograms(...) Completed." << endl;
-	avgCounts = new double[histos->size];
 }
 
 
@@ -211,7 +202,6 @@ void PTCorrelator::execute()
 	int *particles = new int [maxOrder];
 
 	histos->fillEventHistos( event->multiplicity, event->centrality, 1.0); 
-	fillSValues(maxOrder - 1, 0, filters, count, particles);
 	storeEventInfo();
 
 	correlatorIndex = 0;
@@ -224,7 +214,7 @@ void PTCorrelator::execute()
 
 	if(eventsProcessed == maxEvents)
 	{
-		histos->fillDerivedHistos(acceptances, multiplicity, centrality, numParticles, pT, S);
+		histos->fillDerivedHistos(acceptances, multiplicity, centrality, numParticles, pT);
 	}
 
 	if (reportDebug()) cout << "PTCorrelator::execute() Completed" << endl;
@@ -298,211 +288,4 @@ void PTCorrelator::storeEventInfo()
 	multiplicity[eventsProcessed] = event->multiplicity;
 	centrality[eventsProcessed] = event->centrality;
 	if (reportDebug())  cout << "PTCorrelator::storeEventInfo(...) Completed." << endl;
-}
-
-
-
-
-
-
-
-
-
-/////////////////////////////////////////////////////////////
-// Calculate and fill the pT deviation correlators for orders from 1 to maxOrder for all combinations
-// Calculate the average counts of particles, pairs, triples ...
-////////////////////////////////////////////////////////////
-void PTCorrelator::fillSValues(int depth, int filterIndex, int * filters, int & count, int *particles)
-{
-	if (reportDebug())  cout << "PTCorrelator::fillSValues(...) Starting." << endl;
-	
-	double correlators = 0;
-	for(int i = filterIndex; i < maxOrder; i++)
-	{
-		filters[maxOrder - depth- 1] = i;
-		count = 0;
-		switch(maxOrder - depth)
-		{
-			case 1: correlators = calculateS1(filters, count); break;
-			case 2: correlators = calculateS2(filters, count); break;
-			case 3: correlators = calculateS3(filters, count); break;
-			case 4: correlators = calculateS4(filters, count); break;
-		}
-		//correlators = calculateS(filters, maxOrder - depth, 0, count, particles);
-
-		S[eventsProcessed][correlatorIndex] = correlators;
-
-		count = 0;
-		correlatorIndex++;
-		
-		if(depth != 0)
-		{
-			fillSValues(depth - 1, i , filters, count, particles);
-		}
-	}
-	if (reportDebug())  cout << "PTCorrelator::fillSValues(...) Completed." << endl;
-}
-
-double PTCorrelator::calculateS1(int * filters, int & count)
-{
-	if (reportDebug())  cout << "PTCorrelator::calculateS1(...) Starting." << endl;
-	double sum = 0;
-	for(int iParticle1 = 0; iParticle1<event->nParticles; iParticle1++)
-	{
-		Particle & particle1 = * event->getParticleAt(iParticle1);
-		double deviation1 = (particle1.pt - eventAveragept);
-		if(particleFilters[filters[0]]->accept(particle1))
-		{
-			sum +=  deviation1;
-			count++;
-		}
-	}
-	return sum;
-	if (reportDebug())  cout << "PTCorrelator::calculateS1(...) Completed." << endl;
-}
-
-double PTCorrelator::calculateS2(int * filters, int & count)
-{
-	if (reportDebug())  cout << "PTCorrelator::calculateS2(...) Starting." << endl;
-	double sum = 0;
-	for(int iParticle1 = 0; iParticle1<event->nParticles; iParticle1++)
-	{
-		Particle & particle1 = * event->getParticleAt(iParticle1);
-		double deviation1 = (particle1.pt - eventAveragept);
-		if(particleFilters[filters[0]]->accept(particle1))
-		{
-			for(int iParticle2 = 0; iParticle2<event->nParticles; iParticle2++)
-			{
-				Particle & particle2 = * event->getParticleAt(iParticle2);
-				double deviation2 = (particle2.pt - eventAveragept);
-				if(particleFilters[filters[1]]->accept(particle2) && iParticle1 != iParticle2)
-				{
-					sum +=  deviation1 * deviation2;
-					count++;
-				}
-			}
-		}
-	}
-	return sum;
-	if (reportDebug())  cout << "PTCorrelator::calculateS2(...) Completed." << endl;
-}
-
-double PTCorrelator::calculateS3(int * filters, int & count)
-{
-	if (reportDebug())  cout << "PTCorrelator::calculateS3(...) Starting." << endl;
-	double sum = 0;
-	for(int iParticle1 = 0; iParticle1<event->nParticles; iParticle1++)
-	{
-		Particle & particle1 = * event->getParticleAt(iParticle1);
-		double deviation1 = (particle1.pt - eventAveragept);
-		if(particleFilters[filters[0]]->accept(particle1))
-		{
-			for(int iParticle2 = 0; iParticle2<event->nParticles; iParticle2++)
-			{
-				Particle & particle2 = * event->getParticleAt(iParticle2);
-				double deviation2 = (particle2.pt - eventAveragept);
-				if(particleFilters[filters[1]]->accept(particle2) && iParticle1 != iParticle2)
-				{
-					for(int iParticle3 = 0; iParticle3<event->nParticles; iParticle3++)
-					{
-						Particle & particle3 = * event->getParticleAt(iParticle3);
-						double deviation3 = (particle3.pt - eventAveragept);
-						if(particleFilters[filters[2]]->accept(particle3) && iParticle1 != iParticle3 && iParticle2!= iParticle3)
-						{
-							sum +=  deviation1 * deviation2 * deviation3;
-							count++;
-						}
-					}
-				}
-			}
-		}
-	}
-	if (reportDebug())  cout << "PTCorrelator::calculateS3(...) Completed." << endl;
-	return sum;
-}
-
-double PTCorrelator::calculateS4(int * filters, int & count)
-{
-	if (reportDebug())  cout << "PTCorrelator::calculateS4(...) Starting." << endl;
-	double sum = 0;
-	for(int iParticle1 = 0; iParticle1<event->nParticles; iParticle1++)
-	{
-		Particle & particle1 = * event->getParticleAt(iParticle1);
-		double deviation1 = (particle1.pt - eventAveragept);
-		if(particleFilters[filters[0]]->accept(particle1))
-		{
-			for(int iParticle2 = 0; iParticle2<event->nParticles; iParticle2++)
-			{
-				Particle & particle2 = * event->getParticleAt(iParticle2);
-				double deviation2 = (particle2.pt - eventAveragept);
-				if(particleFilters[filters[1]]->accept(particle2) && iParticle1 != iParticle2)
-				{
-					for(int iParticle3 = 0; iParticle3<event->nParticles; iParticle3++)
-					{
-						Particle & particle3 = * event->getParticleAt(iParticle3);
-						double deviation3 = (particle3.pt - eventAveragept);
-						if(particleFilters[filters[2]]->accept(particle3) && iParticle1 != iParticle3 && iParticle2!= iParticle3)
-						{
-							for(int iParticle4 = 0; iParticle4<event->nParticles; iParticle4++)
-							{
-
-								Particle & particle4 = * event->getParticleAt(iParticle4);
-								double deviation4 = (particle4.pt - eventAveragept);
-								if(particleFilters[filters[3]]->accept(particle4) && iParticle1 != iParticle4 && iParticle2!= iParticle4 && iParticle3!= iParticle4)
-								{
-									sum +=  deviation1 * deviation2 * deviation3 * deviation4;
-									count++;
-								}
-							}
-						}
-					}
-				}
-				
-			}
-		}
-		if (reportDebug())  cout << "PTCorrelator::calculateS4(...) Completed." << endl;
-		return sum;
-	}
-}
-
-
-/////////////////////////////////////////////////////////////
-// Calculate the pT deviation correlators(S) for orders from 1 to maxOrder for all combinations
-// checked for correctness
-////////////////////////////////////////////////////////////
-double PTCorrelator::calculateS(int * filters, int order, int curFilterIndex, int & count, int * particles)
-{
-	if (reportDebug())  cout << "PTCorrelator::calculateS(...) Starting." << endl;
-	double sum = 0;
-	for(int iParticle=0; iParticle<event->nParticles; iParticle++)
-	{
-		bool accept = true;
-		for(int i = 0; i <curFilterIndex; i++ )
-		{
-			accept = accept && (iParticle != particles[i]);
-		}
-		if(accept)
-		{
-			Particle & particle = * event->getParticleAt(iParticle);
-			double tempSum = 1;
-			if(particleFilters[filters[curFilterIndex]]->accept(particle))
-			{
-				double deviation = (particle.pt - eventAveragept);
-				if(order != 1)
-				{
-					particles[curFilterIndex] = iParticle;
-					tempSum = calculateS(filters, order - 1, curFilterIndex + 1, count, particles);
-				}
-				else
-				{
-					count++;
-				}
-				sum += tempSum * deviation;
-			}
-		}
-	}
-
-	if (reportDebug())  cout << "PTCorrelator::calculateS(...) Completed." << endl;
-	return sum;
-
 }

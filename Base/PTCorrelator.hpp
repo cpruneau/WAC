@@ -30,12 +30,6 @@ public:
   //  virtual void addHistogramsToExtList(TList *list, bool all=false);
   virtual void scaleHistograms(double factor);
   virtual void calculateAverage();
-  inline virtual double calculateS1(int * filters, int & count);
-  inline virtual double calculateS2(int * filters, int & count);
-  inline virtual double calculateS3(int * filters, int & count);
-  inline virtual double calculateS4(int * filters, int & count);
-  virtual double calculateS(int * filters, int order, int curFilterIndex, int & count, int * particles);
-  virtual void fillSValues(int depth, int filterIndex, int * filters, int & count, int *particles);
   virtual void storeEventInfo();
 
 
@@ -49,9 +43,7 @@ public:
 
   //Average pT of of particles in the event
   double eventAveragept;
-
-  //overall event average counts of particles, pairs, triples ... NOT IN ORDER (They are in "recursive order")
-  double* avgCounts;
+  
   int ** counts; //first index is event, 
 
   //total # of events
@@ -83,11 +75,6 @@ public:
 
   //store the centrality of all the events
   double * centrality;
-
-  // store the S values for all the events. NOT IN ORDER (They are in "recursive order")
-  //first index is event number, second index is correlator number(in "recursive order")
-  double ** S;
-
 
 
   ClassDef(PTCorrelator,0)
