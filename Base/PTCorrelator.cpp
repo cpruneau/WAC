@@ -185,7 +185,7 @@ void PTCorrelator::execute()
 	if (!eventFilter->accept(*event)) return;
   //if (reportDebug()) cout <<"PTCorrelator::analyze(...) acceptable event" << endl;
 
-	AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
+	HeavyIonConfiguration * ac = (HeavyIonConfiguration *) getTaskConfiguration();
 	if (!ac)
 	{
 		if (reportError()) cout << "PTCorrelator::execute(...) analysisConfiguration null pointer" << endl;
@@ -212,6 +212,7 @@ void PTCorrelator::execute()
 
 	if(eventsProcessed == maxEvents)
 	{
+		cout << "Max number of collisions: " << ac->nCollisionsMax << endl;
 		histos->fillDerivedHistos(acceptances, multiplicity, centrality, numParticles, pT);
 	}
 

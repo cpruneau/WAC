@@ -85,6 +85,9 @@ void AACollisionGenerator::initialize()
   // Initialize
   pythia8->Initialize(2212 /* p */, 2212 /* p */, 14000. /* TeV */);
 
+  Factory<Particle> * particleFactory = Particle::getFactory();
+  particleFactory -> initialize(Particle::factorySize * 2000);
+
   if (reportDebug()) cout << "AACollisionGenerator::initialize() Ended" << endl;
 
 
@@ -98,18 +101,19 @@ void AACollisionGenerator::execute()
   HeavyIonConfiguration * hc = (HeavyIonConfiguration *) ac;
 
   nCollisions = collisionGeometry->nBinary; //get the number of binary collisions
+  if (reportDebug()) cout << "AACollisionGenerator::execute() processing " << nCollisions << " collisions." << endl;
 
   Factory<Particle> * particleFactory = Particle::getFactory();
 
-  if(nCollisions > hc->nCollisionsMax)
-  {
-    particleFactory -> initialize(Particle::factorySize * nCollisions); //resize the particleFactory only if the size is too small
-  }
+  //if(nCollisions > hc->nCollisionsMax)
+  //{
+   // particleFactory -> initialize(Particle::factorySize * nCollisions); //resize the particleFactory only if the size is too small
+  //}
 
 
   hc->nCollisionsMax = nCollisions> hc->nCollisionsMax? nCollisions: hc->nCollisionsMax; //set the max number of binary collisions per event, to set the size of the histos later
 
-  if (reportDebug()) cout << "AACollisionGenerator::execute() processing " << nCollisions << " collisions." << endl;
+  
   event->nParticles = 0;
   event->multiplicity = 0;
 
