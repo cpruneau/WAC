@@ -29,7 +29,6 @@ public:
   virtual void saveHistograms(TFile * outputFile);
   //  virtual void addHistogramsToExtList(TList *list, bool all=false);
   virtual void scaleHistograms(double factor);
-  virtual void calculateAverage();
   virtual void storeEventInfo();
 
 
@@ -40,9 +39,6 @@ public:
   EventFilter     * eventFilter;
   ParticleFilter  ** particleFilters;
   TString * partNames;
-
-  //Average pT of of particles in the event
-  double eventAveragept;
   
   int ** counts; //first index is event, 
 

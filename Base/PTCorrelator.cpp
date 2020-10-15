@@ -27,7 +27,6 @@ histos(NULL),
 eventFilter(ef),
 particleFilters(pf),
 maxOrder(0),
-eventAveragept(0),
 correlatorIndex(0),
 maxEvents(0)
 {
@@ -194,7 +193,6 @@ void PTCorrelator::execute()
 		return;
 	}
 
-	calculateAverage();
 
 	correlatorIndex = 0;
 	int count = 0;
@@ -231,27 +229,6 @@ void PTCorrelator::scaleHistograms(double factor)
 	if (reportDebug())  cout << "PTCorrelator::scaleHistograms(..) Scale all primary histograms by " << factor << endl;
 	histos->scale(factor);
 	if (reportDebug())  cout << "PTCorrelator::scale(..) Completed"  << endl;
-}
-
-
-
-/////////////////////////////////////////////////////////////
-// Calculate average pT for each type of particle
-////////////////////////////////////////////////////////////
-void PTCorrelator::calculateAverage()
-{
-	if (reportDebug())  cout << "PTCorrelator::calculateAverage(...) Starting." << endl;
-	eventAveragept = 0;
-	for (int iParticle=0; iParticle<event->nParticles; iParticle++)
-	{
-		Particle & particle = * event->getParticleAt(iParticle);
-		//if (reportDebug())  particle.printProperties(cout);
-		eventAveragept += particle.pt;
-
-	}
-
-	eventAveragept /= event->nParticles;
-	if (reportDebug())  cout << "PTCorrelator::calculateAverage(...) Completed." << endl;
 }
 
 
