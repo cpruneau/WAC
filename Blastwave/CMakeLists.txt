@@ -18,7 +18,7 @@ add_executable(RunBWModelSimulation RunBWModelSimulation.cpp)
 target_include_directories(RunBWModelSimulation PUBLIC Base Blastwave ${EXTRA_INCLUDES})
 target_link_libraries(RunBWModelSimulation Base Blastwave ${CMAKE_DL_LIBS})
 
-install(FILES  "${CMAKE_CURRENT_BINARY_DIR}/libBlastwave.rootmap" "${CMAKE_CURRENT_BINARY_DIR}/libBlastwave_rdict.pcm" DESTINATION /Users/claudeapruneau/opt/WAC/lib)
-install(TARGETS Blastwave  LIBRARY DESTINATION /Users/claudeapruneau/opt/WAC/lib) 
-install(TARGETS RunBWModelSimulation DESTINATION /Users/claudeapruneau/opt/WAC/bin) 
+install(FILES  "${CMAKE_CURRENT_BINARY_DIR}/libBlastwave.rootmap" "${CMAKE_CURRENT_BINARY_DIR}/libBlastwave_rdict.pcm" DESTINATION "$ENV{WAC_LIB}")
+install(TARGETS Blastwave  LIBRARY DESTINATION "$ENV{WAC_LIB}") 
+install(TARGETS RunBWModelSimulation DESTINATION "$ENV{WAC_BIN}") 
 
