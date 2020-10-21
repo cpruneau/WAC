@@ -151,8 +151,6 @@ int CollisionGeometryPlots()
                         histograms,titles,0.25, 0.65, 0.35, 0.85, 0.04);
   compPlotters[iPlotter++]->printAllCanvas(outputPath);
 
-  return 4;
-
   canvasConfiguration->setAxes(CanvasConfiguration::LogY);
   canvasName = "ModelComp_nPart";
   histograms[0] = geomHistos[0]->h_nPart; titles[0] = modelTitles[0];
@@ -321,8 +319,6 @@ int CollisionGeometryPlots()
   compPlotters[iPlotter]->createLabel(14.0, 3.9, 90.0, 1, 1, 0.04, "70-80%", true);
   compPlotters[iPlotter++]->printAllCanvas(outputPath);
 
-  return 2;
-
   canvasConfiguration->setAxes(CanvasConfiguration::Linear);
   canvasName = "ModelComp_nBinaryOmegaVsBOverlay";
   histograms[0] = geomHistos[0]->h_nBinaryOmegaVsB;     titles[0] = new TString("fine binning");
@@ -332,8 +328,6 @@ int CollisionGeometryPlots()
                         "b (fm)", 0.0, 24.0,
                         "#omega[N_{Bin}]", 0.0, 30.0,
                         histograms,titles,0.65, 0.65, 0.8, 0.85, 0.04);
-
-
   compPlotters[iPlotter]->createLabel(2.0, 14.0, 90.0, 1, 1, 0.04, "0-5%", true);
   compPlotters[iPlotter]->createLabel(4.5, 14.0, 90.0, 1, 1, 0.04, "5-10%", true);
   compPlotters[iPlotter]->createLabel(6.0, 22.0, 90.0, 1, 1, 0.04, "10-20%", true);
@@ -347,7 +341,7 @@ int CollisionGeometryPlots()
 
 
 
-// xxxxxxx
+
 
 
   canvasConfiguration->setAxes(CanvasConfiguration::Linear);
@@ -398,6 +392,164 @@ int CollisionGeometryPlots()
                         "#omega[N_{bin}]", 0.0, 15.0,
                         histograms,titles,0.25, 0.65, 0.45, 0.85, 0.04);
   compPlotters[iPlotter++]->printAllCanvas(outputPath);
+
+
+  int nCoarseBins = geomHistos[0]->h_nPartVsXsect_Prof->GetNbinsX();
+  double * nPartAvg0   = new double[nCoarseBins];   double * enPartAvg0 = new double[nCoarseBins];
+  double * nPartAvg1   = new double[nCoarseBins];   double * enPartAvg1 = new double[nCoarseBins];
+  double * nPartAvg2   = new double[nCoarseBins];   double * enPartAvg2 = new double[nCoarseBins];
+  double * nPartRms0   = new double[nCoarseBins];   double * enPartRms0 = new double[nCoarseBins];
+  double * nPartRms1   = new double[nCoarseBins];   double * enPartRms1 = new double[nCoarseBins];
+  double * nPartRms2   = new double[nCoarseBins];   double * enPartRms2 = new double[nCoarseBins];
+  double * nPartOmega0 = new double[nCoarseBins];   double * enPartOmega0 = new double[nCoarseBins];
+  double * nPartOmega1 = new double[nCoarseBins];   double * enPartOmega1 = new double[nCoarseBins];
+  double * nPartOmega2 = new double[nCoarseBins];   double * enPartOmega2 = new double[nCoarseBins];
+
+  double * nBinaryRms0   = new double[nCoarseBins];   double * enBinaryRms0 = new double[nCoarseBins];
+  double * nBinaryRms1   = new double[nCoarseBins];   double * enBinaryRms1 = new double[nCoarseBins];
+  double * nBinaryRms2   = new double[nCoarseBins];   double * enBinaryRms2 = new double[nCoarseBins];
+  double * nBinaryOmega0 = new double[nCoarseBins];   double * enBinaryOmega0 = new double[nCoarseBins];
+  double * nBinaryOmega1 = new double[nCoarseBins];   double * enBinaryOmega1 = new double[nCoarseBins];
+  double * nBinaryOmega2 = new double[nCoarseBins];   double * enBinaryOmega2 = new double[nCoarseBins];
+
+
+  for (int iBin=1; iBin<=nCoarseBins; iBin++)
+  {
+  int iBin1 = iBin-1;
+  nPartAvg0[iBin1] = geomHistos[0]->h_nPartVsXsect_Prof->GetBinContent(iBin); enPartAvg0[iBin1] = geomHistos[0]->h_nPartVsXsect_Prof->GetBinError(iBin);
+  nPartAvg1[iBin1] = geomHistos[1]->h_nPartVsXsect_Prof->GetBinContent(iBin); enPartAvg1[iBin1] = geomHistos[1]->h_nPartVsXsect_Prof->GetBinError(iBin);
+  nPartAvg2[iBin1] = geomHistos[2]->h_nPartVsXsect_Prof->GetBinContent(iBin); enPartAvg2[iBin1] = geomHistos[2]->h_nPartVsXsect_Prof->GetBinError(iBin);
+
+  nPartRms0[iBin1] = geomHistos[0]->h_nPartRmsVsXsect->GetBinContent(iBin); enPartRms0[iBin1] = geomHistos[0]->h_nPartRmsVsXsect->GetBinError(iBin);
+  nPartRms1[iBin1] = geomHistos[1]->h_nPartRmsVsXsect->GetBinContent(iBin); enPartRms1[iBin1] = geomHistos[1]->h_nPartRmsVsXsect->GetBinError(iBin);
+  nPartRms2[iBin1] = geomHistos[2]->h_nPartRmsVsXsect->GetBinContent(iBin); enPartRms2[iBin1] = geomHistos[2]->h_nPartRmsVsXsect->GetBinError(iBin);
+
+  nPartOmega0[iBin1] = geomHistos[0]->h_nPartOmegaVsXsect->GetBinContent(iBin); enPartOmega0[iBin1] = geomHistos[0]->h_nPartOmegaVsXsect->GetBinError(iBin);
+  nPartOmega1[iBin1] = geomHistos[1]->h_nPartOmegaVsXsect->GetBinContent(iBin); enPartOmega1[iBin1] = geomHistos[1]->h_nPartOmegaVsXsect->GetBinError(iBin);
+  nPartOmega2[iBin1] = geomHistos[2]->h_nPartOmegaVsXsect->GetBinContent(iBin); enPartOmega2[iBin1] = geomHistos[2]->h_nPartOmegaVsXsect->GetBinError(iBin);
+
+  nBinaryRms0[iBin1] = geomHistos[0]->h_nBinaryRmsVsXsect->GetBinContent(iBin); enBinaryRms0[iBin1] = geomHistos[0]->h_nBinaryRmsVsXsect->GetBinError(iBin);
+  nBinaryRms1[iBin1] = geomHistos[1]->h_nBinaryRmsVsXsect->GetBinContent(iBin); enBinaryRms1[iBin1] = geomHistos[1]->h_nBinaryRmsVsXsect->GetBinError(iBin);
+  nBinaryRms2[iBin1] = geomHistos[2]->h_nBinaryRmsVsXsect->GetBinContent(iBin); enBinaryRms2[iBin1] = geomHistos[2]->h_nBinaryRmsVsXsect->GetBinError(iBin);
+
+  nBinaryOmega0[iBin1] = geomHistos[0]->h_nBinaryOmegaVsXsect->GetBinContent(iBin); enBinaryOmega0[iBin1] = geomHistos[0]->h_nBinaryOmegaVsXsect->GetBinError(iBin);
+  nBinaryOmega1[iBin1] = geomHistos[1]->h_nBinaryOmegaVsXsect->GetBinContent(iBin); enBinaryOmega1[iBin1] = geomHistos[1]->h_nBinaryOmegaVsXsect->GetBinError(iBin);
+  nBinaryOmega2[iBin1] = geomHistos[2]->h_nBinaryOmegaVsXsect->GetBinContent(iBin); enBinaryOmega2[iBin1] = geomHistos[2]->h_nBinaryOmegaVsXsect->GetBinError(iBin);
+
+  }
+
+  TGraphErrors * nPartRmsVsAvgNpart0 = new TGraphErrors(nCoarseBins-1, nPartAvg0, nPartRms0, enPartAvg0, enPartRms0);
+  TGraphErrors * nPartRmsVsAvgNpart1 = new TGraphErrors(nCoarseBins-1, nPartAvg1, nPartRms1, enPartAvg1, enPartRms1);
+  TGraphErrors * nPartRmsVsAvgNpart2 = new TGraphErrors(nCoarseBins-1, nPartAvg2, nPartRms2, enPartAvg2, enPartRms2);
+
+  TGraphErrors * nPartOmegaVsAvgNpart0 = new TGraphErrors(nCoarseBins-1, nPartAvg0, nPartOmega0, enPartAvg0, enPartOmega0);
+  TGraphErrors * nPartOmegaVsAvgNpart1 = new TGraphErrors(nCoarseBins-1, nPartAvg1, nPartOmega1, enPartAvg1, enPartOmega1);
+  TGraphErrors * nPartOmegaVsAvgNpart2 = new TGraphErrors(nCoarseBins-1, nPartAvg2, nPartOmega2, enPartAvg2, enPartOmega2);
+
+  TGraphErrors * nBinaryRmsVsAvgNpart0 = new TGraphErrors(nCoarseBins-1, nPartAvg0, nBinaryRms0, enPartAvg0, enBinaryRms0);
+  TGraphErrors * nBinaryRmsVsAvgNpart1 = new TGraphErrors(nCoarseBins-1, nPartAvg1, nBinaryRms1, enPartAvg1, enBinaryRms1);
+  TGraphErrors * nBinaryRmsVsAvgNpart2 = new TGraphErrors(nCoarseBins-1, nPartAvg2, nBinaryRms2, enPartAvg2, enBinaryRms2);
+
+  TGraphErrors * nBinaryOmegaVsAvgNpart0 = new TGraphErrors(nCoarseBins-1, nPartAvg0, nBinaryOmega0, enPartAvg0, enBinaryOmega0);
+  TGraphErrors * nBinaryOmegaVsAvgNpart1 = new TGraphErrors(nCoarseBins-1, nPartAvg1, nBinaryOmega1, enPartAvg1, enBinaryOmega1);
+  TGraphErrors * nBinaryOmegaVsAvgNpart2 = new TGraphErrors(nCoarseBins-1, nPartAvg2, nBinaryOmega2, enPartAvg2, enBinaryOmega2);
+
+
+  canvasConfiguration->setAxes(CanvasConfiguration::Linear);
+  canvasName = "ModelComp_nPartRmsVsAvgNPart";
+  histograms[0] = new TH1D("nPartRmsVsAvgNpart0","", 100, 0.0, 440.0);
+  histograms[1] = new TH1D("nPartRmsVsAvgNpart1","", 100, 0.0, 440.0);
+  histograms[2] = new TH1D("nPartRmsVsAvgNpart2","", 100, 0.0, 440.0);
+  compPlotters[iPlotter] = new Plotter();
+  compPlotters[iPlotter]->plot(3, canvasName,canvasConfiguration,graphConfigurations,
+                        "<N_{part}>", 0.0, 440.0,
+                        "RMS[N_{part}]", 0.0, 50.0,
+                        histograms,titles,0.22, 0.55, 0.45, 0.75, 0.04);
+  compPlotters[iPlotter]->setProperties(nPartRmsVsAvgNpart0, *graphConfigurations[0]);
+  compPlotters[iPlotter]->setProperties(nPartRmsVsAvgNpart1, *graphConfigurations[1]);
+  compPlotters[iPlotter]->setProperties(nPartRmsVsAvgNpart2, *graphConfigurations[2]);
+  nPartRmsVsAvgNpart0->Draw("PE");
+  nPartRmsVsAvgNpart1->Draw("PE");
+  nPartRmsVsAvgNpart2->Draw("PE");
+  compPlotters[iPlotter++]->printAllCanvas(outputPath);
+
+  canvasConfiguration->setAxes(CanvasConfiguration::Linear);
+  canvasName = "ModelComp_nPartOmegaVsAvgNPart";
+  histograms[0] = new TH1D("nPartOmegaVsAvgNpart0","", 100, 0.0, 440.0);
+  histograms[1] = new TH1D("nPartOmegaVsAvgNpart1","", 100, 0.0, 440.0);
+  histograms[2] = new TH1D("nPartOmegaVsAvgNpart2","", 100, 0.0, 440.0);
+  compPlotters[iPlotter] = new Plotter();
+  compPlotters[iPlotter]->plot(3, canvasName,canvasConfiguration,graphConfigurations,
+                        "<N_{part}>", 0.0, 440.0,
+                        "#omega[N_{part}]", 0.0, 6.0,
+                        histograms,titles,0.7, 0.65, 0.85, 0.85, 0.04);
+  compPlotters[iPlotter]->setProperties(nPartOmegaVsAvgNpart0, *graphConfigurations[0]);
+  compPlotters[iPlotter]->setProperties(nPartOmegaVsAvgNpart1, *graphConfigurations[1]);
+  compPlotters[iPlotter]->setProperties(nPartOmegaVsAvgNpart2, *graphConfigurations[2]);
+  nPartOmegaVsAvgNpart0->Draw("PE");
+  nPartOmegaVsAvgNpart1->Draw("PE");
+  nPartOmegaVsAvgNpart2->Draw("PE");
+
+  double off = 0.2;
+  compPlotters[iPlotter]->createLabel(nPartAvg1[0], nPartOmega1[0]+off, 90.0, 1, 1, 0.04, "0-5%", true);
+  compPlotters[iPlotter]->createLabel(nPartAvg1[1], nPartOmega1[1]+off, 90.0, 1, 1, 0.04, "5-10%", true);
+  compPlotters[iPlotter]->createLabel(nPartAvg1[2], nPartOmega1[2]+off, 90.0, 1, 1, 0.04, "10-20%", true);
+  compPlotters[iPlotter]->createLabel(nPartAvg1[3], nPartOmega1[3]+off, 90.0, 1, 1, 0.04, "20-30%", true);
+  compPlotters[iPlotter]->createLabel(nPartAvg1[4], nPartOmega1[4]+off, 90.0, 1, 1, 0.04, "30-40%", true);
+  compPlotters[iPlotter]->createLabel(nPartAvg1[5], nPartOmega1[5]+off, 90.0, 1, 1, 0.04, "40-50%", true);
+  compPlotters[iPlotter]->createLabel(nPartAvg1[6], nPartOmega1[6]+off, 90.0, 1, 1, 0.04, "50-60%", true);
+  compPlotters[iPlotter]->createLabel(nPartAvg1[7], nPartOmega1[7]+off, 90.0, 1, 1, 0.04, "60-70%", true);
+  compPlotters[iPlotter]->createLabel(nPartAvg1[8], nPartOmega1[8]+off, 90.0, 1, 1, 0.04, "70-80%", true);
+  compPlotters[iPlotter++]->printAllCanvas(outputPath);
+
+
+  canvasConfiguration->setAxes(CanvasConfiguration::Linear);
+  canvasName = "ModelComp_nBinaryRmsVsAvgNPart";
+  histograms[0] = new TH1D("nBinaryRmsVsAvgNpart0","", 100, 0.0, 440.0);
+  histograms[1] = new TH1D("nBinaryRmsVsAvgNpart1","", 100, 0.0, 440.0);
+  histograms[2] = new TH1D("nBinaryRmsVsAvgNpart2","", 100, 0.0, 440.0);
+  compPlotters[iPlotter] = new Plotter();
+  compPlotters[iPlotter]->plot(3, canvasName,canvasConfiguration,graphConfigurations,
+                        "<N_{part}>", 0.0, 440.0,
+                        "RMS[N_{bin}]", 0.0, 250.0,
+                        histograms,titles,0.22, 0.55, 0.45, 0.75, 0.04);
+  compPlotters[iPlotter]->setProperties(nBinaryRmsVsAvgNpart0, *graphConfigurations[0]);
+  compPlotters[iPlotter]->setProperties(nBinaryRmsVsAvgNpart1, *graphConfigurations[1]);
+  compPlotters[iPlotter]->setProperties(nBinaryRmsVsAvgNpart2, *graphConfigurations[2]);
+  nBinaryRmsVsAvgNpart0->Draw("PE");
+  nBinaryRmsVsAvgNpart1->Draw("PE");
+  nBinaryRmsVsAvgNpart2->Draw("PE");
+  compPlotters[iPlotter++]->printAllCanvas(outputPath);
+
+  canvasConfiguration->setAxes(CanvasConfiguration::Linear);
+  canvasName = "ModelComp_nBinaryOmegaVsAvgNPart";
+  histograms[0] = new TH1D("nBinaryOmegaVsAvgNpart0","", 100, 0.0, 440.0);
+  histograms[1] = new TH1D("nBinaryOmegaVsAvgNpart1","", 100, 0.0, 440.0);
+  histograms[2] = new TH1D("nBinaryOmegaVsAvgNpart2","", 100, 0.0, 440.0);
+  compPlotters[iPlotter] = new Plotter();
+  compPlotters[iPlotter]->plot(3, canvasName,canvasConfiguration,graphConfigurations,
+                        "<N_{part}>", 0.0, 440.0,
+                        "#omega[N_{bin}]", 0.0, 26.0,
+                        histograms,titles,0.7, 0.65, 0.85, 0.85, 0.04);
+  compPlotters[iPlotter]->setProperties(nBinaryOmegaVsAvgNpart0, *graphConfigurations[0]);
+  compPlotters[iPlotter]->setProperties(nBinaryOmegaVsAvgNpart1, *graphConfigurations[1]);
+  compPlotters[iPlotter]->setProperties(nBinaryOmegaVsAvgNpart2, *graphConfigurations[2]);
+  nBinaryOmegaVsAvgNpart0->Draw("PE");
+  nBinaryOmegaVsAvgNpart1->Draw("PE");
+  nBinaryOmegaVsAvgNpart2->Draw("PE");
+  off = 2.0;
+  compPlotters[iPlotter]->createLabel(nPartAvg1[0], nBinaryOmega1[0]+off, 90.0, 1, 1, 0.04, "0-5%", true);
+  compPlotters[iPlotter]->createLabel(nPartAvg1[1], nBinaryOmega1[1]+off, 90.0, 1, 1, 0.04, "5-10%", true);
+  compPlotters[iPlotter]->createLabel(nPartAvg1[2], nBinaryOmega1[2]+off, 90.0, 1, 1, 0.04, "10-20%", true);
+  compPlotters[iPlotter]->createLabel(nPartAvg1[3], nBinaryOmega1[3]+off, 90.0, 1, 1, 0.04, "20-30%", true);
+  compPlotters[iPlotter]->createLabel(nPartAvg1[4], nBinaryOmega1[4]+off, 90.0, 1, 1, 0.04, "30-40%", true);
+  compPlotters[iPlotter]->createLabel(nPartAvg1[5], nBinaryOmega1[5]+off, 90.0, 1, 1, 0.04, "40-50%", true);
+  compPlotters[iPlotter]->createLabel(nPartAvg1[6], nBinaryOmega1[6]+off, 90.0, 1, 1, 0.04, "50-60%", true);
+  compPlotters[iPlotter]->createLabel(nPartAvg1[7], nBinaryOmega1[7]+off, 90.0, 1, 1, 0.04, "60-70%", true);
+  compPlotters[iPlotter]->createLabel(nPartAvg1[8], nBinaryOmega1[8]+off, 90.0, 1, 1, 0.04, "70-80%", true);
+  compPlotters[iPlotter++]->printAllCanvas(outputPath);
+
+  return -10;
 
   canvasConfiguration->setAxes(CanvasConfiguration::Linear);
   canvasName = "ModelComp_nPartR2VsB";
@@ -461,8 +613,6 @@ int CollisionGeometryPlots()
                                histograms,titles,0.65, 0.55, 0.75, 0.75, 0.04);
   compPlotters[iPlotter++]->printAllCanvas(outputPath);
 
-
-
   canvasConfiguration->setAxes(CanvasConfiguration::Linear);
   canvasName = "ModelComp_nPartOmegaVsXsect";
   histograms[0] = geomHistos[0]->h_nPartOmegaVsXsect; titles[0] = modelTitles[0];
@@ -475,7 +625,6 @@ int CollisionGeometryPlots()
                                histograms,titles,0.25, 0.65, 0.45, 0.85, 0.04);
   compPlotters[iPlotter++]->printAllCanvas(outputPath);
 
-
   canvasConfiguration->setAxes(CanvasConfiguration::Linear);
   canvasName = "ModelComp_nBinaryOmegaVsXsect";
   histograms[0] = geomHistos[0]->h_nBinaryOmegaVsXsect; titles[0] = modelTitles[0];
@@ -487,8 +636,6 @@ int CollisionGeometryPlots()
                                "#omega(N_{bin})",  0.0, 50.0,
                                histograms,titles,0.25, 0.55, 0.45, 0.75, 0.04);
   compPlotters[iPlotter++]->printAllCanvas(outputPath);
-
-
 
     canvasConfiguration->setAxes(CanvasConfiguration::Linear);
     canvasName = "ModelComp_nPartR2VsXsect";
@@ -582,6 +729,8 @@ int CollisionGeometryPlots()
                         "Rel. Freq. (a.u.)", 1.0E-6, 10.0,
                         histograms,titles,0.45, 0.62, 0.6, 0.92, 0.04);
   compPlotters[iPlotter++]->printAllCanvas(outputPath);
+
+// rms vs
 
 
   return 0;
