@@ -66,6 +66,127 @@ nBins_cent(20),  min_cent(0.0), max_cent(100.0)
   max_Dphi_shft = 3.0*TMath::Pi()/4.0;
 }
 
+AnalysisConfiguration::AnalysisConfiguration(const AnalysisConfiguration & source)
+:
+TaskConfiguration( source ),
+histoBaseName( source.histoBaseName ),
+nBins_nPartTot( source.nBins_nPartTot ),     min_nPartTot( source.min_nPartTot ),  max_nPartTot( source.max_nPartTot ),
+nBins_nCell( source.nBins_nCell ),        min_nCell( source.min_nCell ),     max_nCell( source.max_nCell ),
+nBins_nPartPerCell( source.nBins_nPartPerCell ), min_nPartPerCell( source.min_nPartPerCell ), max_nPartPerCell( source.max_nPartPerCell ),
+nBins_pt( source.nBins_pt ),           min_pt( source.min_pt ),    max_pt( source.max_pt ),   range_pt( source.range_pt ),
+nBins_eta( source.nBins_eta ),          min_eta( source.min_eta ),  max_eta( source.max_eta ),  range_eta( source.range_eta ),
+nBins_y( source.nBins_y ),            min_y( source.min_y ),    max_y( source.max_y ),   range_y( source.range_y ),
+nBins_phi( source.nBins_phi ),          min_phi( source.min_phi ),   max_phi( source.max_phi ),  range_phi( source.range_phi ),
+nBins_phiEta( source.nBins_phiEta ),
+nBins_phiEtaPt( source.nBins_phiEtaPt ),
+nBins_phiY( source.nBins_phiY ),
+nBins_phiYPt( source.nBins_phiYPt ),
+binCorrPM( source.binCorrPM ),
+binCorrMM( source.binCorrMM ),
+binCorrPP( source.binCorrPP ),
+nBins_DeltaPlong( source.nBins_DeltaPlong ),   min_DeltaPlong( source.min_DeltaPlong ), max_DeltaPlong( source.max_DeltaPlong ),  range_DeltaPlong( source.range_DeltaPlong ),
+nBins_DeltaPside( source.nBins_DeltaPside ),   min_DeltaPside( source.min_DeltaPside ), max_DeltaPside( source.max_DeltaPside ),  range_DeltaPside( source.range_DeltaPside ),
+nBins_DeltaPout( source.nBins_DeltaPout ),    min_DeltaPout( source.min_DeltaPout ),  max_DeltaPout( source.max_DeltaPout ),   range_DeltaPout( source.range_DeltaPout ),
+nBins_Dphi( source.nBins_Dphi ),         min_Dphi( source.min_Dphi ),        max_Dphi( source.max_Dphi ),        width_Dphi( source.width_Dphi ),
+nBins_Dphi_shft( source.nBins_Dphi_shft ),    min_Dphi_shft( source.min_Dphi_shft ),   max_Dphi_shft( source.max_Dphi_shft ),
+nBins_Deta( source.nBins_Deta ),         min_Deta( source.min_Deta ),       max_Deta( source.max_Deta ),        width_Deta( source.width_Deta ),
+nBins_Dy( source.nBins_Dy ),           min_Dy( source.min_Dy ),         max_Dy( source.max_Dy ),          width_Dy( source.width_Dy ),
+fillPairs( source.fillPairs ),
+fill3D( source.fill3D ),
+fill6D( source.fill6D ),
+fillQ3D( source.fillQ3D ),
+fillY( source.fillY ),
+nuDynVsMult( source.nuDynVsMult ),
+nuDynVsCent( source.nuDynVsCent ),
+nBins_mult( source.nBins_mult ),  min_mult( source.min_mult ), max_mult( source.max_mult ),
+nBins_cent( source.nBins_cent ),  min_cent( source.min_cent ), max_cent( source.max_cent )
+{
+}
+
+AnalysisConfiguration & AnalysisConfiguration::operator=(const AnalysisConfiguration & source)
+{
+  if (this!=&source)
+    {
+    TaskConfiguration::operator=( source );
+    histoBaseName  =  source.histoBaseName;
+    nBins_nPartTot  =  source.nBins_nPartTot;
+    min_nPartTot  =  source.min_nPartTot;
+    max_nPartTot  =  source.max_nPartTot;
+    nBins_nCell  =  source.nBins_nCell;
+    min_nCell  =  source.min_nCell;
+    max_nCell  =  source.max_nCell;
+    nBins_nPartPerCell  =  source.nBins_nPartPerCell;
+    min_nPartPerCell  =  source.min_nPartPerCell;
+    max_nPartPerCell  =  source.max_nPartPerCell;
+    nBins_pt  =  source.nBins_pt;
+    min_pt  =  source.min_pt;
+    max_pt  =  source.max_pt;
+    range_pt  =  source.range_pt;
+    nBins_eta  =  source.nBins_eta;
+    min_eta  =  source.min_eta;
+    max_eta  =  source.max_eta;
+    range_eta  =  source.range_eta;
+    nBins_y  =  source.nBins_y;
+    min_y  =  source.min_y;
+    max_y  =  source.max_y;
+    range_y  =  source.range_y;
+    nBins_phi  =  source.nBins_phi;
+    min_phi  =  source.min_phi;
+    max_phi  =  source.max_phi;
+    range_phi  =  source.range_phi;
+    nBins_phiEta  =  source.nBins_phiEta;
+    nBins_phiEtaPt  =  source.nBins_phiEtaPt;
+    nBins_phiY  =  source.nBins_phiY;
+    nBins_phiYPt  =  source.nBins_phiYPt;
+    binCorrPM  =  source.binCorrPM;
+    binCorrMM  =  source.binCorrMM;
+    binCorrPP  =  source.binCorrPP;
+    nBins_DeltaPlong  =  source.nBins_DeltaPlong;
+    min_DeltaPlong  =  source.min_DeltaPlong;
+    max_DeltaPlong  =  source.max_DeltaPlong;
+    range_DeltaPlong  =  source.range_DeltaPlong;
+    nBins_DeltaPside  =  source.nBins_DeltaPside;
+    min_DeltaPside  =  source.min_DeltaPside;
+    max_DeltaPside  =  source.max_DeltaPside;
+    range_DeltaPside  =  source.range_DeltaPside;
+    nBins_DeltaPout  =  source.nBins_DeltaPout;
+    min_DeltaPout  =  source.min_DeltaPout;
+    max_DeltaPout  =  source.max_DeltaPout;
+    range_DeltaPout  =  source.range_DeltaPout;
+    nBins_Dphi  =  source.nBins_Dphi;
+    min_Dphi  =  source.min_Dphi;
+    max_Dphi  =  source.max_Dphi;
+    width_Dphi  =  source.width_Dphi;
+    nBins_Dphi_shft  =  source.nBins_Dphi_shft;
+    min_Dphi_shft  =  source.min_Dphi_shft;
+    max_Dphi_shft  =  source.max_Dphi_shft;
+    nBins_Deta  =  source.nBins_Deta;
+    min_Deta  =  source.min_Deta;
+    max_Deta  =  source.max_Deta;
+    width_Deta  =  source.width_Deta;
+    nBins_Dy  =  source.nBins_Dy;
+    min_Dy  =  source.min_Dy;
+    max_Dy  =  source.max_Dy;
+    width_Dy  =  source.width_Dy;
+    fillPairs  =  source.fillPairs;
+    fill3D  =  source.fill3D;
+    fill6D  =  source.fill6D;
+    fillQ3D  =  source.fillQ3D;
+    fillY  =  source.fillY;
+    nuDynVsMult  =  source.nuDynVsMult;
+    nuDynVsCent  =  source.nuDynVsCent;
+    nBins_mult  =  source.nBins_mult;
+    min_mult  =  source.min_mult;
+    max_mult  =  source.max_mult;
+    nBins_cent  =  source.nBins_cent;
+    min_cent  =  source.min_cent;
+    max_cent  =  source.max_cent;
+    }
+  return *this;
+}
+
+
+
 ////////////////////////////////////////////////////
 // Print this configuration to the given stream
 ////////////////////////////////////////////////////

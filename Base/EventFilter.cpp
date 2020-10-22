@@ -59,19 +59,11 @@ TString EventFilter::getName()
   switch (eventSelectionRequested)
   {
     case MinBias:         name = "MB"; break;
-    case Centrality:      name = "C"; break;
-    case Multiplicity:    name = "M"; break;
-    case ImpactParameter: name = "B"; break;
-    case Other:           name = "O"; break;
+    case Centrality:      name = Form("CGeq%gLt%g",minimum,maximum); break;
+    case Multiplicity:    name = Form("MGeq%gLt%g",minimum,maximum); break;
+    case ImpactParameter: name = Form("bGeq%gLt%g",minimum,maximum); break;
+    case Other:           name = Form("XGeq%gLt%g",minimum,maximum); break;
   }
- if (eventSelectionRequested==MinBias) return name;
-
-  TString minName;
-  int minLim = int(minimum);
-  int maxLim = int(maximum);
-  name += minLim;
-  name += "to";
-  name += maxLim;
   return name;
 }
 
@@ -82,19 +74,14 @@ TString EventFilter::getTitle()
   TString name;
   switch (eventSelectionRequested)
   {
-    case MinBias:         name = "MinBias"; break;
-    case Centrality:      name = "Centrality"; break;
-    case Multiplicity:    name = "Mult"; break;
-    case ImpactParameter: name = "b"; break;
-    case Other:           name = "O"; break;
+    case MinBias:         name = "Min-Bias"; break;
+    case Centrality:      name = Form("%g < C < %g",minimum,maximum); break;
+    case Multiplicity:    name = Form("%g < M < %g",minimum,maximum); break;
+    case ImpactParameter: name = Form("%g < b < %g",minimum,maximum); break;
+    case Other:           name = Form("%g < X < %g",minimum,maximum); break;
   }
- if (eventSelectionRequested==MinBias) return name;
-
-  TString minName;
-  double minLim = double(int(1000.0*minimum))/1000.0;
-  double maxLim = double(int(1000.0*maximum))/1000.0;
-  name += minLim;
-  name += " to ";
-  name += maxLim;
   return name;
 }
+
+//TString EventFilter::getLongName();
+//TString EventFilter::getLongTitle();

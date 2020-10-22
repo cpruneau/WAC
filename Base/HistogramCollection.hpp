@@ -41,29 +41,79 @@
 ///using namespace std;
 
 
-class HistogramCollection : public MessageLogger
+class HistogramCollection : public Collection<TH1>, public MessageLogger
 {
 public:
-  
-  ////////////////////////////////////////////////////////////////////////////
-  // CTOR1
-  ////////////////////////////////////////////////////////////////////////////
+
   HistogramCollection(const TString      & name,
                       int  histoCapacity = 100,
-                      LogLevel debugStatus   = Info);
+                      LogLevel debugStatus   = MessageLogger::Info);
+  HistogramCollection(const HistogramCollection & source);
+
   ////////////////////////////////////////////////////////////////////////////
   virtual ~HistogramCollection();
+
+  HistogramCollection & operator=(const HistogramCollection & source);
+
+  int getNHistograms()
+  {
+  return getCollectionSize();
+  }
+
+  int computeOptions(bool doScale,
+                     bool doSave,
+                     bool doPlot,
+                     bool doPrint)
+  {
+  int option;
+  option = 0;
+  option += doScale ? 1 : 0;
+  option += doSave  ? 2 : 0;
+  option += doPlot  ? 4 : 0;
+  option += doPrint ? 8 : 0;
+  return option;
+  }
+
+  bool isScaled(int option)
+  {
+  return 1 & option;
+  }
+
+  bool isSaved(int option)
+  {
+  return 2 & option;
+  }
+
+  bool isPlotted(int option)
+  {
+  return 4 & option;
+  }
+
+  bool isPrinted(int option)
+  {
+  return 8 & option;
+  }
+
+  bool isSumw2ed(int option)
+  {
+  return 16 & option;
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   // Add the given histogram to the list
   ////////////////////////////////////////////////////////////////////////////
-  void addToList(TH1 * h,
-                 bool doScale    = false,
-                 bool doSave     = true,
-                 bool doPlot     = true,
-                 bool doPrint    = true,
-                 bool doSumw2    = false);
-  TH1 * getHisto(int i);
+  void add(TH1 * h,
+           bool doScale,
+           bool doSave,
+           bool doPlot,
+           bool doPrint);
+
+  TH1 * getHisto(int i)
+  {
+    return getObjectAt(i);
+  }
+
+
   void setDefaultOptions(bool color=0);
   TH1 * createHistogram(const TString &  name,
                         int n, double min_x, double max_x,
@@ -72,8 +122,7 @@ public:
                         bool  scale    = true,
                         bool  save     = true,
                         bool  plot     = true,
-                        bool  print    = true,
-                        bool  sumw2    = true);
+                        bool  print    = true);
   TH1 * createHistogram(const TString &  name,
                         int n, double * bins,
                         const TString &  title_x,
@@ -81,8 +130,7 @@ public:
                         bool  scale    = true,
                         bool  save     = true,
                         bool  plot     = true,
-                        bool  print    = true,
-                        bool  sumw2    = true);
+                        bool  print    = true);
   TH2 * createHistogram(const TString &  name,
                         int n_x, double min_x, double max_x,
                         int n_y, double min_y, double max_y,
@@ -92,8 +140,7 @@ public:
                         bool  scale    = true,
                         bool  save     = true,
                         bool  plot     = true,
-                        bool  print    = true,
-                        bool  sumw2    = true);
+                        bool  print    = true);
   TH2 * createHistogram(const TString &  name,
                         int n_x, double* xbins, int n_y, double min_y, double max_y,
                         const TString &  title_x,
@@ -102,8 +149,7 @@ public:
                         bool  scale    = true,
                         bool  save     = true,
                         bool  plot     = true,
-                        bool  print    = true,
-                        bool  sumw2    = true);
+                        bool  print    = true);
   TH3 * createHistogram(const TString &  name,
                         int n_x, double min_x, double max_x,
                         int n_y, double min_y, double max_y,
@@ -115,24 +161,22 @@ public:
                         bool  scale    = true,
                         bool  save     = true,
                         bool  plot     = true,
-                        bool  print    = true,
-                        bool  sumw2    = true);
+                        bool  print    = true);
   TProfile * createProfile(const TString & name,
                            int n_x,double min_x,double max_x,
                            const TString &  title_x,
                            const TString &  title_y,
                            bool  save     = true,
-                           bool  plot     = true,
-                           bool  print    = true);
+                           bool  plot     = false,
+                           bool  print    = false);
 
   TProfile * createProfile(const TString &  name,
                            int n_x,  double* bins,
                            const TString &  title_x,
                            const TString &  title_y,
-                           bool  scale    = true,
                            bool  save     = true,
-                           bool  plot     = true,
-                           bool  print    = true);
+                           bool  plot     = false,
+                           bool  print    = false);
 
   TProfile2D * createProfile(const TString &  title,
                              int n_x, double min_x, double max_x,
@@ -140,11 +184,9 @@ public:
                              const TString &  title_x,
                              const TString &  title_y,
                              const TString &  title_z,
-                             bool  scale    = true,
                              bool  save     = true,
-                             bool  plot     = true,
-                             bool  print    = true,
-                             bool  sumw2    = true);
+                             bool  plot     = false,
+                             bool  print    = false);
 
   void addHistogramsToExtList(TList *list, bool all=false);
   void saveHistograms(TFile * outputFile, bool saveAll=false);
@@ -154,8 +196,7 @@ public:
                       CanvasConfiguration & cc1d,
                       CanvasConfiguration & cc2d,
                       GraphConfiguration  & gc1D,
-                      GraphConfiguration  & gc2D
-                      );
+                      GraphConfiguration  & gc2D);
   void setHistoProperties(TH1 * h, const GraphConfiguration & graphConfiguration);
   void setHistoProperties(TH2 * h, const GraphConfiguration & graphConfiguration);
   void setHistoProperties(TH1 * h, const GraphConfiguration & graphConfiguration, const TString & xTitle, const TString & yTitle);
@@ -184,6 +225,7 @@ public:
                        bool ijNormalization, int nBins);
   void calculateSc(const TH1 * spp, const TH1 * n1n1, const TH1 * pt1pt1, TH1 * sean, bool ijNormalization);
   void calculateG2_H2H2H2H2(const TH2 * spp, const TH2 * n1n1, const TH2 * pt1pt1, TH2 * sean, bool ijNormalization, double a1, double a2);
+  void calculateBf(const TH2 *n2, const TH2 *n1_1, const TH2 *n1_2, TH2 *bf_12, TH2 *bf_21);
   void calculateSean_H1H2H2H2(const TH1 * spp, const TH2 * n1n1, const TH2 * pt1pt1, TH2 * sean, bool ijNormalization, double a1, double a2);
   int  calculateQ3DwPtPhiEta(double pt1, double phi1, double eta1,
                              double pt2, double phi2, double eta2,
@@ -200,34 +242,10 @@ public:
 
   void setHistogram(TH1 * h, double v, double ev);
   void setHistogram(TH2 * h, double v, double ev);
-  TH1 * loadH1(TFile * inputFile,
-               const TString & histoName,
-               bool  scale    = false,
-               bool  save     = false,
-               bool  plot     = true,
-               bool  print    = true,
-               bool  sumw2    = false);
-  TH2 * loadH2(TFile * inputFile,
-               const TString & histoName,
-               bool  scale    = false,
-               bool  save     = false,
-               bool  plot     = true,
-               bool  print    = true,
-               bool  sumw2    = false);
-  TH3 * loadH3(TFile * inputFile,
-               const TString & histoName,
-               bool  scale    = false,
-               bool  save     = false,
-               bool  plot     = true,
-               bool  print    = true,
-               bool  sumw2    = false);
-  TProfile * loadProfile(TFile * inputFile,
-                         const TString & histoName,
-                         bool  scale    = false,
-                         bool  save     = false,
-                         bool  plot     = true,
-                         bool  print    = true,
-                         bool  sumw2    = false);
+  TH1 * loadH1(TFile * inputFile,const TString & histoName);
+  TH2 * loadH2(TFile * inputFile,const TString & histoName);
+  TH3 * loadH3(TFile * inputFile,const TString & histoName);
+  TProfile * loadProfile(TFile * inputFile,const TString & histoName);
   TH1 * cloneH1(const TH1 * h1, const TString & histoName);
   TH2 * cloneH2(const TH2 * h2, const TString & histoName);
   TH3 * cloneH3(const TH3 * h3, const TString & histoName);
@@ -255,6 +273,8 @@ public:
   void symmetrizeXX(TH2 * h, bool ijNormalization);
   void reduce_n2xEtaPhi_n2DetaDphi(const TH2 * source, TH2 * target,int nEtaBins,int nPhiBins);
   void reduce_n2xEtaPhi_n2EtaEta(const TH1 * source, TH2 * target,int nEtaBins,int nPhiBins);
+  void project_n2XYXY_n2XX(const TH2 * source, TH2 * target,int nXBins,int nYBins);
+  void project_n2XYXY_n2YY(const TH2 * source, TH2 * target,int nXBins,int nYBins);
   TH2* symmetrize(TH2* h);
   void shiftY(const TH2 & source, TH2 & target, int nbins);
   float * getFloatArray(int size, float v);
@@ -295,36 +315,11 @@ public:
   ////////////////////////////////////////////////////////////////////////////
   // Data Members - Inputs
   ////////////////////////////////////////////////////////////////////////////
-  int      nHistoCapacity;
-  int      nHistograms;
-  TH1      ** histograms;
-  bool     * isScaled;   // saved to root file at the end
-  bool     * isSaved;    // saved to root file at the end
-  bool     * isPlotted;  // plot on screen  at the end
-  bool     * isPrinted;  // save histogram content to file at end
-  int      debugLevel;
-  TString  collectionName;
+  TString    collectionName;
+  int      * options;
   TRandom  * randomGenerator;
-  bool    bOwnTheHistograms;  // if the instance owns its own histograms
-                              // use to be the case unless the histograms are incorporated to an external list
-                              // when true at instance destruction time the histograms are deleted
-  
-  ////////////////////////////////////////////////////////////////////////////
-  // Data Members - Constants
-  ////////////////////////////////////////////////////////////////////////////
 
-  
-  bool  scaled;    // = true;
-  bool  saved;     // = true;
-  bool  plotted;   // = true;
-  bool  printed;    //= true;
-  bool  notScaled;  //= false;
-  bool  notSaved;   //= false;
-  bool  notPlotted; //= false;
-  bool  notPrinted; //= false;
-
-
-  ClassDef(HistogramCollection,0);
+  ClassDef(HistogramCollection,1);
 
 }; // HistogramCollection
 

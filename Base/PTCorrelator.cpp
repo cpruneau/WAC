@@ -90,7 +90,7 @@ void PTCorrelator::createHistograms()
 {
 	if (reportDebug())  cout << "PTCorrelator::createHistograms(...) started"<< endl;
 	HeavyIonConfiguration * ac = (HeavyIonConfiguration *) getTaskConfiguration();
-	LogLevel debugLevel = getReportLevel();
+	//LogLevel debugLevel = getReportLevel();
 
 	TString histoName;
 	histoName = partNames[0];
@@ -125,7 +125,7 @@ void PTCorrelator::loadHistograms(TFile * inputFile)
 	eventsProcessed = par->GetVal();
 	delete par;
 	AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
-	LogLevel debugLevel = getReportLevel();
+	//LogLevel debugLevel = getReportLevel();
 
 	TString histoName;
 	histoName = partNames[0];
@@ -157,10 +157,8 @@ void PTCorrelator::saveHistograms(TFile * outputFile)
 		return;
 	}
 	outputFile->cd();
-
   /* first save the number of events as a cumulated parameter */
 	TParameter<Long64_t>("NoOfEvents",eventsProcessed,'+').Write();
-	AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
 	histos->saveHistograms(outputFile);
 	if (reportDebug()) cout << "PTCorrelator::saveHistograms(...) Completed." << endl;
 }

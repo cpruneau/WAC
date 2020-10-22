@@ -8,6 +8,12 @@
 #pragma link C++ class CanvasConfiguration+;
 #pragma link C++ class EnhancedGraph+;
 #pragma link C++ class Factory+;
+#pragma link C++ class Factory<Particle>+;
+
+#pragma link C++ class Collection+;
+#pragma link C++ class Collection<TF1>+;
+#pragma link C++ class Collection<TH1>+;
+#pragma link C++ class Collection<TCanvas>+;
 #pragma link C++ class FunctionCollection+;
 #pragma link C++ class GraphConfiguration+;
 #pragma link C++ class HistogramCollection+;
@@ -48,10 +54,11 @@
 //#pragma link C++ class IMParticleHistos+;
 //#pragma link C++ class MasterAnalysis+;
 //#pragma link C++ class MultHisto+;
-#pragma link C++ class Factory<Particle>+;
 #pragma link C++ class Particle+;
 #pragma link C++ class ParticleFilter+;
 #pragma link C++ class ParticleHistos+;
+#pragma link C++ class ParticleAnalyzer+;
+#pragma link C++ class ParticlePlotter+;
 #pragma link C++ class ParticlePairCombinedHistos+;
 #pragma link C++ class ParticlePairDerivedHistos+;
 #pragma link C++ class ParticlePairFilter+;

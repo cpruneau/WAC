@@ -23,7 +23,7 @@ EventHistos::EventHistos(const TString & name,
 :
 Histograms(name,configuration,5,debugLevel)
 {
-  if (reportDebug()) cout << "EventHistos::CTOR() No OPS." << endl;
+  initialize();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -36,7 +36,7 @@ EventHistos::EventHistos(TFile * inputFile,
 :
 Histograms(name,configuration,5,debugLevel)
 {
-  if (reportDebug()) cout << "EventHistos::CTOR() No OPS." << endl;
+  loadHistograms(inputFile);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -44,7 +44,7 @@ Histograms(name,configuration,5,debugLevel)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 EventHistos::~EventHistos()
 {
-  if (reportDebug()) cout << "EventHistos::DTOR() No ops." << endl;
+ /* */
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ void EventHistos::initialize()
   if (reportDebug()) cout << "EventHistos::initialize() Started." << endl;
   AnalysisConfiguration & ac = *getConfiguration();
   TString baseName = ac.histoBaseName;
-  h_nPartTot = createHistogram(baseName + "EventNpartTot",ac.nBins_nPartTot,ac.min_nPartTot,ac.max_nPartTot,"Event N_{part}","Counts", scaled, saved, notPlotted, notPrinted);
+  h_nPartTot = createHistogram(baseName + "EventNpartTot",ac.nBins_nPartTot,ac.min_nPartTot,ac.max_nPartTot,"Event N_{part}","Counts");
   if (reportDebug()) cout << "EventHistos::initialize() Completed." << endl;
 }
 

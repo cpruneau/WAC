@@ -44,6 +44,13 @@ public:
   virtual void setRThetaPhi(double _r, double _theta, double _phi);
   virtual void setRCosThetaPhi(double _r, double _cosTheta, double _phi);
 
+  virtual void shift(double xMean, double yMean, double zMean);
+
+  virtual double distanceXYZSq(Nucleon * otherNucleon);
+  virtual double distanceXYZ(Nucleon * otherNucleon);
+  virtual double distanceXYSq(Nucleon * otherNucleon);
+  virtual double distanceXY(Nucleon * otherNucleon);
+
   virtual void setWounded(bool _wounded)
   {
   wounded = _wounded;
@@ -52,6 +59,17 @@ public:
   {
   return wounded;
   }
+
+  bool isProton()
+  {
+  return nucleonType == Proton;
+  }
+
+  bool isNeutron()
+  {
+  return nucleonType == Neutron;
+  }
+
 
   ClassDef(Nucleon,0)
   

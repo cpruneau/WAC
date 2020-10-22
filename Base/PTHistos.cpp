@@ -24,7 +24,7 @@ PTHistos::PTHistos(TFile * inputFile,
 	LogLevel  debugLevel,
 	int ord)
 :
-Histograms(name,configuration,(TMath::Factorial(2 * ord) / TMath::Factorial(maxOrder )),debugLevel),
+Histograms(name,configuration,(TMath::Factorial(2 * ord) / TMath::Factorial(ord )),debugLevel),
 maxOrder(ord),
 histoIndex(0),
 size(0),
@@ -225,34 +225,34 @@ void PTHistos::saveHistograms(TFile * outputFile, bool saveAll)
 
 	for (int k=0; k<numTypes; k++)
 	{
-		if ((isSaved[k] || saveAll)) histograms[k]->Write();
+		if (isSaved(options[k]) || saveAll)  getObjectAt(k)->Write();
 	}
 
 	for(int iFunc = 0; iFunc <= 2 * numFunc; iFunc++)
 	{
 		for (int i = 1; i <= maxOrder; i++)
 		{
-			for (int k=numTypes; k<nHistograms; k++)
+			for (int k=numTypes; k<getCollectionSize(); k++)
 			{
 				if(k < size * numTypes + numTypes && iFunc == 2 * numFunc)
 				{
 					int k1 = (k - numTypes);
 					int orderIndex = k1 / numTypes;
-					if ((isSaved[k] || saveAll) && (orders[orderIndex] == i)) histograms[k]->Write();
+        if ((isSaved(options[k]) || saveAll) && (orders[orderIndex] == i)) getObjectAt(k)->Write();
 				}
 				if(k >= size * numTypes + numTypes && k < size * (numFunc + 1) * numTypes + numTypes && iFunc < numFunc)
 				{
 					int k1 = k - size * numTypes - numTypes;
 					int orderIndex = (k1 )/(numTypes * (numFunc ));
 					int funcIndex = (k1 )/numTypes - ( (numFunc )) * ((k1)/(numTypes * (numFunc )));
-					if ((isSaved[k] || saveAll) && (orders[orderIndex] == i) && ((funcIndex) % ( numFunc) == (iFunc % ( numFunc)))) histograms[k]->Write();
+        if ((isSaved(options[k]) || saveAll) && (orders[orderIndex] == i) && ((funcIndex) % ( numFunc) == (iFunc % ( numFunc)))) getObjectAt(k)->Write();
 				}
 				if(k >= size * (numFunc + 1) * numTypes + numTypes && iFunc >= numFunc && iFunc < 2 * numFunc)
 				{
 					int k1 = k - size * (numFunc + 1) * numTypes - numTypes;
 					int orderIndex = (k1 )/(numTypes * (numFunc ));
 					int funcIndex = (k1 )/numTypes - ( (numFunc )) * ((k1)/(numTypes * (numFunc )));
-					if ((isSaved[k] || saveAll) && (orders[orderIndex] == i) && ((funcIndex) % ( numFunc) == (iFunc - ( numFunc)))) histograms[k]->Write();
+        if ((isSaved(options[k]) || saveAll) && (orders[orderIndex] == i) && ((funcIndex) % ( numFunc) == (iFunc - ( numFunc)))) getObjectAt(k)->Write();
 				}
 			}
 		}
@@ -380,7 +380,7 @@ void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * 
 	if (reportDebug())  cout << "PTHistos::fillDerivedHistos(...) Starting." << endl;
 	auto start = chrono::high_resolution_clock::now(); 
 	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)*getConfiguration();
-	double max = ac.nCollisionsMax;
+	//double max = ac.nCollisionsMax;
 	h_events->BufferEmpty();
 	ac.min_mult = h_events->GetXaxis()->GetXmin();
 	ac.max_mult = h_events->GetXaxis()->GetXmax();
@@ -595,7 +595,7 @@ void PTHistos::calculateCumulants(TProfile ** SHistos, TH1 **CHistos, int nBins,
 {	
 	if (reportDebug())  cout << "PTHistos::calculateCumulants(...) Starting." << endl;
 
-	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)( *getConfiguration());
+	//HeavyIonConfiguration & ac = (HeavyIonConfiguration&)( *getConfiguration());
 
 	TProfile ** newSHistos = new TProfile *[size];
 	int counter = 0;

@@ -15,6 +15,8 @@
  */
 
 #include "TaskConfiguration.hpp"
+ClassImp(TaskConfiguration);
+
 
 TaskConfiguration::TaskConfiguration()
 :
@@ -30,17 +32,31 @@ resetHistograms(false),
 clearHistograms(false),
 forceHistogramsRewrite(true),
 inputPath("./"),
-configurationFileName("configuration.txt"),
-rootInputFileName(""),
 outputPath("./"),
-rootOuputFileName("output.root"),
 dataInputPath(""),
 dataInputFileName(""),
 dataInputTreeName("tree"),
 dataInputFileMinIndex(0),
-dataInputFileMaxIndex(1)
+dataInputFileMaxIndex(1),
+dataSourceName(""),
+collisionSystemName(""),
+collisionEnergyName(""),
+triggerName(""),
+taskTypeName(""),
+eventFilterName(""),
+particleFilterName(""),
+otherName(""),
+rootInputFileName(""),
+rootOuputFileName(""),
+dataSourceTitle(""),
+collisionSystemTitle(""),
+collisionEnergyTitle(""),
+triggerTitle(""),
+taskTypeTitle(""),
+eventFilterTitle(""),
+particleFilterTitle("")
 {
-/* no ops */
+  /* no ops */
 }
 
 TaskConfiguration::TaskConfiguration(const TString & theName, const TString & theType, const TString & theVersion)
@@ -57,17 +73,122 @@ resetHistograms(false),
 clearHistograms(false),
 forceHistogramsRewrite(true),
 inputPath("./"),
-configurationFileName("configuration.txt"),
-rootInputFileName(""),
 outputPath("./"),
-rootOuputFileName("output.root")
+dataInputPath(""),
+dataInputFileName(""),
+dataInputTreeName("tree"),
+dataInputFileMinIndex(0),
+dataInputFileMaxIndex(1),
+dataSourceName(""),
+collisionSystemName(""),
+collisionEnergyName(""),
+triggerName(""),
+taskTypeName(""),
+eventFilterName(""),
+particleFilterName(""),
+otherName(""),
+rootInputFileName(""),
+rootOuputFileName(""),
+dataSourceTitle(""),
+collisionSystemTitle(""),
+collisionEnergyTitle(""),
+triggerTitle(""),
+taskTypeTitle(""),
+eventFilterTitle(""),
+particleFilterTitle("")
 {
-/* no ops */
+  /* no ops */
 }
+
+TaskConfiguration::TaskConfiguration(const TaskConfiguration & source)
+:
+name( source.name),
+type( source.type ),
+version( source.version ),
+loadHistograms( source.loadHistograms ),
+createHistograms( source.createHistograms ),
+scaleHistograms( source.scaleHistograms ),
+calculateDerivedHistograms( source.calculateDerivedHistograms ),
+saveHistograms( source.saveHistograms ),
+resetHistograms( source.resetHistograms ),
+clearHistograms( source.clearHistograms ),
+forceHistogramsRewrite( source.forceHistogramsRewrite ),
+inputPath( source.inputPath ),
+outputPath( source.outputPath ),
+dataInputPath( source.dataInputPath ),
+dataInputFileName( source.dataInputFileName ),
+dataInputTreeName( source.dataInputTreeName),
+dataInputFileMinIndex( source.dataInputFileMinIndex ),
+dataInputFileMaxIndex( source.dataInputFileMaxIndex ),
+dataSourceName( source.dataSourceName ),
+collisionSystemName( source.collisionSystemName ),
+collisionEnergyName( source.collisionEnergyName ),
+triggerName( source.triggerName ),
+taskTypeName( source.taskTypeName ),
+eventFilterName( source.eventFilterName ),
+particleFilterName( source.particleFilterName ),
+otherName( source.otherName ),
+rootInputFileName( source.rootInputFileName ),
+rootOuputFileName( source.rootOuputFileName ),
+dataSourceTitle( source.dataSourceTitle ),
+collisionSystemTitle( source.collisionSystemTitle ),
+collisionEnergyTitle( source.collisionEnergyTitle ),
+triggerTitle( source.triggerTitle ),
+taskTypeTitle( source.taskTypeTitle ),
+eventFilterTitle( source.eventFilterTitle ),
+particleFilterTitle( source.particleFilterTitle )
+{
+  /* no ops */
+}
+
+TaskConfiguration & TaskConfiguration::operator=(const TaskConfiguration & source)
+{
+  // avoid copying onto itself...
+  if (this!=&source)
+    {
+    name = source.name;
+    type = source.type;
+    version = source.version;
+    loadHistograms = source.loadHistograms;
+    createHistograms = source.createHistograms;
+    scaleHistograms = source.scaleHistograms;
+    calculateDerivedHistograms = source.calculateDerivedHistograms;
+    saveHistograms = source.saveHistograms;
+    resetHistograms = source.resetHistograms;
+    clearHistograms = source.clearHistograms;
+    forceHistogramsRewrite = source.forceHistogramsRewrite;
+    inputPath = source.inputPath;
+    outputPath = source.outputPath;
+    dataInputPath = source.dataInputPath;
+    dataInputFileName = source.dataInputFileName;
+    dataInputTreeName = source.dataInputTreeName;
+    dataInputFileMinIndex = source.dataInputFileMinIndex;
+    dataInputFileMaxIndex = source.dataInputFileMaxIndex;
+    dataSourceName = source.dataSourceName;
+    collisionSystemName = source.collisionSystemName;
+    collisionEnergyName = source.collisionEnergyName;
+    triggerName = source.triggerName;
+    taskTypeName = source.taskTypeName;
+    eventFilterName = source.eventFilterName;
+    particleFilterName = source.particleFilterName;
+    otherName = source.otherName;
+    rootInputFileName = source.rootInputFileName;
+    rootOuputFileName = source.rootOuputFileName;
+    dataSourceTitle = source.dataSourceTitle;
+    collisionSystemTitle =  source.collisionSystemTitle;
+    collisionEnergyTitle =  source.collisionEnergyTitle;
+    triggerTitle =  source.triggerTitle;
+    taskTypeTitle =  source.taskTypeTitle;
+    eventFilterTitle =  source.eventFilterTitle;
+    particleFilterTitle =  source.particleFilterTitle;
+    }
+  return *this;
+}
+
 
 TaskConfiguration::~TaskConfiguration()
 {
-
+  /* no ops */
 }
 
 TString TaskConfiguration::getName() const
@@ -86,11 +207,23 @@ TString TaskConfiguration::getVersion() const
 void TaskConfiguration::printTaskConfiguration(ostream & os)
 {
   os
-  << " ---------------------------------------------" << endl
-  << "               outputPath: " << name << endl
+  << " ------------------------------------------------------------" << endl
+  << "                   outputPath: " << name << endl
   << "    TaskConfigurationFileName: " << type << endl
-  << "       rootOutputFileName: " << version << endl
-  << " ---------------------------------------------" << endl;
+  << "           rootOutputFileName: " << version << endl
+  << "               loadHistograms: " << loadHistograms << endl
+  << "             createHistograms: " << createHistograms << endl
+  << "              scaleHistograms: " << scaleHistograms << endl
+  << "   calculateDerivedHistograms: " << calculateDerivedHistograms << endl
+  << "               saveHistograms: " << saveHistograms << endl
+  << "              resetHistograms: " << resetHistograms << endl
+  << "              clearHistograms: " << clearHistograms << endl
+  << "       forceHistogramsRewrite: " << forceHistogramsRewrite << endl
+  << "                    inputPath: " << inputPath << endl
+  << "            rootInputFileName: " << rootInputFileName << endl
+  << "                   outputPath: " << outputPath << endl
+  << "            rootOuputFileName: " << rootOuputFileName << endl
+  << " ------------------------------------------------------------" << endl;
 }
 
 TString TaskConfiguration::getInputRootFileName()
@@ -100,10 +233,73 @@ TString TaskConfiguration::getInputRootFileName()
   return inputName;
 }
 
- TString TaskConfiguration::getOutputRootFileName()
+TString TaskConfiguration::getOutputRootFileName()
 {
   TString outputName = outputPath;
   outputName += rootOuputFileName;
   return outputName;
 }
 
+TString TaskConfiguration::composeFileName(int option)
+{
+  TString name;
+  switch (option)
+    {
+      case 0:
+      name = dataSourceName;      // e.g., Pythia, AMPT, ALICE, etc
+      name += "_";
+      name += collisionSystemName; // e.g., pp, Pb-Pb, etc
+      name += "_";
+      name += collisionEnergyName; // e.g., 14 TeV
+      name += "_";
+      name += triggerName;         // e.g., Min Bias
+            break;
+      case 1:
+      name = dataSourceName;      // e.g., Pythia, AMPT, ALICE, etc
+      name += "_";
+      name += collisionSystemName; // e.g., pp, Pb-Pb, etc
+      name += "_";
+      name += collisionEnergyName; // e.g., 14 TeV
+      name += "_";
+      name += triggerName;         // e.g., Min Bias
+      name += "_";
+      name += taskTypeName;        // e.g., Single, Pair, NuDyn, etc...
+      break;
+
+      case 2:
+      name = dataSourceName;      // e.g., Pythia, AMPT, ALICE, etc
+      name += "_";
+      name += collisionSystemName; // e.g., pp, Pb-Pb, etc
+      name += "_";
+      name += collisionEnergyName; // e.g., 14 TeV
+      name += "_";
+      name += triggerName;         // e.g., Min Bias
+      name += "_";
+      name += taskTypeName;        // e.g., Single, Pair, NuDyn, etc...
+      name += "_";
+      name += eventFilterName;     // e.g., MultGt2Lt40
+      break;
+
+      case 3:
+      name = dataSourceName;      // e.g., Pythia, AMPT, ALICE, etc
+      name += "_";
+      name += collisionSystemName; // e.g., pp, Pb-Pb, etc
+      name += "_";
+      name += collisionEnergyName; // e.g., 14 TeV
+      name += "_";
+      name += triggerName;         // e.g., Min Bias
+      name += "_";
+      name += taskTypeName;        // e.g., Single, Pair, NuDyn, etc...
+      name += "_";
+      name += eventFilterName;     // e.g., MultGt2Lt40
+      name += "_";
+      name += particleFilterName;
+      break;
+    }
+  return name;
+}
+
+void TaskConfiguration::setRootOutputFileName(int option)
+{
+  rootOuputFileName = composeFileName(option);
+}

@@ -84,4 +84,43 @@ void Nucleon::setRCosThetaPhi(double _r, double _cosTheta, double _phi)
   wounded = false;
 }
 
+void Nucleon::shift(double dx, double dy, double dz)
+{
+  x += dx;
+  y += dy;
+  z += dz;
+  r     = sqrt(x*x+y*y+z*z);
+  phi   = atan2(y,x);
+  theta = atan2(sqrt(x*x+y*y),z);
+}
 
+double Nucleon::distanceXYZSq(Nucleon  * otherNucleon)
+{
+  double dx = x - otherNucleon->x;
+  double dy = y - otherNucleon->y;
+  double dz = z - otherNucleon->z;
+  return dx*dx + dy*dy + dz*dz;
+}
+
+double Nucleon::distanceXYZ(Nucleon * otherNucleon)
+{
+  double dx = x - otherNucleon->x;
+  double dy = y - otherNucleon->y;
+  double dz = z - otherNucleon->z;
+  return sqrt(dx*dx + dy*dy + dz*dz);
+}
+
+
+double Nucleon::distanceXYSq(Nucleon * otherNucleon)
+{
+  double dx = x - otherNucleon->x;
+  double dy = y - otherNucleon->y;
+  return dx*dx + dy*dy;
+}
+
+double Nucleon::distanceXY(Nucleon * otherNucleon)
+{
+  double dx = x - otherNucleon->x;
+  double dy = y - otherNucleon->y;
+  return sqrt(dx*dx + dy*dy);
+}

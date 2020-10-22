@@ -20,7 +20,7 @@ add_executable(RunCollisionGeometrySimulation RunCollisionGeometrySimulation.cpp
 target_include_directories(RunCollisionGeometrySimulation PUBLIC Base CollisionGeometry ${EXTRA_INCLUDES})
 target_link_libraries(RunCollisionGeometrySimulation Base CollisionGeometry  EGLib CollisionGeometryLib   ${ROOT_LIBRARIES} ${EXTRA_LIBS} ${CMAKE_DL_LIBS})
 
-install(FILES  "${CMAKE_CURRENT_BINARY_DIR}/libCollisionGeometry.rootmap" "${CMAKE_CURRENT_BINARY_DIR}/libCollisionGeometry_rdict.pcm" DESTINATION /Users/claudeapruneau/opt/WAC/lib)
-install(TARGETS CollisionGeometry  LIBRARY DESTINATION /Users/claudeapruneau/opt/WAC/lib) 
-install(TARGETS RunCollisionGeometrySimulation DESTINATION /Users/claudeapruneau/opt/WAC/bin) 
+install(FILES  "${CMAKE_CURRENT_BINARY_DIR}/libCollisionGeometry.rootmap" "${CMAKE_CURRENT_BINARY_DIR}/libCollisionGeometry_rdict.pcm" DESTINATION "$ENV{WAC_LIB}")
+install(TARGETS CollisionGeometry  LIBRARY DESTINATION "$ENV{WAC_LIB}") 
+install(TARGETS RunCollisionGeometrySimulation DESTINATION "$ENV{WAC_BIN}") 
 

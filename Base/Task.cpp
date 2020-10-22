@@ -270,6 +270,7 @@ void Task::addHistogramsToExtList(TList *list, bool all)
     {
     cout << "Task::addHistogramsToExtList(TList *list)  Given file pointer is null." << endl;
     }
+  all = false; // silence warning.
 }
 
 void Task::calculateDerivedHistograms()

@@ -18,38 +18,51 @@
 
 ClassImp(CanvasCollection);
 
-////////////////////////////////////////////////////
-// CTOR
-////////////////////////////////////////////////////
-CanvasCollection::CanvasCollection(int capacity)
-: nCanvasCapacity(capacity), nCanvas(0)
+CanvasCollection::CanvasCollection(long initialCapacity)
+:
+Collection<TCanvas>(initialCapacity)
 {
-  collection = new TCanvas*[capacity];
+  /* no ops*/
 }
 
-////////////////////////////////////////////////////
-// DTOR
-////////////////////////////////////////////////////
 CanvasCollection::~CanvasCollection()
 {
-
+  /* no ops*/
 }
 
-////////////////////////////////////////////////////
+CanvasCollection::CanvasCollection(const CanvasCollection & source)
+:
+Collection<TCanvas>(source)
+{
+  /* no ops*/
+}
+
+
+CanvasCollection & CanvasCollection::operator=(const CanvasCollection & source)
+{
+  Collection<TCanvas>::operator=(source);
+  return *this;
+}
+
+
+
+// =================================================
 // Create a directory or folder in the file system
-// If the directory exists, do nothing.
-////////////////////////////////////////////////////
+// If the directory alearfy exists, do nothing.
+// =================================================
 void CanvasCollection::createDirectory(const TString & dirName)
 {
   gSystem->mkdir(dirName,1);
 }
 
-////////////////////////////////////////////////////
+// =================================================
 // Create a canvas
-////////////////////////////////////////////////////
+// =================================================
 TCanvas * CanvasCollection::createCanvas(const TString & canvasName, const CanvasConfiguration & canvasConfig, int inc)
 {
-  TCanvas * canvas = new TCanvas(canvasName,canvasName,canvasConfig.x+nCanvas*inc,canvasConfig.y,canvasConfig.width,canvasConfig.height);
+  int xInc = inc*getCollectionSize();
+  TCanvas * canvas = new TCanvas(canvasName,canvasName,
+                                 canvasConfig.x+xInc,canvasConfig.y,canvasConfig.width,canvasConfig.height);
   canvas->SetLogx(canvasConfig.logx);
   canvas->SetLogy(canvasConfig.logy);
   canvas->SetLogz(canvasConfig.logz);
@@ -64,9 +77,7 @@ TCanvas * CanvasCollection::createCanvas(const TString & canvasName, const Canva
   canvas->SetFillStyle(1001);
   canvas->SetBorderSize(0);
   canvas->SetBorderMode(0);
-
-  collection[nCanvas] = canvas;
-  nCanvas++;
+  add(canvas);
 
   return canvas;
 }
@@ -76,7 +87,8 @@ TCanvas * CanvasCollection::createCanvas(const TString & canvasName, const Canva
 ////////////////////////////////////////////////////
 TCanvas * CanvasCollection::createCanvasXX(int nx, int ny, const TString & canvasName, const CanvasConfiguration & canvasConfig, int inc)
 {
-  TCanvas * canvas = new TCanvas(canvasName,canvasName,canvasConfig.x+nCanvas*inc,canvasConfig.y,canvasConfig.width,canvasConfig.height);
+  int xInc = inc*getCollectionSize();
+  TCanvas * canvas = new TCanvas(canvasName,canvasName,canvasConfig.x+xInc,canvasConfig.y,canvasConfig.width,canvasConfig.height);
   canvas->Divide(nx,ny,0,0);
   canvas->SetLogx(canvasConfig.logx);
   canvas->SetLogy(canvasConfig.logy);
@@ -87,17 +99,15 @@ TCanvas * CanvasCollection::createCanvasXX(int nx, int ny, const TString & canva
   canvas->SetTopMargin(canvasConfig.topMargin);
   canvas->SetTheta(canvasConfig.theta);
   canvas->SetPhi(canvasConfig.phi);
-
   canvas->SetFillColor(kWhite);
   canvas->SetFillStyle(1001);
   canvas->SetBorderSize(0);
   canvas->SetBorderMode(0);
-
-  collection[nCanvas] = canvas;
-  nCanvas++;
-
+  add(canvas);
   return canvas;
 }
+
+
 
 
 ////////////////////////////////////////////////////
@@ -120,9 +130,9 @@ void CanvasCollection::printCanvas(TCanvas * canvas, const TString & directoryNa
 ////////////////////////////////////////////////////
 void CanvasCollection::printAllCanvas(const TString & outputPath, bool printGif, bool printPdf, bool printSvg, bool printC)
 {
-  for (int k=0; k<nCanvas; k++)
+  for (int k=0; k<getNCanvas(); k++)
     {
-    printCanvas(collection[k],outputPath,printGif,printPdf,printSvg,printC);
+    printCanvas(getObjectAt(k),outputPath,printGif,printPdf,printSvg,printC);
     }
 }
 
@@ -131,6 +141,7 @@ void CanvasCollection::printAllCanvas(const TString & outputPath, bool printGif,
 ////////////////////////////////////////////////////
 TLatex * CanvasCollection::createLabel(double x, double y, int color, int fontType, double fontSize, const TString & text, bool doDraw)
 {
+  fontType = 0; // not used now...
   TLatex * label;
   label = new TLatex(x,y,text);
   label->SetTextColor(color);
@@ -145,6 +156,7 @@ TLatex * CanvasCollection::createLabel(double x, double y, int color, int fontTy
 ////////////////////////////////////////////////////
 TLegend * CanvasCollection::createLegend(float x1, float y1, float x2, float y2, int fontType, float fontSize)
 {
+  fontType = 0; // not used now...
   TLegend *legend = new TLegend(x1,y1,x2,y2);
   //legend->SetTextFont(fontType);
   legend->SetTextSize(fontSize);
@@ -162,7 +174,7 @@ TLine * CanvasCollection::createLine(float x1, float y1, float x2, float y2, int
   line->SetLineStyle(style);
   line->SetLineColor(color);
   line->SetLineWidth(width);
-  line->Draw();
+  if (doDraw) line->Draw();
   return line;
 }
 
@@ -175,6 +187,6 @@ TArrow * CanvasCollection::createArrow(float x1, float y1, float x2, float y2, f
   line->SetLineStyle(style);
   line->SetLineColor(color);
   line->SetLineWidth(width);
-  line->Draw();
+  if (doDraw) line->Draw();
   return line;
 }

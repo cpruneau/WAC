@@ -4,6 +4,7 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
+#pragma link C++ class PythiaConfiguration+;
 #pragma link C++ class PythiaEventReader+;
 #pragma link C++ class PythiaEventGenerator+;
 #pragma link C++ class AACollisionGenerator+;

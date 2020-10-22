@@ -16,26 +16,30 @@
 #include "TLine.h"
 #include "TArrow.h"
 #include "TLegend.h"
+#include "Collection.hpp"
 #include "CanvasConfiguration.hpp"
 
-class CanvasCollection
+class CanvasCollection : public Collection<TCanvas>
 {
 public:
-  ////////////////////////////////////////////////////
-  // Data Members
-  ////////////////////////////////////////////////////
-  int    nCanvasCapacity;
-  int    nCanvas;
-  TCanvas ** collection;
 
   ////////////////////////////////////////////////////
   // Member functions
   ////////////////////////////////////////////////////
-  CanvasCollection(int capacity=500);
+  CanvasCollection(long initialCapacity=500);
+  CanvasCollection(const CanvasCollection & source);
   virtual ~CanvasCollection();
+  CanvasCollection & operator=(const CanvasCollection & source);
+
+  int getNCanvas()
+  {
+  return getCollectionSize();
+  }
+
   void createDirectory(const TString & dirName);
   TCanvas * createCanvas(const TString & canvasName, const CanvasConfiguration & canvasConfig, int inc=200);
   TCanvas * createCanvasXX(int nx, int ny, const TString & canvasName, const CanvasConfiguration & canvasConfig, int inc=30);
+
   void printCanvas(TCanvas * canvas, const TString & directoryName="./", bool printGif=0, bool printPdf=1, bool printSvg=0, bool printC=0);
   void printAllCanvas(const TString & outputPath, bool printGif=0, bool printPdf=1, bool printSvg=0, bool printC=0);
   TLatex * createLabel(double x, double y, int color, int fontType, double fontSize, const TString & text, bool doDraw=true);

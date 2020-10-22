@@ -26,7 +26,11 @@ public:
   AnalysisConfiguration(const TString & name,
                         const TString & type,
                         const TString & version);
+  AnalysisConfiguration(const AnalysisConfiguration & source);
   virtual ~AnalysisConfiguration(){}
+
+  AnalysisConfiguration & operator=(const AnalysisConfiguration & source);
+
   void printConfiguration(ostream & os);
   int getIxEtaPhi(double eta, double phi);
   int getIxYPhi(double y, double phi);

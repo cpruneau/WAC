@@ -21,36 +21,23 @@ ClassImp(Histograms);
 
 Histograms::Histograms(const TString & name,
                        AnalysisConfiguration * config,
-                       int nHistogramsMax,
+                       int initialCapacity,
                        LogLevel  debugLevel)
 :
-HistogramCollection(name,nHistogramsMax,debugLevel),
+HistogramCollection(name,initialCapacity,debugLevel),
 configuration(config)
 {
-  if (reportDebug()) cout << "Histograms::CTOR() No OPS." << endl;
+ /* */
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-// CTOR2
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-Histograms::Histograms(TFile * inputFile,
-                       const TString & name,
-                       AnalysisConfiguration * configuration,
-                       int nHistogramsMax,
-                       LogLevel  debugLevel)
-:
-HistogramCollection(name,nHistogramsMax,debugLevel),
-configuration(configuration)
-{
-  if (reportDebug()) cout << "Histograms::CTOR() No OPS." << endl;
-}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DTOR
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 Histograms::~Histograms()
 {
-  if (reportDebug()) cout << "Histograms::DTOR() No ops." << endl;
+  /* */
 }
 
 // overload this method only if you need to do more than
@@ -70,18 +57,18 @@ void Histograms::finalize()
 void Histograms::reset()
 {
   if (reportDebug()) cout << "Histograms::reset()" << endl;
-  for (int iHisto=0; iHisto<nHistograms; iHisto++)
+  for (int iHisto=0; iHisto<getNHistograms(); iHisto++)
     {
-    histograms[iHisto]->Reset();
+    getHisto(iHisto)->Reset();
     }
 }
 
 void Histograms::clear()
 {
   if (reportDebug()) cout << "Histograms::clear()" << endl;
-  for (int iHisto=0; iHisto<nHistograms; iHisto++)
+  for (int iHisto=0; iHisto<getNHistograms(); iHisto++)
     {
-    histograms[iHisto]->Reset();
+    getHisto(iHisto)->Reset();
     }
 }
 
@@ -96,6 +83,7 @@ void Histograms::createHistograms()
 // ==============================================================
 void Histograms::loadHistograms(TFile * inputFile)
 {
+  inputFile = 0; // stop warnings;
   if (reportDebug()) cout << "Histograms::loadHistograms(...) No ops." << endl;
 }
 

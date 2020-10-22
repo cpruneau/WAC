@@ -8,7 +8,7 @@ class NuDynPlotter : public Plotter
 {
 public:
   
-  NuDynPlotter(bool showErrors=true);
+  NuDynPlotter();
   virtual ~NuDynPlotter();
   void makePlots(const TString & canvasNameBase,
                  NuDynHistos * nuDynHistosUsed,

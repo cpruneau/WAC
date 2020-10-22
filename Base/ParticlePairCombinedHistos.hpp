@@ -63,6 +63,12 @@ public:
   TH2* h_G2_yY;
   TH2* h_G2_DyDphi_shft;
 
+  TH2* h_BF_etaEta;
+  TH2* h_BF_phiPhi;
+  TH2* h_BF_DetaDphi_shft;
+  TH2* h_BF_yY;
+  TH2* h_BF_DyDphi_shft;
+
   TH3* h_R2_Q3D;
   TH2* h_R2_Q3D_xy;
   TH2* h_R2_Q3D_xz;
@@ -79,7 +85,7 @@ public:
   TH1 * h_RR2_Q3D_y;
   TH1 * h_RR2_Q3D_z;
   
-    ClassDef(ParticlePairCombinedHistos,0)
+    ClassDef(ParticlePairCombinedHistos,1)
 };
 
 

@@ -18,17 +18,19 @@
 
 ClassImp(FunctionCollection);
 
-FunctionCollection::FunctionCollection(int functionCapacity)
-: nFunctionCapacity(functionCapacity),nFunctions(0)
+FunctionCollection::FunctionCollection(long initialCapacity)
+:
+Collection<TF1>(initialCapacity)
 {
-  cout << "FunctionCollection() called" << endl;
-  functions = new TF1*[nFunctionCapacity];
+  /* no ops*/
 }
 
-FunctionCollection::FunctionCollection(const FunctionCollection & a)
-: nFunctionCapacity(a.nFunctionCapacity),nFunctions(0)
+
+FunctionCollection::FunctionCollection(const FunctionCollection & source)
+:
+Collection<TF1>(source)
 {
-  functions = new TF1*[nFunctionCapacity];
+  /* no ops*/
 }
 
 FunctionCollection::~FunctionCollection()
@@ -36,15 +38,12 @@ FunctionCollection::~FunctionCollection()
   //deletefunctions();
 }
 
-void FunctionCollection::addToList(TF1 * f)
+FunctionCollection & FunctionCollection::operator=(const FunctionCollection & source)
 {
-  functions[nFunctions++] = f;
+  Collection<TF1>::operator=(source);
+  return *this;
 }
 
-TF1 * FunctionCollection::getFunction(int i)
-{
-  return functions[i];
-}
 
 
 ////////////////////////////////////////////////////
@@ -105,7 +104,7 @@ void FunctionCollection::setFunctionProperties(TF1 * f, const GraphConfiguration
 void FunctionCollection::plotAllFunctions(const TString & outputPath, bool doPrint)
 {
   //cout << "-INFO- plotAllHistos(...) Ploting all histos of the collection." << endl;
-  cout << "-INFO- plotAllHistos(...) nFunctions:" << nFunctions << " with capacity:" << nFunctionCapacity << endl;
+  cout << "-INFO- plotAllFunctions(...) n functions :" << getNFunction() << endl;
 
   GraphConfiguration * gc1D = new GraphConfiguration(1,0);
   GraphConfiguration * gc2D = new GraphConfiguration(2,0);
@@ -115,23 +114,23 @@ void FunctionCollection::plotAllFunctions(const TString & outputPath, bool doPri
   //cout << "-INFO- plotAllHistos(...) Creating directory (unless it already exists):" << outputPath << endl;
   canvasCollection->createDirectory(outputPath);
   TString name;
-  //cout << "-INFO- plotAllHistos(...) nFunctions:" << nFunctions << " with capacity:" << nFunctionCapacity << endl;
+  //cout << "-INFO- plotAllHistos(...) getNFunction() :" << getNFunction()  << " with capacity:" << nFunctionCapacity << endl;
 
-  for (int iFunc=0; iFunc<nFunctions; iFunc++)
+  for (int iFunc=0; iFunc<getNFunction() ; iFunc++)
     {
-    TF1* f = functions[iFunc];
+    TF1* f = getObjectAt(iFunc);
     name = f->GetName();
     if (f->IsA() == TF1::Class())
       {
       cout << "-INFO- plotAllHistos(...) Plotting 1D histo #" << iFunc << " named " << f->GetTitle() << endl;
-      TCanvas * c = canvasCollection->createCanvas(name, *cc1D, 30);
+      canvasCollection->createCanvas(name, *cc1D, 30);
       setFunctionProperties(f, *gc1D);
       f->Draw();
       }
     else if (f->IsA() == TF2::Class())
       {
       cout << "-INFO- plotAllHistos(...) Plotting 2D histo #" << iFunc << " named " << f->GetTitle() << endl;
-      TCanvas * c = canvasCollection->createCanvas(name, *cc2D, 30);
+      canvasCollection->createCanvas(name, *cc2D, 30);
       setFunctionProperties(f, *gc2D);
       f->Draw("SURF3");
       }

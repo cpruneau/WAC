@@ -27,6 +27,8 @@ public:
 
   TString getName();
   TString getTitle();
+//  TString getLongName();
+//  TString getLongTitle();
 
   EventSelection eventSelectionRequested;
   double minimum;

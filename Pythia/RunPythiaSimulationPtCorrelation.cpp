@@ -33,16 +33,9 @@ int main()
   long nEventsRequested = 10000000;
   int  nEventsReport    = 100000;
 
-
-
-
   /////////////////////////////////////////////////////////////////////////////////////////////////////
   // Heavy Ion and Analysis Configuration Parameters
   ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
   HeavyIonConfiguration * ac = new HeavyIonConfiguration("PYTHIA","PYTHIA","1.0");
   ac->loadHistograms  = false;
   ac->createHistograms  = true;
@@ -53,7 +46,6 @@ int main()
   ac->clearHistograms  = false;
   ac->forceHistogramsRewrite  = true;
   ac->inputPath = "./";
-  ac->configurationFileName = "configuration";
   ac->rootInputFileName = "";
   ac->outputPath = getenv("OUTPUT_PATH");            // check this 
   ac->rootOuputFileName =  "/Pythia6";                // and this

@@ -43,12 +43,6 @@ int main()
   ac->resetHistograms  = false;
   ac->clearHistograms  = false;
   ac->forceHistogramsRewrite  = true;
-  ac->inputPath = "./";
-  ac->configurationFileName = "configuration";
-  ac->rootInputFileName = "";
-  ac->outputPath = "./BW_RESULTS/";
-  ac->rootOuputFileName =  "output";
-  ac->histoBaseName =  "BW_";
 
   ac->nBins_pt    = 40;
   ac->min_pt      = 0.0;

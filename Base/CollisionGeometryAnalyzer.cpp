@@ -54,6 +54,8 @@ void CollisionGeometryAnalyzer::initialize()
 void CollisionGeometryAnalyzer::execute()
 {
   if (reportDebug()) cout << "CollisionGeometryAnalyzer::execute() Started" << endl;
+
+
   collisionGeometryHistograms->fill(collisionGeometry,1.0);
   if (reportDebug()) cout << "CollisionGeometryAnalyzer::execute() Completed" << endl;
 }
@@ -73,3 +75,7 @@ void CollisionGeometryAnalyzer::saveHistograms(TFile * outputFile)
 }
 
 
+void CollisionGeometryAnalyzer::calculateDerivedHistograms()
+{
+  collisionGeometryHistograms->calculateDerivedHistograms();
+}

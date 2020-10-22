@@ -62,6 +62,26 @@ public:
   TH2* h_G2_etaEta;
   TH2* h_G2_phiPhi;
 
+  /* the balance functions components not R2 based */
+  TH2* h_bf12_phiEtaPhiEta;
+  TH2* h_bf12_etaEta;
+  TH2* h_bf12_phiPhi;
+  TH2* h_bf12_phiYPhiY;
+  TH2* h_bf12_yY;
+  TH2* h_bf12_DetaDphi;
+  TH2* h_bf12_DyDphi;
+  TH2* h_bf12_DetaDphi_shft;
+  TH2* h_bf12_DyDphi_shft;
+  TH2* h_bf21_phiEtaPhiEta;
+  TH2* h_bf21_etaEta;
+  TH2* h_bf21_phiPhi;
+  TH2* h_bf21_phiYPhiY;
+  TH2* h_bf21_yY;
+  TH2* h_bf21_DetaDphi;
+  TH2* h_bf21_DyDphi;
+  TH2* h_bf21_DetaDphi_shft;
+  TH2* h_bf21_DyDphi_shft;
+
   TH2* h_n1n1_DetaDphi;
   TH2* h_pt1pt1_DetaDphi;
   TH2* h_n2_DetaDphi;
@@ -140,7 +160,7 @@ public:
   
   bool ijNormalization;
 
-    ClassDef(ParticlePairDerivedHistos,0)
+    ClassDef(ParticlePairDerivedHistos,1)
 
 };
 

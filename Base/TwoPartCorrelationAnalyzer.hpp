@@ -51,15 +51,9 @@ public:
   // Data Members
   //////////////////////////////////////////////////////////////
 
-  EventFilter * eventFilter;
+  EventFilter    * eventFilter;
   ParticleFilter * particleFilter1;
   ParticleFilter * particleFilter2;
-
-  TString partName1;
-  TString partName2;
-
-
-  EventHistos                * event_Histos;
   ParticleHistos             * particle1_Histos;
   ParticleHistos             * particle2_Histos;
   ParticlePairHistos         * pair11_Histos;
@@ -70,6 +64,8 @@ public:
   ParticlePairDerivedHistos  * pair12_DerivedHistos;
   ParticlePairCombinedHistos * pair12_CIHistos;
   ParticlePairCombinedHistos * pair12_CDHistos;
+  TString partName1;
+  TString partName2;
 
    ClassDef(TwoPartCorrelationAnalyzer,0)
 };

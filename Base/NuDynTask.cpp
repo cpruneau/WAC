@@ -80,10 +80,6 @@ partName4("U")
      return;
      }
 
-  TString newName = getName();
-  newName += "_";
-  newName += eventFilter->getName();
-  setName(newName);
   partName1 = particleFilter1->getName();
   partName2 = particleFilter2->getName();
   partName3 = particleFilter3->getName();
@@ -108,7 +104,8 @@ void NuDynTask::createHistograms()
   if (reportDebug())  cout << "NuDynTask::initialize(...) started"<< endl;
   AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
   LogLevel debugLevel = getReportLevel();
-  TString histoName;
+  TString prefixName = getName(); prefixName += "_";
+  TString histoName = prefixName;
   histoName = partName1;
   histoName += partName2;
   histoName += partName3;
@@ -134,7 +131,8 @@ void NuDynTask::loadHistograms(TFile * inputFile)
   delete par;
   AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
   LogLevel debugLevel = getReportLevel();
-  TString histoName;
+  TString prefixName = getName(); prefixName += "_";
+  TString histoName = prefixName;
   histoName = partName1;
   histoName += partName2;
   histoName += partName3;

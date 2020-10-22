@@ -32,7 +32,9 @@ TwoPartCorrelationAnalyzer::TwoPartCorrelationAnalyzer(const TString &  name,
                                                        ParticleFilter * pf2)
 :
 Task(name,configuration,event),
-event_Histos(NULL),
+eventFilter(ef),
+particleFilter1(pf1),
+particleFilter2(pf2),
 particle1_Histos(NULL),
 particle2_Histos(NULL),
 pair11_Histos(NULL),
@@ -43,9 +45,6 @@ pair22_DerivedHistos(NULL),
 pair12_DerivedHistos(NULL),
 pair12_CIHistos(NULL),
 pair12_CDHistos(NULL),
-eventFilter(ef),
-particleFilter1(pf1),
-particleFilter2(pf2),
 partName1("U"),
 partName2("U")
 {
@@ -74,6 +73,7 @@ if (!eventFilter)
   TString newName = getName();
   newName += "_";
   newName += eventFilter->getName();
+  newName += "_";
   setName(newName);
   partName1 = particleFilter1->getName();
   partName2 = particleFilter2->getName();
@@ -86,7 +86,6 @@ if (!eventFilter)
 TwoPartCorrelationAnalyzer::~TwoPartCorrelationAnalyzer()
 {
   if (reportDebug())  cout << "TwoPartCorrelationAnalyzer::DTOR(...) Started" << endl;
-  if (event_Histos != NULL) delete event_Histos;
   if (particle1_Histos != NULL) delete particle1_Histos;
   if (particle2_Histos != NULL) delete particle2_Histos;
   if (pair11_Histos != NULL) delete pair11_Histos;
@@ -106,24 +105,22 @@ void TwoPartCorrelationAnalyzer::createHistograms()
   if (reportDebug())  cout << "TwoPartCorrelationAnalyzer::initialize(...) started"<< endl;
   AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
   LogLevel debugLevel = getReportLevel();
-  //event_Histos  = new EventHistos("Event Histos",analysisConfiguration,debugLevel);
 
-
-
-  particle1_Histos  = new ParticleHistos(partName1,ac,debugLevel);
-  particle2_Histos  = new ParticleHistos(partName2,ac,debugLevel);
+  TString prefixName = getName();
+  particle1_Histos  = new ParticleHistos(prefixName+partName1,ac,debugLevel);
+  particle2_Histos  = new ParticleHistos(prefixName+partName2,ac,debugLevel);
   if (ac->fillPairs)
     {
-    pair11_Histos = new ParticlePairHistos(partName1+partName1,ac,debugLevel);
-    pair22_Histos = new ParticlePairHistos(partName2+partName2,ac,debugLevel);
-    pair12_Histos = new ParticlePairHistos(partName1+partName2,ac,debugLevel);
+    pair11_Histos = new ParticlePairHistos(prefixName+partName1+partName1,ac,debugLevel);
+    pair22_Histos = new ParticlePairHistos(prefixName+partName2+partName2,ac,debugLevel);
+    pair12_Histos = new ParticlePairHistos(prefixName+partName1+partName2,ac,debugLevel);
     if (ac->calculateDerivedHistograms)
       {
-      pair11_DerivedHistos = new ParticlePairDerivedHistos(  partName1+partName1,ac,debugLevel);
-      pair22_DerivedHistos = new ParticlePairDerivedHistos(  partName2+partName2,ac,debugLevel);
-      pair12_DerivedHistos = new ParticlePairDerivedHistos(  partName1+partName2,ac,debugLevel);
-      pair12_CIHistos      = new ParticlePairCombinedHistos( partName1+partName2+"CI",ac,debugLevel);
-      pair12_CDHistos      = new ParticlePairCombinedHistos( partName1+partName2+"CD",ac,debugLevel);
+      pair11_DerivedHistos = new ParticlePairDerivedHistos(  prefixName+partName1+partName1,ac,debugLevel);
+      pair22_DerivedHistos = new ParticlePairDerivedHistos(  prefixName+partName2+partName2,ac,debugLevel);
+      pair12_DerivedHistos = new ParticlePairDerivedHistos(  prefixName+partName1+partName2,ac,debugLevel);
+      pair12_CIHistos      = new ParticlePairCombinedHistos( prefixName+partName1+partName2+"CI",ac,debugLevel);
+      pair12_CDHistos      = new ParticlePairCombinedHistos( prefixName+partName1+partName2+"CD",ac,debugLevel);
       }
     }
   if (reportDebug())  cout << "TwoPartCorrelationAnalyzer::createHistograms(...) completed"<< endl;
@@ -141,21 +138,22 @@ void TwoPartCorrelationAnalyzer::loadHistograms(TFile * inputFile)
   delete par;
   AnalysisConfiguration * analysisConfiguration = (AnalysisConfiguration *) getTaskConfiguration();
   LogLevel debugLevel = getReportLevel();
+  TString prefixName = getName();
 
-  particle1_Histos         = new ParticleHistos(inputFile,partName1, analysisConfiguration,debugLevel);
-  particle2_Histos         = new ParticleHistos(inputFile,partName2,analysisConfiguration,debugLevel);
+  particle1_Histos         = new ParticleHistos(inputFile,prefixName+partName1, analysisConfiguration,debugLevel);
+  particle2_Histos         = new ParticleHistos(inputFile,prefixName+partName2,analysisConfiguration,debugLevel);
   if (analysisConfiguration->fillPairs)
     {
-    pair11_Histos        = new ParticlePairHistos(inputFile,partName1+partName1,analysisConfiguration,debugLevel);
-    pair22_Histos        = new ParticlePairHistos(inputFile,partName2+partName2,analysisConfiguration,debugLevel);
-    pair12_Histos        = new ParticlePairHistos(inputFile,partName1+partName2,analysisConfiguration,debugLevel);
+    pair11_Histos        = new ParticlePairHistos(inputFile,prefixName+partName1+partName1,analysisConfiguration,debugLevel);
+    pair22_Histos        = new ParticlePairHistos(inputFile,prefixName+partName2+partName2,analysisConfiguration,debugLevel);
+    pair12_Histos        = new ParticlePairHistos(inputFile,prefixName+partName1+partName2,analysisConfiguration,debugLevel);
     if (analysisConfiguration->calculateDerivedHistograms)
       {
-      pair11_DerivedHistos = new ParticlePairDerivedHistos(inputFile, partName1+partName1,analysisConfiguration,debugLevel);
-      pair22_DerivedHistos = new ParticlePairDerivedHistos(inputFile, partName2+partName2,analysisConfiguration,debugLevel);
-      pair12_DerivedHistos = new ParticlePairDerivedHistos(inputFile, partName1+partName2,analysisConfiguration,debugLevel);
-      pair12_CIHistos      = new ParticlePairCombinedHistos(inputFile,partName1+partName2+"CI",analysisConfiguration,debugLevel);
-      pair12_CDHistos      = new ParticlePairCombinedHistos(inputFile,partName1+partName2+"CD",analysisConfiguration,debugLevel);
+      pair11_DerivedHistos = new ParticlePairDerivedHistos(inputFile, prefixName+partName1+partName1,analysisConfiguration,debugLevel);
+      pair22_DerivedHistos = new ParticlePairDerivedHistos(inputFile, prefixName+partName2+partName2,analysisConfiguration,debugLevel);
+      pair12_DerivedHistos = new ParticlePairDerivedHistos(inputFile, prefixName+partName1+partName2,analysisConfiguration,debugLevel);
+      pair12_CIHistos      = new ParticlePairCombinedHistos(inputFile,prefixName+partName1+partName2+"CI",analysisConfiguration,debugLevel);
+      pair12_CDHistos      = new ParticlePairCombinedHistos(inputFile,prefixName+partName1+partName2+"CD",analysisConfiguration,debugLevel);
       }
     }
   if (reportDebug())  cout << "TwoPartCorrelationAnalyzer::loadHistograms(...) Completed." << endl;
@@ -175,20 +173,21 @@ void TwoPartCorrelationAnalyzer::loadBaseHistograms(TFile * inputFile)
   AnalysisConfiguration * analysisConfiguration = (AnalysisConfiguration *) getTaskConfiguration();
   LogLevel debugLevel = getReportLevel();
   
-  particle1_Histos         = new ParticleHistos(inputFile,partName1, analysisConfiguration,debugLevel);
-  particle2_Histos         = new ParticleHistos(inputFile,partName2,analysisConfiguration,debugLevel);
+  TString prefixName = getName();
+  particle1_Histos         = new ParticleHistos(inputFile,prefixName+partName1, analysisConfiguration,debugLevel);
+  particle2_Histos         = new ParticleHistos(inputFile,prefixName+partName2,analysisConfiguration,debugLevel);
   if (analysisConfiguration->fillPairs)
     {
-    pair11_Histos        = new ParticlePairHistos(inputFile,partName1+partName1,analysisConfiguration,debugLevel);
-    pair22_Histos        = new ParticlePairHistos(inputFile,partName2+partName2,analysisConfiguration,debugLevel);
-    pair12_Histos        = new ParticlePairHistos(inputFile,partName1+partName2,analysisConfiguration,debugLevel);
+    pair11_Histos        = new ParticlePairHistos(inputFile,prefixName+partName1+partName1,analysisConfiguration,debugLevel);
+    pair22_Histos        = new ParticlePairHistos(inputFile,prefixName+partName2+partName2,analysisConfiguration,debugLevel);
+    pair12_Histos        = new ParticlePairHistos(inputFile,prefixName+partName1+partName2,analysisConfiguration,debugLevel);
     if (analysisConfiguration->calculateDerivedHistograms)
       {
-      pair11_DerivedHistos = new ParticlePairDerivedHistos(  partName1+partName1,analysisConfiguration,debugLevel);
-      pair22_DerivedHistos = new ParticlePairDerivedHistos(  partName2+partName2,analysisConfiguration,debugLevel);
-      pair12_DerivedHistos = new ParticlePairDerivedHistos(  partName1+partName2,analysisConfiguration,debugLevel);
-      pair12_CIHistos      = new ParticlePairCombinedHistos( partName1+partName2+"CI",analysisConfiguration,debugLevel);
-      pair12_CDHistos      = new ParticlePairCombinedHistos( partName1+partName2+"CD",analysisConfiguration,debugLevel);
+      pair11_DerivedHistos = new ParticlePairDerivedHistos(  prefixName+partName1+partName1,analysisConfiguration,debugLevel);
+      pair22_DerivedHistos = new ParticlePairDerivedHistos(  prefixName+partName2+partName2,analysisConfiguration,debugLevel);
+      pair12_DerivedHistos = new ParticlePairDerivedHistos(  prefixName+partName1+partName2,analysisConfiguration,debugLevel);
+      pair12_CIHistos      = new ParticlePairCombinedHistos( prefixName+partName1+partName2+"CI",analysisConfiguration,debugLevel);
+      pair12_CDHistos      = new ParticlePairCombinedHistos( prefixName+partName1+partName2+"CD",analysisConfiguration,debugLevel);
       }
     }
 
@@ -221,7 +220,6 @@ void TwoPartCorrelationAnalyzer::saveHistograms(TFile * outputFile)
 
   if (reportDebug()) cout << "TwoPartCorrelationAnalyzer::saveHistograms(...) saving singles." << endl;
 
-  //event_Histos  ->saveHistograms(outputFile);
   particle1_Histos  ->saveHistograms(outputFile);
   particle2_Histos  ->saveHistograms(outputFile);
 
@@ -258,7 +256,6 @@ void TwoPartCorrelationAnalyzer::addHistogramsToExtList(TList *list, bool all)
   list->Add(new TParameter<Long64_t>("NoOfEvents",eventsProcessed,'+'));
   AnalysisConfiguration * analysisConfiguration = (AnalysisConfiguration *) getTaskConfiguration();
 
-  //event_Histos  ->saveHistograms(outputFile);
   particle1_Histos  ->addHistogramsToExtList(list, all);
   particle2_Histos  ->addHistogramsToExtList(list, all);
   if (analysisConfiguration->fillPairs)
@@ -360,10 +357,15 @@ void TwoPartCorrelationAnalyzer::calculateDerivedHistograms()
 {
   if (reportDebug()) cout << "TwoPartCorrelationAnalyzer::calculateDerivedHistograms() Starting" << endl;
   AnalysisConfiguration * analysisConfiguration = (AnalysisConfiguration *) getTaskConfiguration();
+  particle1_Histos->completeFill();
+  particle2_Histos->completeFill();
   if (analysisConfiguration->fillPairs)
     {
     particle1_Histos->calculateAverages();
     particle2_Histos->calculateAverages();
+    pair11_Histos->completeFill();
+    pair22_Histos->completeFill();
+    pair12_Histos->completeFill();
     pair11_DerivedHistos->calculateDerivedHistograms(particle1_Histos,particle1_Histos,pair11_Histos,analysisConfiguration->binCorrPP);
     pair22_DerivedHistos->calculateDerivedHistograms(particle2_Histos,particle2_Histos,pair22_Histos,analysisConfiguration->binCorrMM);
     pair12_DerivedHistos->calculateDerivedHistograms(particle1_Histos,particle2_Histos,pair12_Histos,analysisConfiguration->binCorrPM);
@@ -376,61 +378,7 @@ void TwoPartCorrelationAnalyzer::calculateDerivedHistograms()
   if (reportDebug())  cout << "TwoPartCorrelationAnalyzer::calculateDerivedHistograms() Completed" << endl;
 }
 
-//////////////////////////////////////////////////////////////
-// plot histograms on screeen
-//////////////////////////////////////////////////////////////
-//  void plotHistograms(const TString & outputPath,
-//                              CanvasCollection & canvasCollection)
-//  {
-//    if (reportDebug())  cout << "TwoPartCorrelationAnalyzer::plotDerived() Starting" << endl;
-//    canvasCollection.createDirectory(outputPath);
-//
-//    if (analysisConfiguration->plotEventHistos)
-//    {
-//      //event_Histos ->plotHistograms(outputPath, canvasCollection);
-//    }
-//    if (analysisConfiguration->plotSingles)
-//    {
-//      particle1_Histos ->plotHistograms(outputPath, canvasCollection);
-//      particle2_Histos ->plotHistograms(outputPath, canvasCollection);
-//    }
-//
-//    if (analysisConfiguration->fillPairs)
-//    {
-//      if (analysisConfiguration->plotPairs)
-//      {
-//        pair11_Histos->plotHistograms(outputPath, canvasCollection);
-//        pair22_Histos->plotHistograms(outputPath, canvasCollection);
-//        pair12_Histos->plotHistograms(outputPath, canvasCollection);
-//      }
-//
-//      if (analysisConfiguration->calculateDerivedHistograms)
-//      {
-//        if (analysisConfiguration->plotDerivedPairs)
-//        {
-//          pair11_DerivedHistos ->plotHistograms(outputPath, canvasCollection);
-//          pair22_DerivedHistos ->plotHistograms(outputPath, canvasCollection);
-//          pair12_DerivedHistos ->plotHistograms(outputPath, canvasCollection);
-//        }
-//        if (analysisConfiguration->plotCombined)
-//        {
-//          pair12_CIHistos      ->plotHistograms(outputPath, canvasCollection);
-//          pair12_CDHistos      ->plotHistograms(outputPath, canvasCollection);
-//        }
-//      }
-//    }
-//
-//
-//
-//    //  // pt spectrum comparison with ALICE data
-//    //TH1 * ptparticle1 = particle1_Histos->h_n1_pt;
-//    //TString name = "BF_n_pt_P_vsAlice";
-//    //TCanvas * c = canvasCollection->createCanvas(name, *cc1D, 30);
-//    //hc->setHistoProperties(ptparticle1, *gc1D);
-//    //ptparticle1->Draw("P.E");
-//
-//    if (reportDebug())  cout << "TwoPartCorrelationAnalyzer::plotDerived() Completed" << endl;
-//  }
+
 
 //////////////////////////////////////////////////////////////
 // Scale all filled histograms by the given factor
@@ -450,3 +398,6 @@ void TwoPartCorrelationAnalyzer::scaleHistograms(double factor)
     }
   if (reportDebug())  cout << "TwoPartCorrelationAnalyzer::scale(..) Completed"  << endl;
 }
+
+
+

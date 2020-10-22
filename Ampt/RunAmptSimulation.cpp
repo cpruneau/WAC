@@ -32,12 +32,6 @@ int main()
   ac->clearHistograms  = false;
   ac->forceHistogramsRewrite  = true;
 
-  ac->configurationFileName = "configuration";
-  ac->rootInputFileName = "";
-  ac->outputPath = "./";
-  ac->rootOuputFileName =  "output";
-  ac->histoBaseName =  "ampt";
-
 
   ac->nBins_pt    = 40;
   ac->min_pt      = 0.2;

@@ -235,8 +235,8 @@ void NuDynHistos::loadHistograms(TFile * inputFile)
   TString histTitle;
 
   h_events   = loadH1(inputFile,bn+TString("Nevents"));
-  if (ac.nuDynVsMult) h_events_vsMult = loadH1(inputFile,bn+TString("Nevents_vsMult"),ac.nBins_mult,ac.min_mult,  ac.max_mult,  "mult","n_{Events}");
-  if (ac.nuDynVsCent) h_events_vsCent = loadH1(inputFile,bn+TString("Nevents_vsCent"),ac.nBins_cent,ac.min_cent,  ac.max_cent,  "cent","n_{Events}");
+  if (ac.nuDynVsMult) h_events_vsMult = loadH1(inputFile,bn+TString("Nevents_vsMult"));
+  if (ac.nuDynVsCent) h_events_vsCent = loadH1(inputFile,bn+TString("Nevents_vsCent"));
 
 //  baseName = bn + "f1_";
 //  baseTitle = "f_{1}";

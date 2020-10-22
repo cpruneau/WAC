@@ -33,6 +33,7 @@ public:
   virtual ~ParticlePairHistos();
   void initialize();
   void fill(Particle & particle1, Particle & particle2, double weight);
+  void completeFill();
   void loadHistograms(TFile * inputFile);
 
   ////////////////////////////////////////////////////////////////////////////

@@ -43,15 +43,18 @@ public:
   bool accept(Particle & particle);
   TString getName();
   TString getTitle();
+  TString getLongName();
+  TString getLongTitle();
 
   //////////////////////////////////////////////////////////////////////////////////////////
   // Data Members
   //////////////////////////////////////////////////////////////////////////////////////////
 
-
-
   SpeciesSelection pidRequested;
   ChargeSelection  chargeRequested;
+  bool   filterOnPt;
+  bool   filterOnEta;
+  bool   filterOnY;
   double min_pt;
   double max_pt;
   double min_eta;

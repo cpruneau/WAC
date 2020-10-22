@@ -1,9 +1,9 @@
 #include "NuDynPlotter.hpp"
 ClassImp(NuDynPlotter);
 
-NuDynPlotter::NuDynPlotter(bool showErrors)
+NuDynPlotter::NuDynPlotter()
 :
-Plotter(showErrors)
+Plotter()
 {  }
 
 NuDynPlotter::~NuDynPlotter()
@@ -29,8 +29,6 @@ void NuDynPlotter::makePlots(const TString & canvasNameBase,
 
   int nPart = 4;
   int nGraphs = 0;
-  bool nuDynVsMult  = true;
-  bool nuDynVsCent  = true;
 
   histograms[0] = nuDynHistos->h_events_vsMult;     histTitles[0] = new TString("N_{events}");
   plot(1, canvasNameBase+"events_vsMult",canvasConfiguration,graphConfigurations,

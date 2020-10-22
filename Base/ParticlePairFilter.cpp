@@ -42,5 +42,6 @@ ParticlePairFilter::~ParticlePairFilter()
 //////////////////////////////////////////////////////////////////////////////////////////
 bool ParticlePairFilter::accept(Particle & particle1, Particle &  particle2)
 {
-  return true; // accept all for now...
+  if (particle1.pid>=0 && particle2.pid>=0) return true;
+  return false;
 }

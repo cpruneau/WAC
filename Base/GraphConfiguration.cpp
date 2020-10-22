@@ -46,7 +46,7 @@ zTitleOffset(1.5),
 zLabelSize(0.05),
 zLabelOffset(0.01),
 zTitle("z"),
-plotOption("")
+plotOption("E0")
 {
   if (dim==1 || dim==0)
     {

@@ -29,26 +29,26 @@
 #include "GraphConfiguration.hpp"
 #include "CanvasConfiguration.hpp"
 #include "CanvasCollection.hpp"
+#include "Collection.hpp"
 using namespace std;
 
-class FunctionCollection
+class FunctionCollection  : public Collection<TF1>
 {
 public:
-  /////////////////////////////////////////////////////////////
-  // Data Members
-  /////////////////////////////////////////////////////////////
-  int    nFunctionCapacity;
-  int    nFunctions;
-  TF1   ** functions;
   
   /////////////////////////////////////////////////////////////
   // Member functions
   /////////////////////////////////////////////////////////////
-  FunctionCollection(int functionCapacity=20);
-  FunctionCollection(const FunctionCollection & a);
+  FunctionCollection(long functionCapacity=20);
+  FunctionCollection(const FunctionCollection & source);
   virtual ~FunctionCollection();
-  void addToList(TF1 * f);
-  TF1 * getFunction(int i);
+  FunctionCollection & operator=(const FunctionCollection & source);
+
+  int getNFunction()
+  {
+  return getCollectionSize();
+  }
+
   void setDefaultOptions(bool color=0);
   void setFunctionProperties(TF1 * f, const GraphConfiguration & graphConfiguration);
   void plotAllFunctions(const TString & outputPath, bool doPrint=false);

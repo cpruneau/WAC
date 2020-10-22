@@ -29,11 +29,14 @@ public:
   void loadHistograms(TFile * inputFile);
   void fill(Particle & particle, double weight);
   void fill(TLorentzVector & p, double weight);
+  void completeFill();
+  void fillMultiplicity(double nAccepted, double weight);
   void calculateAverages();
 
   ////////////////////////////////////////////////////////////////////////////
   // Data Members - Histograms
   ////////////////////////////////////////////////////////////////////////////
+  TH1 * h_n1;
   TH1 * h_n1_pt;
   TH1 * h_n1_ptXS;  // 1/pt dN/dptdy
   TH1 * h_n1_eta;
