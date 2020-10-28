@@ -121,7 +121,7 @@ public:
   //store the yields of each combination of particle filters (1, 2 ... 4, 11, 12, ... 44 ...) per event
   //first index is event number
   //calculated in normal order, but then changed into recursive order.
-  int ** counts;
+  double** counts;
 
   //store the moments of each combination of particle filters (1, 2 ... 4, 11, 12, ... 44 ...) per event
   //first index is event number

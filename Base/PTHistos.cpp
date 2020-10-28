@@ -385,12 +385,11 @@ void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * 
 	ac.min_mult = h_events->GetXaxis()->GetXmin();
 	ac.max_mult = h_events->GetXaxis()->GetXmax();
 
-
 	avgpT = new double  [maxOrder];
 	calculateInclusivePtAverage(acceptances, numParticles, pT);
 
 	avgCounts = new double [size]();
-	counts = new int * [totEvents]();
+	counts = new double* [totEvents]();
 	calculateInclusiveYieldsAverage(acceptances, numParticles);
 
 	SValues = new double * [totEvents]();
@@ -473,8 +472,8 @@ void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * 
 					hC_vsMult[0][iHisto]->SetBinContent(iBin, totEvents * newhCValues[1][reorder[iHisto]]->GetBinContent(iBin));
 					hC_vsMult[0][iHisto]->SetBinError(iBin, totEvents * newhCValues[1][reorder[iHisto]]->GetBinError(iBin));
 
-					hC_vsMult[1][iHisto]->SetBinContent(iBin,  totEvents * newhCValues[1][reorder[iHisto]]->GetBinContent(iBin)/h_counts_vsMult[iHisto]->GetBinContent(iBin));
-					double err = newhCValues[1][reorder[iHisto]]->GetBinContent(iBin)/h_counts_vsMult[iHisto]->GetBinContent(iBin) * ( newhCValues[1][reorder[iHisto]]->GetBinError(iBin)/newhCValues[1][reorder[iHisto]]->GetBinContent(iBin) + h_counts_vsMult[iHisto]->GetBinError(iBin)/h_counts_vsMult[iHisto]->GetBinContent(iBin) );
+					hC_vsMult[1][iHisto]->SetBinContent(iBin,  totEvents * newhCValues[1][reorder[iHisto]]->GetBinContent(iBin)/h_counts[iHisto]->GetBinContent(1));
+					double err = newhCValues[1][reorder[iHisto]]->GetBinContent(iBin)/h_counts[iHisto]->GetBinContent(1) * ( newhCValues[1][reorder[iHisto]]->GetBinError(iBin)/newhCValues[1][reorder[iHisto]]->GetBinContent(iBin) + h_counts_vsMult[iHisto]->GetBinError(iBin)/h_counts_vsMult[iHisto]->GetBinContent(iBin) );
 					hC_vsMult[1][iHisto]->SetBinError(iBin, totEvents * err);
 				}
 			}
@@ -490,8 +489,8 @@ void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * 
 					hC_vsCent[0][iHisto]->SetBinContent(iBin, totEvents * newhCValues[2][reorder[iHisto]]->GetBinContent(iBin));
 					hC_vsCent[0][iHisto]->SetBinError(iBin, totEvents * newhCValues[2][reorder[iHisto]]->GetBinError(iBin));
 
-					hC_vsCent[1][iHisto]->SetBinContent(iBin, totEvents * newhCValues[2][reorder[iHisto]]->GetBinContent(iBin)/h_counts_vsCent[iHisto]->GetBinContent(iBin));
-					double err = newhCValues[2][reorder[iHisto]]->GetBinContent(iBin)/h_counts_vsCent[iHisto]->GetBinContent(iBin) * ( newhCValues[2][reorder[iHisto]]->GetBinError(iBin)/newhCValues[2][reorder[iHisto]]->GetBinContent(iBin) + h_counts_vsCent[iHisto]->GetBinError(iBin)/h_counts_vsCent[iHisto]->GetBinContent(iBin) );
+					hC_vsCent[1][iHisto]->SetBinContent(iBin, totEvents * newhCValues[2][reorder[iHisto]]->GetBinContent(iBin)/h_counts[iHisto]->GetBinContent(1));
+					double err = newhCValues[2][reorder[iHisto]]->GetBinContent(iBin)/h_counts_vsCent[iHisto]->GetBinContent(1) * ( newhCValues[2][reorder[iHisto]]->GetBinError(iBin)/newhCValues[2][reorder[iHisto]]->GetBinContent(iBin) + h_counts_vsCent[iHisto]->GetBinError(iBin)/h_counts_vsCent[iHisto]->GetBinContent(iBin) );
 					hC_vsCent[1][iHisto]->SetBinError(iBin, totEvents * err);
 				}
 			}
@@ -769,14 +768,14 @@ void PTHistos::calculateInclusiveYieldsAverage(bool *** acceptances, int * numPa
 {
 	if (reportDebug())  cout << "PTHistos::calculateInclusiveYieldsAverage(...) Starting." << endl;
 
-	int ** tempCounts = new int *[totEvents];
+	double ** tempCounts = new double *[totEvents];
 	double * tempAvgCounts = new double [size];
 	for(int iEvent = 0; iEvent < totEvents; iEvent++)
 	{
-		int *n = new int [maxOrder]();
+		double *n = new double [maxOrder]();
 		int counter = 0;
-		tempCounts[iEvent] = new int [size]();
-		counts[iEvent] = new int [size];
+		tempCounts[iEvent] = new double [size]();
+		counts[iEvent] = new double [size]();
 		for(int iFilter = 0; iFilter < maxOrder; iFilter++)
 		{
 			for(int iParticle = 0; iParticle < numParticles[iEvent]; iParticle++ )

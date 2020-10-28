@@ -24,13 +24,23 @@ target_include_directories(RunPythiaSimulationTwoParticles PUBLIC Base WacPythia
 target_link_libraries(RunPythiaSimulationTwoParticles Base WacPythia Base EGLib PythiaLib EGPythiaLib   ${ROOT_LIBRARIES} ${EXTRA_LIBS} ${CMAKE_DL_LIBS})
 
 add_executable(RunPythiaSimulationPtCorrelation RunPythiaSimulationPtCorrelation.cpp)
-target_include_directories(RunPythiaSimulationPtCorrelation PUBLIC Base Blastwave  WacPythia ${EXTRA_INCLUDES})
-target_link_libraries(RunPythiaSimulationPtCorrelation Base Blastwave WacPythia Base EGLib PythiaLib EGPythiaLib   ${ROOT_LIBRARIES} ${EXTRA_LIBS} ${CMAKE_DL_LIBS})
+target_include_directories(RunPythiaSimulationPtCorrelation PUBLIC Base  WacPythia ${EXTRA_INCLUDES})
+target_link_libraries(RunPythiaSimulationPtCorrelation Base WacPythia Base EGLib PythiaLib EGPythiaLib   ${ROOT_LIBRARIES} ${EXTRA_LIBS} ${CMAKE_DL_LIBS})
+
+FIND_PACKAGE( OpenMP)
+  if(OPENMP_FOUND)
+    message("OPENMP FOUND")
+	add_executable(RunPythiaParallelEventGenerator RunPythiaParallelEventGenerator.cpp)
+	target_include_directories(RunPythiaParallelEventGenerator PUBLIC Base  WacPythia ${EXTRA_INCLUDES})
+	target_link_libraries(RunPythiaParallelEventGenerator Base WacPythia Base EGLib PythiaLib EGPythiaLib   ${ROOT_LIBRARIES} ${EXTRA_LIBS} ${CMAKE_DL_LIBS} "${OpenMP_CXX_FLAGS}")
+	target_compile_options(RunPythiaParallelEventGenerator PRIVATE "${OpenMP_CXX_FLAGS}")
+	endif()
 
 
-install(FILES  "${CMAKE_CURRENT_BINARY_DIR}/libPythia.rootmap" "${CMAKE_CURRENT_BINARY_DIR}/libPythia_rdict.pcm" DESTINATION "$ENV{WAC_LIB}")
+install(FILES  "${CMAKE_CURRENT_BINARY_DIR}/libPythia.rootmap" "${CMAKE_CURRENT_BINARY_DIR}/libPythia_rdict.pcm" DESTINATION "$ENV{WAC_LIB}" )
 install(TARGETS WacPythia  LIBRARY DESTINATION "$ENV{WAC_LIB}") 
 install(TARGETS RunPythiaSimulationSingleParticles DESTINATION "$ENV{WAC_BIN}") 
 install(TARGETS RunPythiaSimulationTwoParticles DESTINATION "$ENV{WAC_BIN}") 
 install(TARGETS RunPythiaSimulationNudyn DESTINATION "$ENV{WAC_BIN}")
 install(TARGETS RunPythiaSimulationPtCorrelation DESTINATION "$ENV{WAC_BIN}")
+install(TARGETS RunPythiaParallelEventGenerator DESTINATION "$ENV{WAC_BIN}")
