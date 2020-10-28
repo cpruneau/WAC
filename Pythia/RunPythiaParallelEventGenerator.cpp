@@ -20,8 +20,8 @@ int main()
   auto start = chrono::high_resolution_clock::now(); 
 
   cout << "<INFO> PYTHIA Model Analysis - Starting" << endl;
-  long nEventsRequested = 10000000;
-  int  nThreads    = 50;        // make sure this divides the number of events
+  long nEventsRequested = 10000;
+  int  nThreads    = 5;        // make sure this divides the number of events
   int eventsPerThread = nEventsRequested/nThreads;
   TString outputFolder = getenv("OUTPUT_PATH");
   TFile * file = new TFile(outputFolder + "/PythiaEventTree.root", "RECREATE");
@@ -63,7 +63,7 @@ int main()
     }
     auto time = chrono::high_resolution_clock::now();
     unsigned int seed = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
-    seed = TMath::Power(seed, omp_get_thread_num()+ 1);
+    seed = ((seed  * (omp_get_thread_num()+ 1)) % 90000000) * ((seed  * (omp_get_thread_num()+ 1)) % 90000000) * ((seed  * (omp_get_thread_num()+ 1)) % 90000000) * ((seed  * (omp_get_thread_num()+ 1)) % 90000000) * ((seed  * (omp_get_thread_num()+ 1)) % 90000000);
     seed = seed % 90000000;
     cout << "Seed from thread " << omp_get_thread_num()+ 1 << " is " << seed << endl;
     TString s = "Random:seed = ";
