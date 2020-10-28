@@ -20,8 +20,8 @@ int main()
   auto start = chrono::high_resolution_clock::now(); 
 
   cout << "<INFO> PYTHIA Model Analysis - Starting" << endl;
-  long nEventsRequested = 10000;
-  int  nThreads    = 5;        // make sure this divides the number of events
+  long nEventsRequested = 10000000;
+  int  nThreads    = 50;        // make sure this divides the number of events
   int eventsPerThread = nEventsRequested/nThreads;
   TString outputFolder = getenv("OUTPUT_PATH");
   TFile * file = new TFile(outputFolder + "/PythiaEventTree.root", "RECREATE");
