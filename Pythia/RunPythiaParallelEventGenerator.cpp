@@ -19,9 +19,9 @@ int main()
 {
   auto start = chrono::high_resolution_clock::now(); 
 
-  cout << "<INFO> PYTHIA Model Analysis - Starting" << endl;
+  cout << "<INFO> PYTHIA Parallel Event Generation - Starting" << endl;
   long nEventsRequested = 10000000;
-  int  nThreads    = 50;        // make sure this divides the number of events
+  int  nThreads    = 1;        // make sure this divides the number of events
   int eventsPerThread = nEventsRequested/nThreads;
   TString outputFolder = getenv("OUTPUT_PATH");
   TFile * file = new TFile(outputFolder + "/PythiaEventTree.root", "RECREATE");
@@ -90,7 +90,7 @@ int main()
  file->Close();
 
 
- cout << "<INFO> PYTHIA Analysis - Completed" << endl;
+ cout << "<INFO> Parallel Event Generation - Completed" << endl;
 
 
 
