@@ -29,6 +29,7 @@ public:
   virtual void createHistogramRec(TString * baseName, TString * baseTitle, int depth, int partIndex);
   virtual void loadHistogramRec(TString * baseName, int depth, int partIndex, TFile * inputFile);
   virtual void fillEventHistos(double mult, double cent, double weight);
+  virtual void fillTransverseMomentumHistos(double transverseMomentum, int filter, double mult, double cent, double weight);
   virtual void fillNormalizedPTValues( int depth, int partIndex, double product, double * SValues, double  mult, double  cent);
   virtual void fillNormalizedPTValues( int depth, int partIndex, double product, TH1 *** values, int* reorder, int*  nBin);
   virtual void calculateCumulants(TProfile ** Shistos, TH1 **CHistos, int nBins, double min, double max);
@@ -72,12 +73,18 @@ public:
   //keep track of the orders of the correlation functions in the histograms
   int * orders;
 
+  //store the average transverse momenta of each type of particle
+  // first index is filter index(1-4)
+  TProfile ** pT;
+  TProfile ** pT_vsMult;
+  TProfile ** pT_vsCent;
+
   // Min bias all included NOT IN ORDER (They are in "recursive order")
   // in the order S, s, s*, C, c, 
   TH1 * h_events;
   //first index is function index, second index is histo index
   TProfile *** hS;
-  TH1 *** hC;
+  TProfile *** hC;
 
 
 
@@ -86,7 +93,7 @@ public:
   TH1 * h_events_vsMult;
   //first index is function index, second index is histo index
   TProfile *** hS_vsMult;
-  TH1 *** hC_vsMult;
+  TProfile *** hC_vsMult;
 
 
   // vs Centrality NOT IN ORDER (They are in "recursive order")
@@ -94,7 +101,7 @@ public:
   TH1 * h_events_vsCent;
   //first index is function index, second index is histo index
   TProfile *** hS_vsCent;
-  TH1 *** hC_vsCent;
+  TProfile *** hC_vsCent;
 
 
   //number of pairs, triples ... NOT IN ORDER (They are in "recursive order")

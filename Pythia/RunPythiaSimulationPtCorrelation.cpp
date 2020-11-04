@@ -30,7 +30,7 @@ int main()
   cout << "<INFO> PYTHIA Model Analysis - Starting" << endl;
 
 //  long nEventsRequested = 100;
-  long nEventsRequested = 1000;
+  long nEventsRequested = 100;
   int  nEventsReport    = 100000;
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ int main()
   ac->nuDynVsCent     = false;
   ac->nBins_mult   = 100;
   ac->min_mult     = 0.0;
-  ac->max_mult     = 400.0;
+  ac->max_mult     = 100000.0;
   ac->nBins_cent   = 20;
   ac->min_cent     = 0.0;
   ac->max_cent     = 100.0;

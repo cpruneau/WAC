@@ -28,6 +28,8 @@ public:
   virtual void saveHistograms(TFile * outputFile);
   virtual void scaleHistograms(double factor);
   virtual void storeEventInfo();
+  virtual void fillTransverseMomentumValues();
+  virtual void calculateTransverseMomentumMoments();
 
   //////////////////////////////////////////////////////////////
   // Data Members
@@ -46,8 +48,12 @@ public:
   //order is at most the number of particle filters
   int maxOrder;
 
-  //temp variable used
+  //temp variable 
   int correlatorIndex;
+
+  //store the moments of the transverse momentum per event
+  // first index is event, second is moment (1st, 2nd ...)
+  double ** transverseMomentumMoments
 
 
   //stores the number of particles in each event

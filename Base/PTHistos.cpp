@@ -63,9 +63,9 @@ void PTHistos::createHistograms()
 	hS_vsMult = new TProfile ** [numFunc];
 	hS_vsCent = new TProfile ** [numFunc];
 
-	hC = new TH1 ** [numFunc];
-	hC_vsMult = new TH1 ** [numFunc];
-	hC_vsCent = new TH1 ** [numFunc];
+	hC = new TProfile ** [numFunc];
+	hC_vsMult = new TProfile ** [numFunc];
+	hC_vsCent = new TProfile ** [numFunc];
 
 	names = new TString* [numFunc];
 	titles = new TString *[numFunc];
@@ -78,9 +78,9 @@ void PTHistos::createHistograms()
 		hS_vsMult[i] = new TProfile * [size];
 		hS_vsCent[i] = new TProfile * [size];
 
-		hC[i] = new TH1 * [size];
-		hC_vsMult[i] = new TH1 * [size];
-		hC_vsCent[i] = new TH1 * [size];
+		hC[i] = new TProfile * [size];
+		hC_vsMult[i] = new TProfile * [size];
+		hC_vsCent[i] = new TProfile * [size];
 
 		names[i] = new TString [size];
 		titles[i] = new TString [size];
@@ -95,9 +95,22 @@ void PTHistos::createHistograms()
 
 	orders = new int [size];
 
-	h_events   = createHistogram(bn+TString("Nevents"),1, 0.0, 0.0,  "mult","n_{Events}");
-	if (ac.ptCorrelatorVsMult) h_events_vsMult = createHistogram(bn+TString("Nevents_vsMult"),ac.nBins_mult, 0.0, 0.0,  "mult","n_{Events}");
-	if (ac.ptCorrelatorVsCent) h_events_vsCent = createHistogram(bn+TString("Nevents_vsCent"),ac.nBins_cent, 0.0, 0.0,  "cent","n_{Events}");
+	h_events   = createHistogram(bn+TString("Nevents"),1, ac.min_mult, ac.max_mult,  "mult","n_{Events}");
+	if (ac.ptCorrelatorVsMult) h_events_vsMult = createHistogram(bn+TString("Nevents_vsMult"),ac.nBins_mult, ac.min_mult, ac.max_mult,  "mult","n_{Events}");
+	if (ac.ptCorrelatorVsCent) h_events_vsCent = createHistogram(bn+TString("Nevents_vsCent"),ac.nBins_cent,ac.min_cent, ac.max_cent,  "cent","n_{Events}");
+
+	pT = new TProfile * [maxOrder];
+	pT_vsMult = new TProfile * [maxOrder];
+	pT_vsCent = new TProfile * [maxOrder];
+
+	for(int i = 0; i < maxOrder; i++)
+	{
+		pT[i]  = createProfile(bn+TString("AverageTransverseMomentum_") + (i + 1) ,1,ac.min_mult, ac.max_mult,  "mult",TString("AverageTransverseMomentum_") + i);
+		if (ac.ptCorrelatorVsMult) pT_vsMult[i] = createProfile(bn+TString("AverageTransverseMomentum_") + (i + 1) + TString("_vsMult"),ac.nBins_mult, ac.min_mult, ac.max_mult,  "mult",TString("AverageTransverseMomentum_") + i);
+		if (ac.ptCorrelatorVsCent) pT_vsCent[i] = createProfile(bn+TString("AverageTransverseMomentum_") + (i + 1)  +TString("_vsCent"),ac.nBins_cent, ac.min_cent, ac.max_cent,  "cent",TString("AverageTransverseMomentum_") + i);
+	}
+
+
 
 	TString * baseName = new TString[2 * numFunc + 1];
 	baseName[0] = bn + "S_";
@@ -160,9 +173,9 @@ void PTHistos::loadHistograms(TFile * inputFile)
 	hS_vsMult = new TProfile ** [numFunc];
 	hS_vsCent = new TProfile ** [numFunc];
 
-	hC = new TH1 ** [numFunc];
-	hC_vsMult = new TH1 ** [numFunc];
-	hC_vsCent = new TH1 ** [numFunc];
+	hC = new TProfile ** [numFunc];
+	hC_vsMult = new TProfile ** [numFunc];
+	hC_vsCent = new TProfile ** [numFunc];
 
 	for(int i = 0; i < numFunc; i++)
 	{	
@@ -170,9 +183,9 @@ void PTHistos::loadHistograms(TFile * inputFile)
 		hS_vsMult[i] = new TProfile * [size];
 		hS_vsCent[i] = new TProfile * [size];
 
-		hC[i] = new TH1 * [size];
-		hC_vsMult[i] = new TH1 * [size];
-		hC_vsCent[i] = new TH1 * [size];
+		hC[i] = new TProfile * [size];
+		hC_vsMult[i] = new TProfile * [size];
+		hC_vsCent[i] = new TProfile * [size];
 	}
 
 	h_counts = new TProfile*  [size];
@@ -223,7 +236,10 @@ void PTHistos::saveHistograms(TFile * outputFile, bool saveAll)
 	if (ac.ptCorrelatorVsMult) numTypes++;
 	if (ac.ptCorrelatorVsCent) numTypes++;
 
-	for (int k=0; k<numTypes; k++)
+	int extra = numTypes * (maxOrder + 1);
+
+	//saves event and transverse momentum histos
+	for (int k=0; k<extra; k++)
 	{
 		if (isSaved(options[k]) || saveAll)  getObjectAt(k)->Write();
 	}
@@ -236,23 +252,23 @@ void PTHistos::saveHistograms(TFile * outputFile, bool saveAll)
 			{
 				if(k < size * numTypes + numTypes && iFunc == 2 * numFunc)
 				{
-					int k1 = (k - numTypes);
+					int k1 = (k - extra);
 					int orderIndex = k1 / numTypes;
-        if ((isSaved(options[k]) || saveAll) && (orders[orderIndex] == i)) getObjectAt(k)->Write();
+					if ((isSaved(options[k]) || saveAll) && (orders[orderIndex] == i)) getObjectAt(k)->Write();
 				}
 				if(k >= size * numTypes + numTypes && k < size * (numFunc + 1) * numTypes + numTypes && iFunc < numFunc)
 				{
-					int k1 = k - size * numTypes - numTypes;
+					int k1 = k - size * numTypes - extra;
 					int orderIndex = (k1 )/(numTypes * (numFunc ));
 					int funcIndex = (k1 )/numTypes - ( (numFunc )) * ((k1)/(numTypes * (numFunc )));
-        if ((isSaved(options[k]) || saveAll) && (orders[orderIndex] == i) && ((funcIndex) % ( numFunc) == (iFunc % ( numFunc)))) getObjectAt(k)->Write();
+					if ((isSaved(options[k]) || saveAll) && (orders[orderIndex] == i) && ((funcIndex) % ( numFunc) == (iFunc % ( numFunc)))) getObjectAt(k)->Write();
 				}
 				if(k >= size * (numFunc + 1) * numTypes + numTypes && iFunc >= numFunc && iFunc < 2 * numFunc)
 				{
-					int k1 = k - size * (numFunc + 1) * numTypes - numTypes;
+					int k1 = k - size * (numFunc + 1) * numTypes - extra;
 					int orderIndex = (k1 )/(numTypes * (numFunc ));
 					int funcIndex = (k1 )/numTypes - ( (numFunc )) * ((k1)/(numTypes * (numFunc )));
-        if ((isSaved(options[k]) || saveAll) && (orders[orderIndex] == i) && ((funcIndex) % ( numFunc) == (iFunc - ( numFunc)))) getObjectAt(k)->Write();
+					if ((isSaved(options[k]) || saveAll) && (orders[orderIndex] == i) && ((funcIndex) % ( numFunc) == (iFunc - ( numFunc)))) getObjectAt(k)->Write();
 				}
 			}
 		}
@@ -269,6 +285,15 @@ void PTHistos::fillEventHistos(double mult, double cent, double weight)
 	if (ac1.ptCorrelatorVsMult) h_events_vsMult->Fill(mult,weight);
 	if (ac1.ptCorrelatorVsCent) h_events_vsCent->Fill(cent,weight);
 }
+
+void PTHistos::fillTransverseMomentumHistos(double transverseMomentum, int filter, double mult, double cent, double weight)
+{
+	AnalysisConfiguration & ac1 = *getConfiguration();
+	pT[filter]->Fill(mult, transverseMomentum,weight);
+	if (ac1.ptCorrelatorVsMult) pT_vsMult[filter]->Fill(mult, transverseMomentum,weight);
+	if (ac1.ptCorrelatorVsCent) pT_vsCent[filter]->Fill(cent, transverseMomentum,weight);
+}
+
 
 
 // recursively create histograms for correlation functions of order 1 - maxOrder
@@ -381,9 +406,16 @@ void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * 
 	auto start = chrono::high_resolution_clock::now(); 
 	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)*getConfiguration();
 	//double max = ac.nCollisionsMax;
-	h_events->BufferEmpty();
+	/*h_events_vsMult->BufferEmpty();
 	ac.min_mult = h_events->GetXaxis()->GetXmin();
 	ac.max_mult = h_events->GetXaxis()->GetXmax();
+
+	for(int i = 0; i < maxOrder; i++)
+	{
+		PTHistos::pT[i]->GetXaxis()->SetLimits(ac.min_mult, ac.max_mult);
+		if (ac.ptCorrelatorVsMult) pT_vsMult[i]->GetXaxis()->SetLimits(ac.min_mult, ac.max_mult);
+		if (ac.ptCorrelatorVsCent) pT_vsCent[i]->GetXaxis()->SetLimits(ac.min_mult, ac.max_mult);
+	}*/
 
 	avgpT = new double  [maxOrder];
 	calculateInclusivePtAverage(acceptances, numParticles, pT);
@@ -444,9 +476,9 @@ void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * 
 	{
 		for (int i = 0; i < numFunc; ++i)
 		{
-			hC[i][iHisto] = createHistogram( names2[i][iHisto], 1, ac.min_mult, ac.max_mult,"mult",titles2[i][iHisto] + "}" );
-			if (ac.ptCorrelatorVsMult)	hC_vsMult[i][iHisto] = createHistogram(names2[i][iHisto] + "_vsMult",ac.nBins_mult,ac.min_mult , ac.max_mult , "mult", titles2[i][iHisto] + "}");
-			if (ac.ptCorrelatorVsCent)	hC_vsCent[i][iHisto] = createHistogram(names2[i][iHisto] + "_vsCent",ac.nBins_cent,ac.min_mult , ac.max_mult , "cent", titles2[i][iHisto] + "}");
+			hC[i][iHisto] = createProfile( names2[i][iHisto], 1, ac.min_mult, ac.max_mult,"mult",titles2[i][iHisto] + "}" );
+			if (ac.ptCorrelatorVsMult)	hC_vsMult[i][iHisto] = createProfile(names2[i][iHisto] + "_vsMult",ac.nBins_mult,ac.min_mult , ac.max_mult , "mult", titles2[i][iHisto] + "}");
+			if (ac.ptCorrelatorVsCent)	hC_vsCent[i][iHisto] = createProfile(names2[i][iHisto] + "_vsCent",ac.nBins_cent,ac.min_mult , ac.max_mult , "cent", titles2[i][iHisto] + "}");
 		}
 		int nBins = 1;
 		for(int iBin = 1; iBin <=nBins; iBin++)

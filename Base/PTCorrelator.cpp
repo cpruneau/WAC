@@ -198,6 +198,8 @@ void PTCorrelator::execute()
 	int *particles = new int [maxOrder];
 
 	histos->fillEventHistos( event->multiplicity, event->centrality, 1.0); 
+	fillTransverseMomentumValues();
+	calculateTransverseMomentumMoments();
 	storeEventInfo();
 
 	correlatorIndex = 0;
@@ -265,3 +267,16 @@ void PTCorrelator::storeEventInfo()
 	centrality[eventsProcessed] = event->centrality;
 	if (reportDebug())  cout << "PTCorrelator::storeEventInfo(...) Completed." << endl;
 }
+
+void PTCorrelator::fillTransverseMomentumValues()
+{
+	for(int iParticle = 0; iParticle < event->nParticles; iParticle++)
+	{
+		Particle & particle = * event->getParticleAt(iParticle);
+		for(int i = 0; i< maxOrder; i++)
+		{
+			if(particleFilters[i]->accept(particle)) histos->fillTransverseMomentumHistos(particle.pt, i,event->multiplicity, event->centrality, 1.0);
+		}
+	}
+}
+
