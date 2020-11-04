@@ -53,7 +53,7 @@ public:
 
   //store the moments of the transverse momentum per event
   // first index is event, second is moment (1st, 2nd ...)
-  double ** transverseMomentumMoments
+  double ** transverseMomentumMoments;
 
 
   //stores the number of particles in each event
