@@ -38,12 +38,9 @@ maxEvents(0)
 	maxEvents      = hc->totEvents;
 	maxOrder      = hc->maxOrder;
 	partNames     = new TString[maxOrder];
-	pT            = new double * [maxEvents];
-	acceptances   = new bool **[maxEvents];
 	multiplicity  = new double [maxEvents];
 	centrality    = new double [maxEvents];
-	counts        = new int * [maxEvents];
-	numParticles  = new int [maxEvents];
+	transverseMomentumMoments = new double ** [maxEvents];
 
 	if (!eventFilter)
 	{
@@ -101,13 +98,6 @@ void PTCorrelator::createHistograms()
 
 	histos = new PTHistos(histoName,ac,MessageLogger::Error, maxOrder);
 	
-
-
-	for(int i = 0; i < maxEvents; i++)
-	{
-		counts[i] = new int[histos->size];
-	}
-
 	if (reportDebug())  cout << "PTCorrelator::createHistograms(...) completed"<< endl;
 
 
@@ -136,10 +126,6 @@ void PTCorrelator::loadHistograms(TFile * inputFile)
 
 	histos = new PTHistos(inputFile,histoName,ac,MessageLogger::Error, maxOrder);
 
-	for(int i = 0; i < maxEvents; i++)
-	{
-		counts[i] = new int[histos->size];
-	}
 	if (reportDebug())  cout << "PTCorrelator::loadHistograms(...) Completed." << endl;
 }
 
@@ -193,12 +179,9 @@ void PTCorrelator::execute()
 
 
 	correlatorIndex = 0;
-	int count = 0;
-	int *filters = new int [maxOrder];
-	int *particles = new int [maxOrder];
-
 	histos->fillEventHistos( event->multiplicity, event->centrality, 1.0); 
 	fillTransverseMomentumValues();
+	transverseMomentumMoments[eventsProcessed] = new double * [maxOrder];
 	calculateTransverseMomentumMoments();
 	storeEventInfo();
 
@@ -213,7 +196,7 @@ void PTCorrelator::execute()
 	if(eventsProcessed == maxEvents)
 	{
 		cout << "Max number of collisions: " << ac->nCollisionsMax << endl;
-		histos->fillDerivedHistos(acceptances, multiplicity, centrality, numParticles, pT);
+		//histos->fillDerivedHistos(transverseMomentumMoments, multiplicity, centrality);
 	}
 
 	if (reportDebug()) cout << "PTCorrelator::execute() Completed" << endl;
@@ -242,27 +225,6 @@ void PTCorrelator::scaleHistograms(double factor)
 void PTCorrelator::storeEventInfo()
 {
 	if (reportDebug())  cout << "PTCorrelator::storeEventInfo(...) Starting." << endl;
-	//the transverse momentum
-	pT[eventsProcessed] = new double [event->nParticles];
-	for(int iParticle = 0; iParticle < event->nParticles; iParticle++)
-	{
-		Particle & particle = * event->getParticleAt(iParticle);
-		pT[eventsProcessed][iParticle] = particle.pt;
-	}
-
-	//The acceptances
-	acceptances[eventsProcessed] = new bool *[maxOrder];
-	for(int i = 0; i < maxOrder; i++)
-	{
-		acceptances[eventsProcessed][i] = new bool [event->nParticles];
-		for(int iParticle = 0; iParticle < event->nParticles; iParticle++)
-		{
-			Particle & particle = * event->getParticleAt(iParticle);
-			acceptances[eventsProcessed][i][iParticle] = particleFilters[i]->accept(particle);
-		}
-	}
-
-	numParticles[eventsProcessed] = event->nParticles;
 	multiplicity[eventsProcessed] = event->multiplicity;
 	centrality[eventsProcessed] = event->centrality;
 	if (reportDebug())  cout << "PTCorrelator::storeEventInfo(...) Completed." << endl;
@@ -277,6 +239,25 @@ void PTCorrelator::fillTransverseMomentumValues()
 		{
 			if(particleFilters[i]->accept(particle)) histos->fillTransverseMomentumHistos(particle.pt, i,event->multiplicity, event->centrality, 1.0);
 		}
+	}
+}
+
+void PTCorrelator::calculateTransverseMomentumMoments()
+{
+	for (int iFilter = 0; iFilter < maxOrder; ++iFilter)
+	{
+		transverseMomentumMoments[eventsProcessed][iFilter] = new double [maxOrder];
+		for(int iParticle = 0; iParticle < event->nParticles; iParticle++ )
+			{
+				Particle & particle = * event->getParticleAt(iParticle);
+				if(particleFilters[iFilter]->accept(particle))
+				{
+					transverseMomentumMoments[eventsProcessed][iFilter][0]+= particle.pt;
+					if(maxOrder > 1)transverseMomentumMoments[eventsProcessed][iFilter][1]+= particle.pt * particle.pt;
+					if(maxOrder > 2)transverseMomentumMoments[eventsProcessed][iFilter][2]+= particle.pt * particle.pt * particle.pt;
+					if(maxOrder > 3)transverseMomentumMoments[eventsProcessed][iFilter][3]+= particle.pt * particle.pt * particle.pt * particle.pt;
+				}
+			}
 	}
 }
 

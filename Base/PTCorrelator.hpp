@@ -39,8 +39,6 @@ public:
   ParticleFilter  ** particleFilters;
   TString * partNames;
   
-  int ** counts; //first index is event, 
-
   //total # of events
   int maxEvents;
 
@@ -52,22 +50,8 @@ public:
   int correlatorIndex;
 
   //store the moments of the transverse momentum per event
-  // first index is event, second is moment (1st, 2nd ...)
-  double ** transverseMomentumMoments;
-
-
-  //stores the number of particles in each event
-  int * numParticles;
-
-
-  //store the transverse momentum of all the particles
-  //first index is event number, second index is particle number
-  double ** pT;
-
-  //store the acceptances by the filters of all the particles
-  //first index is event number, second number is filter number, third is particle number
-  bool *** acceptances;
-
+  // first index is event, second is filter number, third is moment (1st, 2nd ...)
+  double *** transverseMomentumMoments;
 
   //store the multiplicty of all the events
   double * multiplicity;

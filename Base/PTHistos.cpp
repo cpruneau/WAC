@@ -400,7 +400,7 @@ void PTHistos::loadHistogramRec(TString * baseName, int depth, int partIndex, TF
 	if (reportDebug())  cout << "PTHistos::loadHistogramRec(...) Completed." << endl;
 }
 
-void PTHistos::fillDerivedHistos(bool *** acceptances, double * mults, double * cents, int * numParticles, double ** pT)
+void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments, double * mults, double * cents)
 {
 	if (reportDebug())  cout << "PTHistos::fillDerivedHistos(...) Starting." << endl;
 	auto start = chrono::high_resolution_clock::now(); 

@@ -24,7 +24,7 @@ public:
 
   virtual void createHistograms();
   virtual void loadHistograms(TFile * inputFile);
-  virtual void fillDerivedHistos(bool *** acceptances, double * mults, double * cents, int * numParticles, double ** pT);
+  virtual void fillDerivedHistos(double *** transverseMomentumMoments, double * mults, double * cents);
   virtual void saveHistograms(TFile * outputFile, bool saveAll=false);
   virtual void createHistogramRec(TString * baseName, TString * baseTitle, int depth, int partIndex);
   virtual void loadHistogramRec(TString * baseName, int depth, int partIndex, TFile * inputFile);
@@ -36,7 +36,7 @@ public:
   virtual void calcRecSum(TH1 **CHistos, int iBin, double& absESq, double curRelESq, int* iHisto, int* Subset, int len,  int * set, int lenSet, double productC, double* used, int& curInd, int productS, double& sum);
   virtual void calculateInclusivePtAverage(bool *** acceptances, int * numParticles, double ** pT);
   virtual void calculateInclusiveYieldsAverage(bool *** acceptances, int * numParticles);
-  virtual void calculateEventMoments(bool *** acceptances, int * numParticles, double ** pT);
+  virtual void calculatePTDeviationMoments(bool *** acceptances, int * numParticles, double ** pT);
 
   ////////////////////////////////////////////////////////////////////////////
   //Helper Functions
