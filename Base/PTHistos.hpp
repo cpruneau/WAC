@@ -24,19 +24,17 @@ public:
 
   virtual void createHistograms();
   virtual void loadHistograms(TFile * inputFile);
-  virtual void fillDerivedHistos(double *** transverseMomentumMoments, double * mults, double * cents);
+  virtual void fillDerivedHistos(double *** transverseMomentumMoments, double ** yields, double * mults, double * cents, double * numParticles);
   virtual void saveHistograms(TFile * outputFile, bool saveAll=false);
   virtual void createHistogramRec(TString * baseName, TString * baseTitle, int depth, int partIndex);
   virtual void loadHistogramRec(TString * baseName, int depth, int partIndex, TFile * inputFile);
   virtual void fillEventHistos(double mult, double cent, double weight);
   virtual void fillTransverseMomentumHistos(double transverseMomentum, int filter, double mult, double cent, double weight);
-  virtual void fillNormalizedPTValues( int depth, int partIndex, double product, double * SValues, double  mult, double  cent);
-  virtual void fillNormalizedPTValues( int depth, int partIndex, double product, TH1 *** values, int* reorder, int*  nBin);
+  //virtual void fillNormalizedPTValues( int depth, int partIndex, double product, double * SValues, double  mult, double  cent);
+  //virtual void fillNormalizedPTValues( int depth, int partIndex, double product, TH1 *** values, int* reorder, int*  nBin);
   virtual void calculateCumulants(TProfile ** Shistos, TH1 **CHistos, int nBins, double min, double max);
   virtual void calcRecSum(TH1 **CHistos, int iBin, double& absESq, double curRelESq, int* iHisto, int* Subset, int len,  int * set, int lenSet, double productC, double* used, int& curInd, int productS, double& sum);
-  virtual void calculateInclusivePtAverage(bool *** acceptances, int * numParticles, double ** pT);
-  virtual void calculateInclusiveYieldsAverage(bool *** acceptances, int * numParticles);
-  virtual void calculatePTDeviationMoments(bool *** acceptances, int * numParticles, double ** pT);
+  virtual void calculatePTDeviationMoments(double *** transverseMomentumMoments, int bin, int iEvent, int nParticles, TProfile ** pTHisto);
 
   ////////////////////////////////////////////////////////////////////////////
   //Helper Functions
@@ -80,28 +78,30 @@ public:
   TProfile ** pT_vsCent;
 
   // Min bias all included NOT IN ORDER (They are in "recursive order")
-  // in the order S, s, s*, C, c, 
+  // in the order S, s, s*, C, c, c*
   TH1 * h_events;
-  //first index is function index, second index is histo index
+
+  //first index is function index(S, s, s*), second index is histo index
   TProfile *** hS;
-  TProfile *** hC;
+  TH1 *** hC;
 
 
 
   // vs Mult measured in fiducial NOT IN ORDER (They are in "recursive order")
   // in the order S, s, s*, C, c, 
   TH1 * h_events_vsMult;
-  //first index is function index, second index is histo index
+
+  //first index is function index(S, s, s*), second index is histo index
   TProfile *** hS_vsMult;
-  TProfile *** hC_vsMult;
+  TH1 *** hC_vsMult;
 
 
   // vs Centrality NOT IN ORDER (They are in "recursive order")
   // in the order S, s, s*, C, c, c*
   TH1 * h_events_vsCent;
-  //first index is function index, second index is histo index
+  //first index is function index(S, s, s*), second index is histo index
   TProfile *** hS_vsCent;
-  TProfile *** hC_vsCent;
+  TH1 *** hC_vsCent;
 
 
   //number of pairs, triples ... NOT IN ORDER (They are in "recursive order")
@@ -110,25 +110,13 @@ public:
   TProfile ** h_counts_vsCent;
 
   //number of functions we are counting 
-  // here it is 6 (S, s, s*, C, c, c*)
+  // here it is 3 (S, s, s*) (C, c, c*)
   int numFunc;
 
   //keep track of which index in "recursive order" corresponds to which index in normal order
   int * reorder;
 
   int totEvents;
-
-  //store the inclusive avgpT of each of the particle filters
-  double * avgpT; 
-  
-  //store the inclusive average yields of each combination of particle filters (1, 2 ... 4, 11, 12, ... 44 ...)
-  //calculated in normal order, but then changed into recursive order.
-  double * avgCounts;
-
-  //store the yields of each combination of particle filters (1, 2 ... 4, 11, 12, ... 44 ...) per event
-  //first index is event number
-  //calculated in normal order, but then changed into recursive order.
-  double** counts;
 
   //store the moments of each combination of particle filters (1, 2 ... 4, 11, 12, ... 44 ...) per event
   //first index is event number

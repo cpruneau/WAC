@@ -7,8 +7,8 @@
  *
  * For the licensing terms see LICENSE.
  **********************************************************************/
-#ifndef WAC_EposEventReader
-#define WAC_EposEventReader
+#ifndef WAC_PythiaEventReader
+#define WAC_PythiaEventReader
 #include "TChain.h"
 #include "TTree.h"
 #include "TBranch.h"
@@ -16,16 +16,16 @@
 #include "EventFilter.hpp"
 #include "ParticleFilter.hpp"
 
-class EposEventReader : public Task
+class PythiaEventReader : public Task
 {
 public:
 
-  EposEventReader(const TString & name,
+  PythiaEventReader(const TString & name,
                   TaskConfiguration * configuration,
                   Event * event,
                   EventFilter * ef,
                   ParticleFilter * pf);
-  virtual ~EposEventReader();
+  virtual ~PythiaEventReader();
   virtual void initialize();
   virtual void reset();
   void execute();
@@ -84,7 +84,7 @@ public:
   EventFilter * eventFilter;
   ParticleFilter * particleFilter;
 
-  ClassDef(EposEventReader,0)
+  ClassDef(PythiaEventReader,0)
 };
 
-#endif /* WAC_EposEventReader */
+#endif /* WAC_PythiaEventReader */

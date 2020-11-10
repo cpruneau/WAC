@@ -29,6 +29,7 @@ public:
   virtual void scaleHistograms(double factor);
   virtual void storeEventInfo();
   virtual void fillTransverseMomentumValues();
+  virtual void fillYieldValues();
   virtual void calculateTransverseMomentumMoments();
 
   //////////////////////////////////////////////////////////////
@@ -53,11 +54,18 @@ public:
   // first index is event, second is filter number, third is moment (1st, 2nd ...)
   double *** transverseMomentumMoments;
 
+  //store the yields of each combination of particles per event
+  //first index is event, second index is combination(in recursive order)
+  double ** yields; 
+
   //store the multiplicty of all the events
   double * multiplicity;
 
   //store the centrality of all the events
   double * centrality;
+
+  //stores the number of particles in each event
+  double * numParticles;
 
 
   ClassDef(PTCorrelator,0)

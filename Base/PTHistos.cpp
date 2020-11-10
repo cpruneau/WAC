@@ -36,6 +36,73 @@ numFunc(3)
 PTHistos::~PTHistos()
 {
 	//deleteHistograms();
+	if (reportDebug())  cout << "PTHistos::DTOR(...) Started" << endl;
+	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)( *getConfiguration());
+	/*for (int i = 0; i < maxOrder; ++i)
+	{
+		delete pT[i];
+		if (ac.ptCorrelatorVsMult) delete pT_vsMult[i];
+		if (ac.ptCorrelatorVsCent) delete pT_vsCent[i];
+	}
+	delete[] pT;
+	if (ac.ptCorrelatorVsMult) delete[] pT_vsMult;
+	if (ac.ptCorrelatorVsCent) delete[] pT_vsCent;
+
+	delete h_events;
+	if (ac.ptCorrelatorVsMult) delete h_events_vsMult;
+	if (ac.ptCorrelatorVsCent) delete h_events_vsCent;
+	for (int i = 0; i < numFunc; ++i)
+	{
+		for(int j = 0; j < size; j++)
+		{
+			delete hS[i][j];
+			if (ac.ptCorrelatorVsMult) delete hS_vsMult[i][j];
+			if (ac.ptCorrelatorVsCent) delete hS_vsCent[i][j]; 
+			delete hC[i][j];
+			if (ac.ptCorrelatorVsMult) delete hC_vsMult[i][j];
+			if (ac.ptCorrelatorVsCent) delete hC_vsCent[i][j]; 
+		}
+		delete[] hS[i];
+		if (ac.ptCorrelatorVsMult) delete[] hS_vsMult[i];
+		if (ac.ptCorrelatorVsCent) delete[] hS_vsCent[i]; 
+		delete[] hC[i];
+		if (ac.ptCorrelatorVsMult) delete[] hC_vsMult[i];
+		if (ac.ptCorrelatorVsCent) delete[] hC_vsCent[i];
+		delete[] names[i];
+		delete[] titles[i];
+		delete[] names2[i];
+		delete[] titles2[i]; 
+	}
+	delete[] hS;
+	if (ac.ptCorrelatorVsMult) delete[] hS_vsMult;
+	if (ac.ptCorrelatorVsCent) delete[] hS_vsCent; 
+	delete[] hC;
+	if (ac.ptCorrelatorVsMult) delete[] hC_vsMult;
+	if (ac.ptCorrelatorVsCent) delete[] hC_vsCent; 
+	delete[] names;
+	delete[] titles;
+	delete[] names2;
+	delete[] titles2; 
+
+	for(int j = 0; j < size; j++)
+	{
+		delete h_counts[j];
+		if (ac.ptCorrelatorVsMult) delete h_counts_vsMult[j];
+		if (ac.ptCorrelatorVsCent) delete h_counts_vsCent[j]; 
+	}
+	delete[] h_counts;
+	if (ac.ptCorrelatorVsMult) delete[] h_counts_vsMult;
+	if (ac.ptCorrelatorVsCent) delete[] h_counts_vsCent; 
+
+	delete[] reorder;
+	delete[] orders;
+
+	for(int i = 0; i < totEvents; i++)
+	{
+		delete[] SValues[i];
+	}
+	delete[] SValues;*/
+	if (reportDebug())  cout << "PTHistos::DTOR(...) Completed" << endl;
 }
 
 // for now use the same boundaries for eta and y histogram
@@ -63,9 +130,9 @@ void PTHistos::createHistograms()
 	hS_vsMult = new TProfile ** [numFunc];
 	hS_vsCent = new TProfile ** [numFunc];
 
-	hC = new TProfile ** [numFunc];
-	hC_vsMult = new TProfile ** [numFunc];
-	hC_vsCent = new TProfile ** [numFunc];
+	hC = new TH1 ** [numFunc];
+	hC_vsMult = new TH1 ** [numFunc];
+	hC_vsCent = new TH1 ** [numFunc];
 
 	names = new TString* [numFunc];
 	titles = new TString *[numFunc];
@@ -78,9 +145,9 @@ void PTHistos::createHistograms()
 		hS_vsMult[i] = new TProfile * [size];
 		hS_vsCent[i] = new TProfile * [size];
 
-		hC[i] = new TProfile * [size];
-		hC_vsMult[i] = new TProfile * [size];
-		hC_vsCent[i] = new TProfile * [size];
+		hC[i] = new TH1 * [size];
+		hC_vsMult[i] = new TH1 * [size];
+		hC_vsCent[i] = new TH1 * [size];
 
 		names[i] = new TString [size];
 		titles[i] = new TString [size];
@@ -119,7 +186,7 @@ void PTHistos::createHistograms()
 	baseName[3] = bn + "C_";
 	baseName[4] = bn + "c_" ;
 	baseName[5] = bn + "c*_";
-	baseName[6] = bn + "Counts_";
+	baseName[6] = bn + "Yields_";
 
 	TString * baseTitle = new TString[2 * numFunc + 1];
 	baseTitle[0] = "S_{";
@@ -128,7 +195,7 @@ void PTHistos::createHistograms()
 	baseTitle[3] = "C_{";
 	baseTitle[4] = "c_{";
 	baseTitle[5] = "c*_{";
-	baseTitle[6] = "Counts_{";
+	baseTitle[6] = "Yields_{";
 
 	histoIndex = 0;
 	createHistogramRec(baseName, baseTitle, maxOrder - 1, 0);
@@ -173,9 +240,9 @@ void PTHistos::loadHistograms(TFile * inputFile)
 	hS_vsMult = new TProfile ** [numFunc];
 	hS_vsCent = new TProfile ** [numFunc];
 
-	hC = new TProfile ** [numFunc];
-	hC_vsMult = new TProfile ** [numFunc];
-	hC_vsCent = new TProfile ** [numFunc];
+	hC = new TH1 ** [numFunc];
+	hC_vsMult = new TH1 ** [numFunc];
+	hC_vsCent = new TH1 ** [numFunc];
 
 	for(int i = 0; i < numFunc; i++)
 	{	
@@ -183,9 +250,9 @@ void PTHistos::loadHistograms(TFile * inputFile)
 		hS_vsMult[i] = new TProfile * [size];
 		hS_vsCent[i] = new TProfile * [size];
 
-		hC[i] = new TProfile * [size];
-		hC_vsMult[i] = new TProfile * [size];
-		hC_vsCent[i] = new TProfile * [size];
+		hC[i] = new TH1 * [size];
+		hC_vsMult[i] = new TH1 * [size];
+		hC_vsCent[i] = new TH1 * [size];
 	}
 
 	h_counts = new TProfile*  [size];
@@ -250,20 +317,20 @@ void PTHistos::saveHistograms(TFile * outputFile, bool saveAll)
 		{
 			for (int k=numTypes; k<getCollectionSize(); k++)
 			{
-				if(k < size * numTypes + numTypes && iFunc == 2 * numFunc)
+				if(k < size * numTypes + extra && iFunc == 2 * numFunc)
 				{
 					int k1 = (k - extra);
 					int orderIndex = k1 / numTypes;
 					if ((isSaved(options[k]) || saveAll) && (orders[orderIndex] == i)) getObjectAt(k)->Write();
 				}
-				if(k >= size * numTypes + numTypes && k < size * (numFunc + 1) * numTypes + numTypes && iFunc < numFunc)
+				if(k >= size * numTypes + extra && k < size * (numFunc + 1) * numTypes + extra && iFunc < numFunc)
 				{
 					int k1 = k - size * numTypes - extra;
 					int orderIndex = (k1 )/(numTypes * (numFunc ));
 					int funcIndex = (k1 )/numTypes - ( (numFunc )) * ((k1)/(numTypes * (numFunc )));
 					if ((isSaved(options[k]) || saveAll) && (orders[orderIndex] == i) && ((funcIndex) % ( numFunc) == (iFunc % ( numFunc)))) getObjectAt(k)->Write();
 				}
-				if(k >= size * (numFunc + 1) * numTypes + numTypes && iFunc >= numFunc && iFunc < 2 * numFunc)
+				if(k >= size * (numFunc + 1) * numTypes + extra && iFunc >= numFunc && iFunc < 2 * numFunc)
 				{
 					int k1 = k - size * (numFunc + 1) * numTypes - extra;
 					int orderIndex = (k1 )/(numTypes * (numFunc ));
@@ -280,18 +347,23 @@ void PTHistos::saveHistograms(TFile * outputFile, bool saveAll)
 
 void PTHistos::fillEventHistos(double mult, double cent, double weight)
 {
+	if (reportDebug())  cout << "PTHistos::fillEventHistos(...) started"<< endl;
 	AnalysisConfiguration & ac1 = *getConfiguration();
 	h_events->Fill(mult,weight);
 	if (ac1.ptCorrelatorVsMult) h_events_vsMult->Fill(mult,weight);
 	if (ac1.ptCorrelatorVsCent) h_events_vsCent->Fill(cent,weight);
+	if (reportDebug()) cout << "HistogramCollection::fillEventHistos(...)completed."  << endl;
 }
 
 void PTHistos::fillTransverseMomentumHistos(double transverseMomentum, int filter, double mult, double cent, double weight)
 {
+	if (reportDebug())  cout << "PTHistos::fillTransverseMomentumHistos(...) started"<< endl;
 	AnalysisConfiguration & ac1 = *getConfiguration();
 	pT[filter]->Fill(mult, transverseMomentum,weight);
 	if (ac1.ptCorrelatorVsMult) pT_vsMult[filter]->Fill(mult, transverseMomentum,weight);
 	if (ac1.ptCorrelatorVsCent) pT_vsCent[filter]->Fill(cent, transverseMomentum,weight);
+	if (reportDebug()) cout << "HistogramCollection::fillTransverseMomentumHistos(...) completed."  << endl;
+
 }
 
 
@@ -334,9 +406,9 @@ void PTHistos::createHistogramRec(TString * baseName, TString * baseTitle, int d
 		histoName[2 * numFunc]  = baseName[2 * numFunc] + (i + 1);
 		histoTitle[2 * numFunc] = (depth == maxOrder - 1) ? baseTitle[2 * numFunc] + (i + 1) : baseTitle[2 * numFunc] + ", " + (i + 1);
 
-		h_counts[histoIndex]         = createProfile(histoName[2 * numFunc], 1, ac.max_mult, ac.min_mult,"mult", histoTitle[2 * numFunc] + "}" );
-		if (ac.ptCorrelatorVsMult)	h_counts_vsMult[histoIndex]  = createProfile(histoName[2 * numFunc] + "_vsMult",ac.nBins_mult, ac.max_mult, ac.min_mult, "mult", histoTitle[2 * numFunc] + "}");
-		if (ac.ptCorrelatorVsCent)	h_counts_vsCent[histoIndex]  = createProfile(histoName[2 * numFunc] + "_vsCent",ac.nBins_cent,ac.max_cent,  ac.min_cent, "cent",histoTitle[2 * numFunc] + "}");
+		h_counts[histoIndex]         = createProfile(histoName[2 * numFunc], 1, ac.min_mult, ac.max_mult,"mult", histoTitle[2 * numFunc] + "}" );
+		if (ac.ptCorrelatorVsMult)	h_counts_vsMult[histoIndex]  = createProfile(histoName[2 * numFunc] + "_vsMult",ac.nBins_mult, ac.min_mult, ac.max_mult, "mult", histoTitle[2 * numFunc] + "}");
+		if (ac.ptCorrelatorVsCent)	h_counts_vsCent[histoIndex]  = createProfile(histoName[2 * numFunc] + "_vsCent",ac.nBins_cent,ac.min_cent,  ac.max_cent, "cent",histoTitle[2 * numFunc] + "}");
 
 		orders[histoIndex] = maxOrder - depth;
 
@@ -400,7 +472,7 @@ void PTHistos::loadHistogramRec(TString * baseName, int depth, int partIndex, TF
 	if (reportDebug())  cout << "PTHistos::loadHistogramRec(...) Completed." << endl;
 }
 
-void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments, double * mults, double * cents)
+void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments,double ** yields, double * mults, double * cents, double * numParticles)
 {
 	if (reportDebug())  cout << "PTHistos::fillDerivedHistos(...) Starting." << endl;
 	auto start = chrono::high_resolution_clock::now(); 
@@ -417,16 +489,24 @@ void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments, double * 
 		if (ac.ptCorrelatorVsCent) pT_vsCent[i]->GetXaxis()->SetLimits(ac.min_mult, ac.max_mult);
 	}*/
 
-	avgpT = new double  [maxOrder];
-	calculateInclusivePtAverage(acceptances, numParticles, pT);
+	//avgpT = new double  [maxOrder];
+	//calculateInclusivePtAverage(acceptances, numParticles, pT);
 
-	avgCounts = new double [size]();
-	counts = new double* [totEvents]();
-	calculateInclusiveYieldsAverage(acceptances, numParticles);
+	//avgCounts = new double [size]();
+	//counts = new double* [totEvents]();
+	//calculateInclusiveYieldsAverage(acceptances, numParticles);
 
 	SValues = new double * [totEvents]();
-	calculateEventMoments(acceptances, numParticles, pT);
-
+	//fill yields
+	for(int iEvent = 0; iEvent < totEvents;iEvent++)
+	{
+		for(int iHisto = 0; iHisto <size; iHisto++)
+		{
+			h_counts[iHisto]->Fill(mults[iEvent], yields[iEvent][iHisto], 1.0);//weight is always 1.0
+			if (ac.ptCorrelatorVsMult)	h_counts_vsMult[iHisto]->Fill(mults[iEvent], yields[iEvent][iHisto] , 1.0);
+			if (ac.ptCorrelatorVsCent)	h_counts_vsCent[iHisto]->Fill(cents[iEvent], yields[iEvent][iHisto] , 1.0);
+		}
+	}
 	//fill SValues
 	//fill SValues normalized by counts and average pT's
 	for(int iEvent = 0; iEvent < totEvents;iEvent++)
@@ -442,23 +522,32 @@ void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments, double * 
 					if (ac.ptCorrelatorVsCent)	hS_vsCent[iFunc][iHisto] = createProfile(names[iFunc][iHisto] + "_vsCent",ac.nBins_mult,ac.min_mult, ac.max_mult , "cent", titles[iFunc][iHisto] + "}");
 				}
 			}
-			if(counts[iEvent][iHisto] != 0)
+			if(yields[iEvent][iHisto] != 0)
 			{
+				SValues[iEvent] = new double [size];
+				int bin = pT[0]->FindBin(mults[iEvent]);
+				calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent, numParticles[iEvent],pT );
 				hS[0][iHisto]->Fill(mults[iEvent], SValues[iEvent][iHisto], 1.0);//weight is always 1.0
-				if (ac.ptCorrelatorVsMult)	hS_vsMult[0][iHisto]->Fill(mults[iEvent], SValues[iEvent][iHisto] , 1.0);
-				if (ac.ptCorrelatorVsCent)	hS_vsCent[0][iHisto]->Fill(cents[iEvent], SValues[iEvent][iHisto] , 1.0);
-
-				hS[1][iHisto]->Fill(mults[iEvent], (SValues[iEvent][iHisto] / avgCounts[iHisto]), 1.0);
-				if (ac.ptCorrelatorVsMult)  hS_vsMult[1][iHisto]->Fill(mults[iEvent], (SValues[iEvent][iHisto] / avgCounts[iHisto]), 1.0);
-				if (ac.ptCorrelatorVsCent)	hS_vsCent[1][iHisto]->Fill(cents[iEvent], (SValues[iEvent][iHisto] / avgCounts[iHisto]), 1.0);
+				hS[1][iHisto]->Fill(mults[iEvent], (SValues[iEvent][iHisto] / h_counts[iHisto]->GetBinContent(bin)), 1.0);
+				if (ac.ptCorrelatorVsMult)	
+				{
+					bin = pT_vsMult[0]->FindBin(mults[iEvent]);
+					calculatePTDeviationMoments(transverseMomentumMoments, 1, iEvent, numParticles[iEvent],pT);
+					hS_vsMult[0][iHisto]->Fill(mults[iEvent], SValues[iEvent][iHisto] , 1.0);
+					hS_vsMult[1][iHisto]->Fill(mults[iEvent], (SValues[iEvent][iHisto] / h_counts_vsMult[iHisto]->GetBinContent(bin)), 1.0);
+				}
+				if (ac.ptCorrelatorVsCent)	
+				{
+					bin = pT_vsCent[0]->FindBin(mults[iEvent]);
+					calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent,  numParticles[iEvent],pT_vsCent);
+					hS_vsCent[0][iHisto]->Fill(cents[iEvent], SValues[iEvent][iHisto] , 1.0);
+					hS_vsCent[1][iHisto]->Fill(cents[iEvent], (SValues[iEvent][iHisto] / h_counts_vsCent[iHisto]->GetBinContent(bin)), 1.0);
+				}
 			}
 
-			h_counts[iHisto]->Fill(mults[iEvent], counts[iEvent][iHisto], 1.0);//weight is always 1.0
-			if (ac.ptCorrelatorVsMult)	h_counts_vsMult[iHisto]->Fill(mults[iEvent], counts[iEvent][iHisto] , 1.0);
-			if (ac.ptCorrelatorVsCent)	h_counts_vsCent[iHisto]->Fill(cents[iEvent], counts[iEvent][iHisto] , 1.0);
 		}
 		histoIndex = 0;
-		fillNormalizedPTValues(maxOrder - 1, 0, 1,  SValues[iEvent], mults[iEvent], cents[iEvent]);
+		//fillNormalizedPTValues(maxOrder - 1, 0, 1,  SValues[iEvent], mults[iEvent], cents[iEvent]);
 		histoIndex = 0;
 	}
 
@@ -476,9 +565,9 @@ void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments, double * 
 	{
 		for (int i = 0; i < numFunc; ++i)
 		{
-			hC[i][iHisto] = createProfile( names2[i][iHisto], 1, ac.min_mult, ac.max_mult,"mult",titles2[i][iHisto] + "}" );
-			if (ac.ptCorrelatorVsMult)	hC_vsMult[i][iHisto] = createProfile(names2[i][iHisto] + "_vsMult",ac.nBins_mult,ac.min_mult , ac.max_mult , "mult", titles2[i][iHisto] + "}");
-			if (ac.ptCorrelatorVsCent)	hC_vsCent[i][iHisto] = createProfile(names2[i][iHisto] + "_vsCent",ac.nBins_cent,ac.min_mult , ac.max_mult , "cent", titles2[i][iHisto] + "}");
+			hC[i][iHisto] = createHistogram( names2[i][iHisto], 1, ac.min_mult, ac.max_mult,"mult",titles2[i][iHisto] + "}" );
+			if (ac.ptCorrelatorVsMult)	hC_vsMult[i][iHisto] = createHistogram(names2[i][iHisto] + "_vsMult",ac.nBins_mult,ac.min_mult , ac.max_mult , "mult", titles2[i][iHisto] + "}");
+			if (ac.ptCorrelatorVsCent)	hC_vsCent[i][iHisto] = createHistogram(names2[i][iHisto] + "_vsCent",ac.nBins_cent,ac.min_mult , ac.max_mult , "cent", titles2[i][iHisto] + "}");
 		}
 		int nBins = 1;
 		for(int iBin = 1; iBin <=nBins; iBin++)
@@ -530,7 +619,7 @@ void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments, double * 
 
 	}
 
-	fillNormalizedPTValues(maxOrder - 1, 0, 1,  newhCValues, reorder, new int[3]{1,ac.nBins_mult, ac.nBins_cent});
+	//fillNormalizedPTValues(maxOrder - 1, 0, 1,  newhCValues, reorder, new int[3]{1,ac.nBins_mult, ac.nBins_cent});
 
 	auto stop = chrono::high_resolution_clock::now(); 
 	auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
@@ -545,7 +634,7 @@ void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments, double * 
 ////////////////////////////////////////////
 //fill  S or C Values normalized by overall event average transverse momenta
 /////////////////////////////////////////////
-void PTHistos::fillNormalizedPTValues( int depth, int partIndex, double product, double * values, double  mult, double  cent)
+/*void PTHistos::fillNormalizedPTValues( int depth, int partIndex, double product, double * values, double  mult, double  cent)
 {
 	if (reportDebug())  cout << "PTHistos::fillNormalizedPTValues(...) Starting." << endl;
 	AnalysisConfiguration & ac = *getConfiguration();
@@ -617,7 +706,7 @@ void PTHistos::fillNormalizedPTValues( int depth, int partIndex, double product,
 		if(depth != 0)	fillNormalizedPTValues(depth - 1, i, newProduct, values, reorder, nBin);
 	}
 	if (reportDebug())  cout << "PTHistos::fillNormalizedPTValues(...) Completed." << endl;
-}
+}*/
 
 ///////////////////////////////////////////
 //calculate the cumulants of the moments
@@ -666,7 +755,7 @@ void PTHistos::calculateCumulants(TProfile ** SHistos, TH1 **CHistos, int nBins,
 
 			TString name = nBins * size + iHisto;
 			
-			if(iBin == 1) CHistos[iHisto] = new TH1F(name, name, nBins, min, max);
+			if(iBin == 1) CHistos[iHisto] = new TProfile(name, name, nBins, min, max);
 
 			double content = newSHistos[iHisto]->GetBinContent(iBin) - sum;
 			double error = sqrt(newSHistos[iHisto]->GetBinError(iBin) * newSHistos[iHisto]->GetBinError(iBin) + absESq);
@@ -769,252 +858,116 @@ void PTHistos::calcRecSum(TH1 **CHistos, int iBin, double& absESq, double curRel
 	
 }
 
-
-
-void PTHistos::calculateInclusivePtAverage(bool *** acceptances, int * numParticles, double ** pT)
+void PTHistos::calculatePTDeviationMoments(double *** transverseMomentumMoments, int bin, int iEvent, int nParticles, TProfile ** pTHisto)
 {
-	if (reportDebug())  cout << "PTHistos::calculateInclusivePtAverage(...) Starting." << endl;
+	if (reportDebug())  cout << "PTHistos::calculatePTDeviationMoments(...) Starting." << endl;
 
+	double *n1 = new double [maxOrder]();
+	double *n2 = new double [maxOrder]();
+	double *n3 = new double [maxOrder]();
+	double *n4 = new double [maxOrder]();
+	int counter = 0;
+	double * tempSValues = new double [size]();
 	for(int iFilter = 0; iFilter < maxOrder; iFilter++)
 	{
-		double sumPt = 0;
-		double totParts = 0;
-		for(int iEvent = 0; iEvent < totEvents; iEvent++)
-		{
-			for (int iParticle = 0; iParticle < numParticles[iEvent]; ++iParticle)
-			{
-				if(acceptances[iEvent][iFilter][iParticle])
-				{
-					sumPt += pT[iEvent][iParticle];
-					totParts += 1;
-				}
-			}
-		}
-		avgpT[iFilter] = sumPt/totParts;
+
+		n1[iFilter]= transverseMomentumMoments[iEvent][iFilter][0] - nParticles * pTHisto[iFilter]->GetBinContent(bin);
+		n2[iFilter]= transverseMomentumMoments[iEvent][iFilter][1] - 2 * transverseMomentumMoments[iEvent][iFilter][0] * pTHisto[iFilter]->GetBinContent(bin) + nParticles * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin);
+		n3[iFilter]= transverseMomentumMoments[iEvent][iFilter][2] - 3 * transverseMomentumMoments[iEvent][iFilter][1] * pTHisto[iFilter]->GetBinContent(bin) 
+		+ 3 * transverseMomentumMoments[iEvent][iFilter][0] * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin) - nParticles * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin);
+		n4[iFilter]= transverseMomentumMoments[iEvent][iFilter][3] - 4 * transverseMomentumMoments[iEvent][iFilter][2] * pTHisto[iFilter]->GetBinContent(bin) + 6 * transverseMomentumMoments[iEvent][iFilter][1] * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin)
+		- 4 * transverseMomentumMoments[iEvent][iFilter][0] * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin) + nParticles * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin);
 	}
-	if (reportDebug())  cout << "PTHistos::calculateInclusivePtAverage(...) Completed." << endl;
 
-}
-
-void PTHistos::calculateInclusiveYieldsAverage(bool *** acceptances, int * numParticles)
-{
-	if (reportDebug())  cout << "PTHistos::calculateInclusiveYieldsAverage(...) Starting." << endl;
-
-	double ** tempCounts = new double *[totEvents];
-	double * tempAvgCounts = new double [size];
-	for(int iEvent = 0; iEvent < totEvents; iEvent++)
+	for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
 	{
-		double *n = new double [maxOrder]();
-		int counter = 0;
-		tempCounts[iEvent] = new double [size]();
-		counts[iEvent] = new double [size]();
-		for(int iFilter = 0; iFilter < maxOrder; iFilter++)
-		{
-			for(int iParticle = 0; iParticle < numParticles[iEvent]; iParticle++ )
-			{
-				if(acceptances[iEvent][iFilter][iParticle]) n[iFilter]++;
-			}
-		}
+		tempSValues[counter] = n1[iFilter1];
+		counter++;
+	}
 
-		for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
+	for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
+	{
+		for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
 		{
-			if(n[iFilter1] > 0 ) tempCounts[iEvent][counter] = n[iFilter1];
-			tempAvgCounts[counter] += tempCounts[iEvent][counter];
+			double same12 = iFilter2 == iFilter1? n2[iFilter1] : 0;
+			tempSValues[counter] = n1[iFilter1] * n1[iFilter2] - same12;
 			counter++;
 		}
+	}
 
-		for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
+	for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
+	{
+		for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
 		{
-			for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
+			int same12 = iFilter2 == iFilter1? 1 : 0;
+			for(int iFilter3 = iFilter2; iFilter3 < maxOrder; iFilter3++)
 			{
-				int same1 = iFilter2 == iFilter1? 1 : 0;
-				if(n[iFilter1] > 0 && (n[iFilter2] - same1) > 0) tempCounts[iEvent][counter] = n[iFilter1]*(n[iFilter2] - same1);
-				tempAvgCounts[counter] += tempCounts[iEvent][counter];
+				if(iFilter1 == iFilter2)
+				{
+					if(iFilter1 == iFilter3) tempSValues[counter] = n1[iFilter1] * n1[iFilter1] * n1[iFilter1] - 3 * n2[iFilter1] * n1[iFilter1] + 2 * n3[iFilter1];
+					else tempSValues[counter] = (n1[iFilter1] * n1[iFilter1] - n2[iFilter1] ) * n1[iFilter3];
+				}
+				else
+				{
+					if(iFilter2 == iFilter3) tempSValues[counter] = (n1[iFilter2] * n1[iFilter2] - n2[iFilter2] ) * n1[iFilter1];
+					else tempSValues[counter] = n1[iFilter1] * n1[iFilter2] * n1[iFilter3];
+				}
 				counter++;
 			}
 		}
-
-		for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
-		{
-			for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
-			{
-				int same12 = iFilter2 == iFilter1? 1 : 0;
-				for(int iFilter3 = iFilter2; iFilter3 < maxOrder; iFilter3++)
-				{
-					int same13 = iFilter3 == iFilter1? 1 : 0;
-					int same23 = iFilter2 == iFilter3? 1 : 0;
-					if(n[iFilter1] > 0 && (n[iFilter2] - same12) > 0 && (n[iFilter3] - same13 - same23) > 0) tempCounts[iEvent][counter] = n[iFilter1]*(n[iFilter2] - same12)*(n[iFilter3] - same13 - same23);
-					tempAvgCounts[counter] += tempCounts[iEvent][counter];
-					counter++;
-				}
-			}
-		}
-
-		for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
-		{
-			for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
-			{
-				for(int iFilter3 = iFilter2; iFilter3 < maxOrder; iFilter3++)
-				{
-					int same12 = iFilter2 == iFilter1? 1 : 0;
-					int same13 = iFilter3 == iFilter1? 1 : 0;
-					int same23 = iFilter2 == iFilter3? 1 : 0;
-					for(int iFilter4 = iFilter3; iFilter4 < maxOrder; iFilter4++)
-					{
-						int same14 = iFilter4 == iFilter1? 1 : 0;
-						int same24 = iFilter2 == iFilter4? 1 : 0;
-						int same34 = iFilter3 == iFilter4? 1 : 0;
-						if(n[iFilter1] > 0 && (n[iFilter2] - same12) > 0 && (n[iFilter3] - same13 - same23) > 0 && (n[iFilter4] - same14 - same24 - same34) > 0) tempCounts[iEvent][counter] = n[iFilter1]*(n[iFilter2] - same12)*(n[iFilter3] - same13 - same23)*(n[iFilter4] - same14 - same24 - same34);
-						tempAvgCounts[counter] += tempCounts[iEvent][counter];
-						counter++;
-					}
-				}
-			}
-		}
-		delete [] n;
 	}
 
-	for (int i = 0; i < size; ++i)
+	for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
 	{
-		tempAvgCounts[i] /= totEvents;
-	}
-
-	for(int iEvent = 0; iEvent < totEvents; iEvent++)
-	{
-		for(int iHisto = 0; iHisto < size; iHisto++)
+		for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
 		{
-			counts[iEvent][iHisto] = tempCounts[iEvent][reorder[iHisto]];
-		}
-	}
-
-	for(int iHisto = 0; iHisto < size; iHisto++)
-	{
-		avgCounts[iHisto] = tempAvgCounts[reorder[iHisto]];
-	}
-	if (reportDebug())  cout << "PTHistos::calculateInclusiveYieldsAverage(...) Completed." << endl;
-
-}
-
-void PTHistos::calculateEventMoments(bool *** acceptances, int * numParticles, double ** pT)
-{
-	if (reportDebug())  cout << "PTHistos::calculateEventMoments(...) Starting." << endl;
-
-	double ** tempSValues = new double *[totEvents];
-	for(int iEvent = 0; iEvent < totEvents; iEvent++)
-	{
-		double *n1 = new double [maxOrder]();
-		double *n2 = new double [maxOrder]();
-		double *n3 = new double [maxOrder]();
-		double *n4 = new double [maxOrder]();
-		int counter = 0;
-		tempSValues[iEvent] = new double [size]();
-		SValues[iEvent] = new double [size];
-		for(int iFilter = 0; iFilter < maxOrder; iFilter++)
-		{
-			for(int iParticle = 0; iParticle < numParticles[iEvent]; iParticle++ )
+			for(int iFilter3 = iFilter2; iFilter3 < maxOrder; iFilter3++)
 			{
-				if(acceptances[iEvent][iFilter][iParticle])
-				{
-					n1[iFilter]+= pT[iEvent][iParticle] - avgpT[iFilter];
-					n2[iFilter]+= (pT[iEvent][iParticle] - avgpT[iFilter]) * (pT[iEvent][iParticle] - avgpT[iFilter]);
-					n3[iFilter]+= (pT[iEvent][iParticle] - avgpT[iFilter]) * (pT[iEvent][iParticle] - avgpT[iFilter]) * (pT[iEvent][iParticle] - avgpT[iFilter]);
-					n4[iFilter]+= (pT[iEvent][iParticle] - avgpT[iFilter]) * (pT[iEvent][iParticle] - avgpT[iFilter]) * (pT[iEvent][iParticle] - avgpT[iFilter]) * (pT[iEvent][iParticle] - avgpT[iFilter]);
-				}
-			}
-		}
-
-		for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
-		{
-			tempSValues[iEvent][counter] = n1[iFilter1];
-			counter++;
-		}
-
-		for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
-		{
-			for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
-			{
-				double same12 = iFilter2 == iFilter1? n2[iFilter1] : 0;
-				tempSValues[iEvent][counter] = n1[iFilter1] * n1[iFilter2] - same12;
-				counter++;
-			}
-		}
-
-		for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
-		{
-			for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
-			{
-				int same12 = iFilter2 == iFilter1? 1 : 0;
-				for(int iFilter3 = iFilter2; iFilter3 < maxOrder; iFilter3++)
+				for(int iFilter4 = iFilter3; iFilter4 < maxOrder; iFilter4++)
 				{
 					if(iFilter1 == iFilter2)
 					{
-						if(iFilter1 == iFilter3) tempSValues[iEvent][counter] = n1[iFilter1] * n1[iFilter1] * n1[iFilter1] - 3 * n2[iFilter1] * n1[iFilter1] + 2 * n3[iFilter1];
-						else tempSValues[iEvent][counter] = (n1[iFilter1] * n1[iFilter1] - n2[iFilter1] ) * n1[iFilter3];
+						if(iFilter1 == iFilter3)
+						{
+							if(iFilter1 == iFilter4)  tempSValues[counter] = n1[iFilter2] * n1[iFilter1] * n1[iFilter1] * n1[iFilter1] - 6 * n1[iFilter1] * n1[iFilter1] * n2[iFilter1] + 8 * n1[iFilter1] *  n3[iFilter1] + 3 * n2[iFilter1] *  n2[iFilter1] - 6 *  n4[iFilter1];
+							else tempSValues[counter] = (n1[iFilter1] * n1[iFilter1] * n1[iFilter1] - 3 * n2[iFilter1] * n1[iFilter1] + 2 * n3[iFilter1]) * n1[iFilter4];
+						}
+						else
+						{
+							if(iFilter3 == iFilter4) tempSValues[counter] = (n1[iFilter1] * n1[iFilter1] - n2[iFilter1] ) * (n1[iFilter3] * n1[iFilter3] - n2[iFilter3] );
+							else tempSValues[counter] = (n1[iFilter1] * n1[iFilter1] - n2[iFilter1] ) * n1[iFilter3] * n1[iFilter4];
+						}
 					}
-					else
+					else 
 					{
-						if(iFilter2 == iFilter3) tempSValues[iEvent][counter] = (n1[iFilter2] * n1[iFilter2] - n2[iFilter2] ) * n1[iFilter1];
-						else tempSValues[iEvent][counter] = n1[iFilter1] * n1[iFilter2] * n1[iFilter3];
+						if(iFilter2 == iFilter3)
+						{
+							if(iFilter2 == iFilter4) tempSValues[counter] = (n1[iFilter2] * n1[iFilter2] * n1[iFilter2] - 3 * n2[iFilter2] * n1[iFilter2] + 2 * n3[iFilter2]) * n1[iFilter1];
+							else tempSValues[counter] = (n1[iFilter2] * n1[iFilter2] - n2[iFilter2] ) * n1[iFilter1] * n1[iFilter4];
+						}
+						else
+						{
+							if(iFilter3 == iFilter4) tempSValues[counter] = (n1[iFilter3] * n1[iFilter3] - n2[iFilter3] ) * n1[iFilter1] * n1[iFilter2];
+							else tempSValues[counter] = n1[iFilter1] * n1[iFilter2] * n1[iFilter3] * n1[iFilter4];
+						}
 					}
 					counter++;
 				}
 			}
 		}
-
-		for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
-		{
-			for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
-			{
-				for(int iFilter3 = iFilter2; iFilter3 < maxOrder; iFilter3++)
-				{
-					for(int iFilter4 = iFilter3; iFilter4 < maxOrder; iFilter4++)
-					{
-						if(iFilter1 == iFilter2)
-						{
-							if(iFilter1 == iFilter3)
-							{
-								if(iFilter1 == iFilter4)  tempSValues[iEvent][counter] = n1[iFilter2] * n1[iFilter1] * n1[iFilter1] * n1[iFilter1] - 6 * n1[iFilter1] * n1[iFilter1] * n2[iFilter1] + 8 * n1[iFilter1] *  n3[iFilter1] + 3 * n2[iFilter1] *  n2[iFilter1] - 6 *  n4[iFilter1];
-								else tempSValues[iEvent][counter] = (n1[iFilter1] * n1[iFilter1] * n1[iFilter1] - 3 * n2[iFilter1] * n1[iFilter1] + 2 * n3[iFilter1]) * n1[iFilter4];
-							}
-							else
-							{
-								if(iFilter3 == iFilter4) tempSValues[iEvent][counter] = (n1[iFilter1] * n1[iFilter1] - n2[iFilter1] ) * (n1[iFilter3] * n1[iFilter3] - n2[iFilter3] );
-								else tempSValues[iEvent][counter] = (n1[iFilter1] * n1[iFilter1] - n2[iFilter1] ) * n1[iFilter3] * n1[iFilter4];
-							}
-						}
-						else 
-						{
-							if(iFilter2 == iFilter3)
-							{
-								if(iFilter2 == iFilter4) tempSValues[iEvent][counter] = (n1[iFilter2] * n1[iFilter2] * n1[iFilter2] - 3 * n2[iFilter2] * n1[iFilter2] + 2 * n3[iFilter2]) * n1[iFilter1];
-								else tempSValues[iEvent][counter] = (n1[iFilter2] * n1[iFilter2] - n2[iFilter2] ) * n1[iFilter1] * n1[iFilter4];
-							}
-							else
-							{
-								if(iFilter3 == iFilter4) tempSValues[iEvent][counter] = (n1[iFilter3] * n1[iFilter3] - n2[iFilter3] ) * n1[iFilter1] * n1[iFilter2];
-								else tempSValues[iEvent][counter] = n1[iFilter1] * n1[iFilter2] * n1[iFilter3] * n1[iFilter4];
-							}
-						}
-						counter++;
-					}
-				}
-			}
-		}
-		delete [] n1;
-		delete [] n2;
-		delete [] n3;
-		delete [] n4;
 	}
+	delete [] n1;
+	delete [] n2;
+	delete [] n3;
+	delete [] n4;
+	
 
-	for(int iEvent = 0; iEvent < totEvents; iEvent++)
+	for(int iHisto = 0; iHisto < size; iHisto++)
 	{
-		for(int iHisto = 0; iHisto < size; iHisto++)
-		{
-			SValues[iEvent][iHisto] = tempSValues[iEvent][reorder[iHisto]];
-		}
+		SValues[iEvent][iHisto] = tempSValues[reorder[iHisto]];
 	}
 
-	if (reportDebug())  cout << "PTHistos::calculateEventMoments(...) Completed." << endl;
+	if (reportDebug())  cout << "PTHistos::calculatePTDeviationMoments(...) Completed." << endl;
 }
 ////////////////////////////////////////////////////////////////////////////
 //Helper Functions

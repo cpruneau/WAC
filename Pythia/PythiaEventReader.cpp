@@ -13,10 +13,10 @@
 
  Class defining Task
  */
-#include "EposEventReader.hpp"
-ClassImp(EposEventReader);
+#include "PythiaEventReader.hpp"
+ClassImp(PythiaEventReader);
 
-EposEventReader::EposEventReader(const TString & name,
+PythiaEventReader::PythiaEventReader(const TString & name,
                                  TaskConfiguration * configuration,
                                  Event * event,
                                  EventFilter * ef,
@@ -26,20 +26,20 @@ Task(name, configuration, event),
 eventFilter(ef),
 particleFilter(pf)
 {
-  if (reportDebug()) cout << "EposEventReader::EposEventReader(...) No ops" << endl;
+  if (reportDebug()) cout << "PythiaEventReader::PythiaEventReader(...) No ops" << endl;
 }
 
-EposEventReader::~EposEventReader()
+PythiaEventReader::~PythiaEventReader()
 {
-if (reportDebug()) cout << "EposEventReader::~EposEventReader(...) No ops" << endl;
+if (reportDebug()) cout << "PythiaEventReader::~PythiaEventReader(...) No ops" << endl;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialize generator
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void EposEventReader::initialize()
+void PythiaEventReader::initialize()
 {
-  if (reportDebug()) cout << "EposEventReader::initialize() Started" << endl;
+  if (reportDebug()) cout << "PythiaEventReader::initialize() Started" << endl;
 
   TChain *chain = new TChain("tree"," ");
   for(int ifl=0; ifl<45; ifl++)
@@ -52,28 +52,28 @@ void EposEventReader::initialize()
   jentry = 0;
 
   nentries = fChain->GetEntries();
-  if (reportInfo()) cout << "EposEventReader::initialize() nEntries: " << nentries << endl;
+  if (reportInfo()) cout << "PythiaEventReader::initialize() nEntries: " << nentries << endl;
   if (nentries < 1)
     {
-    if (reportError()) cout << "EposEventReader::initialize() no data found. Abort." << endl;
+    if (reportError()) cout << "PythiaEventReader::initialize() no data found. Abort." << endl;
     postTaskFatal();
     return;
     }
   nbytes = 0;
   nb = 0;
-  if (reportDebug()) cout << "EposEventReader::initialize() Completed" << endl;
+  if (reportDebug()) cout << "PythiaEventReader::initialize() Completed" << endl;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Reset and Initialize the generator
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void EposEventReader::reset()
+void PythiaEventReader::reset()
 {
-  if (reportDebug()) cout << "EposEventReader::reset() Started" << endl;
+  if (reportDebug()) cout << "PythiaEventReader::reset() Started" << endl;
   event->reset();
   Particle::getFactory()->reset();
-  if (reportDebug()) cout << "EposEventReader::reset() Completed" << endl;
+  if (reportDebug()) cout << "PythiaEventReader::reset() Completed" << endl;
 }
 
 
@@ -81,13 +81,13 @@ void EposEventReader::reset()
 // Read an ampt event from file
 // Copy the event into Event for convenience...
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void EposEventReader::execute()
+void PythiaEventReader::execute()
 {
-  if (reportDebug()) cout << "EposEventReader::execute() Started" << endl;
+  if (reportDebug()) cout << "PythiaEventReader::execute() Started" << endl;
 
   if (!fChain)
     {
-    if (reportFatal()) cout << " EposEventReader::execute() no TChain available" << endl;
+    if (reportFatal()) cout << " PythiaEventReader::execute() no TChain available" << endl;
     postTaskFatal();
     return;
     }
@@ -116,11 +116,11 @@ void EposEventReader::execute()
 
   if (mult > arraySize)
     {
-    if (reportError()) cout<< "EposEventReader::execute() n particles is " << mult << " and exceeds capacity " << arraySize << endl;
+    if (reportError()) cout<< "PythiaEventReader::execute() n particles is " << mult << " and exceeds capacity " << arraySize << endl;
     postTaskError();
     return;
     }
-  if (reportDebug())  cout<< "EposEventReader::execute() Impact par: "<<impact<<"  "<<mult<<endl;
+  if (reportDebug())  cout<< "PythiaEventReader::execute() Impact par: "<<impact<<"  "<<mult<<endl;
 
   int thePid;
   double charge, p_x, p_y, p_z, p_e, mass;
@@ -169,19 +169,19 @@ void EposEventReader::execute()
       }
     }
   event->nParticles = particleAccepted;
-  if (reportDebug()) cout << "EposEventReader::execute() No of accepted Particles : "<< particleAccepted<<endl;
-  if (reportDebug()) cout << "EposEventReader::execute() event completed!" << endl;
+  if (reportDebug()) cout << "PythiaEventReader::execute() No of accepted Particles : "<< particleAccepted<<endl;
+  if (reportDebug()) cout << "PythiaEventReader::execute() event completed!" << endl;
 }
 
 
-Int_t EposEventReader::GetEntry(Long64_t entry)
+Int_t PythiaEventReader::GetEntry(Long64_t entry)
 {
   // Read contents of entry.
   if (!fChain) return 0;
   return fChain->GetEntry(entry);
 }
 
-Long64_t EposEventReader::LoadTree(Long64_t entry)
+Long64_t PythiaEventReader::LoadTree(Long64_t entry)
 {
   // Set the environment to read one entry
   if (!fChain) return -5;
@@ -194,7 +194,7 @@ Long64_t EposEventReader::LoadTree(Long64_t entry)
   return centry;
 }
 
-void EposEventReader::Init(TTree *tree)
+void PythiaEventReader::Init(TTree *tree)
 {
   if (!tree) return;
   fChain = tree;
@@ -220,18 +220,18 @@ void EposEventReader::Init(TTree *tree)
   nb = 0;
 }
 
-Bool_t EposEventReader::Notify()
+Bool_t PythiaEventReader::Notify()
 {
   return kTRUE;
 }
 
-void EposEventReader::Show(Long64_t entry)
+void PythiaEventReader::Show(Long64_t entry)
 {
   if (!fChain) return;
   fChain->Show(entry);
 }
 
-Int_t EposEventReader::Cut(Long64_t entry)
+Int_t PythiaEventReader::Cut(Long64_t entry)
 {
   return 1;
 }

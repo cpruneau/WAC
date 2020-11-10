@@ -17,10 +17,13 @@
 #include "NuDynTask.hpp"
 #include "PTCorrelator.hpp"
 #include "AACollisionGenerator.hpp"
+#include "AACollisionReader.hpp"
 #include "CollisionGeometryGenerator.hpp"
 #include "CollisionGeometry.hpp"
 #include "NucleusGenerator.hpp"
 #include "HeavyIonConfiguration.hpp"
+#include "MessageLogger.hpp"
+
 
 
 int main()
@@ -30,8 +33,8 @@ int main()
   cout << "<INFO> PYTHIA Model Analysis - Starting" << endl;
 
 //  long nEventsRequested = 100;
-  long nEventsRequested = 100;
-  int  nEventsReport    = 100000;
+  long nEventsRequested = 1000;
+  int  nEventsReport    = 1;
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////
   // Heavy Ion and Analysis Configuration Parameters
@@ -95,6 +98,18 @@ int main()
   ac->param_b        = 1;
   ac->maxOrder       = 4; // order <= particleFilters1 length
   ac->totEvents      = nEventsRequested;
+
+  ac->branchName_eventNo = "eventNo";
+  ac->branchName_mult = "mult";
+  ac->branchName_px = "px";
+  ac->branchName_py = "py";
+  ac->branchName_pz = "pz";
+  ac->branchName_ist = "ist";
+  ac->branchName_pdg = "pdg";
+  ac->branchName_pE = "pE";
+  ac->eventTreeName =  "PythiaEventTree"; 
+  ac->treeFile =  ac->outputPath + "/PythiaEventTree"; // no .root extension on purpose
+  ac->numFiles = 5;
 
 
 
@@ -179,11 +194,17 @@ int main()
 
   Event * event = Event::getEvent();
   EventLoop * eventLoop = new EventLoop();
-
+  CollisionGeometryGenerator* cg = new CollisionGeometryGenerator("PYTHIA_PbPbCollisionGeometryGenerator",ac1, collisionGeometry,nucGenA,nucGenB);
+  AACollisionReader* ar =  new AACollisionReader("PYTHIA_PbPbEventGenerator",ac, event,eventFilter,particleFilter, collisionGeometry);
+  PTCorrelator* pc = new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM", ac, event, eventFilter, particleFilters1);
   //eventLoop->addTask( new PythiaEventGenerator("PYTHIA",0, event,eventFilter,particleFilter) );
-  eventLoop->addTask( new CollisionGeometryGenerator("PYTHIA_PbPbCollisionGeometryGenerator",ac1, collisionGeometry,nucGenA,nucGenB) );
-  eventLoop->addTask( new AACollisionGenerator("PYTHIA_PbPbEventGenerator",ac, event,eventFilter,particleFilter, collisionGeometry) );
-  eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM", ac, event, eventFilter, particleFilters1) ); // Note: make sure all filters are distinct
+  eventLoop->addTask(cg );
+  //eventLoop->addTask( new AACollisionGenerator("PYTHIA_PbPbEventGenerator",ac, event,eventFilter,particleFilter, collisionGeometry) );
+  eventLoop->addTask( ar );
+  eventLoop->addTask( pc ); // Note: make sure all filters are distinct
+  ar->setReportLevel(MessageLogger::Debug);
+  pc->setReportLevel(MessageLogger::Debug);
+
 
   /*
   NuDynTask * t = new NuDynTask("PYTHIA_NuDyn_HPHPHPHP", ac, event, eventFilter,particleFilter_HP,particleFilter_HP,particleFilter_HP,particleFilter_HP);
@@ -200,6 +221,25 @@ int main()
 
   eventLoop->run(nEventsRequested,nEventsReport);
 
+  delete collisionGeometry;
+  delete nucGenA;
+  delete nucGenB;
+  delete ac1;
+  delete ac;
+  delete eventFilter;
+  delete particleFilter;     
+  delete   particleFilter_HP; 
+  delete  particleFilter_HM ;
+  delete  particleFilter_PiP; 
+  delete  particleFilter_PiM ;
+  delete  particleFilter_KP  ;
+  delete   particleFilter_KM;  
+  delete  particleFilter_PP  ;
+  delete   particleFilter_PM;
+  delete eventLoop;
+  delete ar;
+  delete cg;
+  delete pc;
   cout << "<INFO> PYTHIA Analysis - Completed" << endl;
 
 

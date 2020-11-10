@@ -41,6 +41,8 @@ maxEvents(0)
 	multiplicity  = new double [maxEvents];
 	centrality    = new double [maxEvents];
 	transverseMomentumMoments = new double ** [maxEvents];
+	yields = new double * [maxEvents];
+	numParticles = new double [maxEvents];
 
 	if (!eventFilter)
 	{
@@ -78,6 +80,20 @@ maxEvents(0)
 PTCorrelator::~PTCorrelator()
 {
 	if (reportDebug())  cout << "PTCorrelator::DTOR(...) Started" << endl;
+	for(int i = 0; i < eventsProcessed; i ++)
+	{
+		for(int j = 0 ; j < maxOrder; j++)
+		{
+			delete[] transverseMomentumMoments[i][j];
+		}
+		delete[] transverseMomentumMoments[i];
+		delete[] yields[i];
+	}
+	delete[] transverseMomentumMoments;
+	delete[] yields;
+	delete[] multiplicity;
+	delete[] centrality;
+	delete[] numParticles;
 	if (histos != NULL) delete histos;
 	if (reportDebug())  cout << "PTCorrelator::DTOR(...) Completed" << endl;
 }
@@ -183,6 +199,8 @@ void PTCorrelator::execute()
 	fillTransverseMomentumValues();
 	transverseMomentumMoments[eventsProcessed] = new double * [maxOrder];
 	calculateTransverseMomentumMoments();
+	yields[eventsProcessed] = new double  [histos->size];
+	fillYieldValues();
 	storeEventInfo();
 
 	correlatorIndex = 0;
@@ -196,7 +214,7 @@ void PTCorrelator::execute()
 	if(eventsProcessed == maxEvents)
 	{
 		cout << "Max number of collisions: " << ac->nCollisionsMax << endl;
-		//histos->fillDerivedHistos(transverseMomentumMoments, multiplicity, centrality);
+		histos->fillDerivedHistos(transverseMomentumMoments, yields, multiplicity, centrality, numParticles);
 	}
 
 	if (reportDebug()) cout << "PTCorrelator::execute() Completed" << endl;
@@ -227,11 +245,13 @@ void PTCorrelator::storeEventInfo()
 	if (reportDebug())  cout << "PTCorrelator::storeEventInfo(...) Starting." << endl;
 	multiplicity[eventsProcessed] = event->multiplicity;
 	centrality[eventsProcessed] = event->centrality;
+	numParticles[eventsProcessed] = event->nParticles;
 	if (reportDebug())  cout << "PTCorrelator::storeEventInfo(...) Completed." << endl;
 }
 
 void PTCorrelator::fillTransverseMomentumValues()
 {
+	if (reportDebug())  cout << "PTCorrelator::fillTransverseMomentumValues(...) Starting." << endl;
 	for(int iParticle = 0; iParticle < event->nParticles; iParticle++)
 	{
 		Particle & particle = * event->getParticleAt(iParticle);
@@ -240,13 +260,91 @@ void PTCorrelator::fillTransverseMomentumValues()
 			if(particleFilters[i]->accept(particle)) histos->fillTransverseMomentumHistos(particle.pt, i,event->multiplicity, event->centrality, 1.0);
 		}
 	}
+	if (reportDebug())  cout << "PTCorrelator::fillTransverseMomentumValues(...) Completed." << endl;
+}
+
+void PTCorrelator::fillYieldValues()
+{
+	if (reportDebug())  cout << "PTCorrelator::fillYieldValues(...) Starting." << endl;
+		double *n = new double [maxOrder]();
+		int counter = 0;
+		double * tempCounts = new double [histos->size]();
+		for(int iFilter = 0; iFilter < maxOrder; iFilter++)
+		{
+			for(int iParticle = 0; iParticle < event->nParticles; iParticle++ )
+			{
+				Particle & particle = * event->getParticleAt(iParticle);
+				if(particleFilters[iFilter]->accept(particle)) n[iFilter]++;
+			}
+		}
+
+		for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
+		{
+			if(n[iFilter1] > 0 ) tempCounts[counter] = n[iFilter1];
+			counter++;
+		}
+
+		for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
+		{
+			for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
+			{
+				int same1 = iFilter2 == iFilter1? 1 : 0;
+				if(n[iFilter1] > 0 && (n[iFilter2] - same1) > 0) tempCounts[counter] = n[iFilter1]*(n[iFilter2] - same1);
+				counter++;
+			}
+		}
+
+		for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
+		{
+			for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
+			{
+				int same12 = iFilter2 == iFilter1? 1 : 0;
+				for(int iFilter3 = iFilter2; iFilter3 < maxOrder; iFilter3++)
+				{
+					int same13 = iFilter3 == iFilter1? 1 : 0;
+					int same23 = iFilter2 == iFilter3? 1 : 0;
+					if(n[iFilter1] > 0 && (n[iFilter2] - same12) > 0 && (n[iFilter3] - same13 - same23) > 0) tempCounts[counter] = n[iFilter1]*(n[iFilter2] - same12)*(n[iFilter3] - same13 - same23);
+					counter++;
+				}
+			}
+		}
+
+		for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
+		{
+			for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
+			{
+				for(int iFilter3 = iFilter2; iFilter3 < maxOrder; iFilter3++)
+				{
+					int same12 = iFilter2 == iFilter1? 1 : 0;
+					int same13 = iFilter3 == iFilter1? 1 : 0;
+					int same23 = iFilter2 == iFilter3? 1 : 0;
+					for(int iFilter4 = iFilter3; iFilter4 < maxOrder; iFilter4++)
+					{
+						int same14 = iFilter4 == iFilter1? 1 : 0;
+						int same24 = iFilter2 == iFilter4? 1 : 0;
+						int same34 = iFilter3 == iFilter4? 1 : 0;
+						if(n[iFilter1] > 0 && (n[iFilter2] - same12) > 0 && (n[iFilter3] - same13 - same23) > 0 && (n[iFilter4] - same14 - same24 - same34) > 0) tempCounts[counter] = n[iFilter1]*(n[iFilter2] - same12)*(n[iFilter3] - same13 - same23)*(n[iFilter4] - same14 - same24 - same34);
+						counter++;
+					}
+				}
+			}
+		}
+		delete [] n;
+	
+
+		for(int iHisto = 0; iHisto < histos->size; iHisto++)
+		{
+			yields[eventsProcessed][iHisto] = tempCounts[histos->reorder[iHisto]];
+		}
+	if (reportDebug())  cout << "PTCorrelator::fillYieldValues(...) Completed." << endl;
 }
 
 void PTCorrelator::calculateTransverseMomentumMoments()
 {
+	if (reportDebug())  cout << "PTCorrelator::calculateTransverseMomentumMoments(...) Starting." << endl;
 	for (int iFilter = 0; iFilter < maxOrder; ++iFilter)
 	{
-		transverseMomentumMoments[eventsProcessed][iFilter] = new double [maxOrder];
+		transverseMomentumMoments[eventsProcessed][iFilter] = new double [maxOrder]();
 		for(int iParticle = 0; iParticle < event->nParticles; iParticle++ )
 			{
 				Particle & particle = * event->getParticleAt(iParticle);
@@ -259,5 +357,6 @@ void PTCorrelator::calculateTransverseMomentumMoments()
 				}
 			}
 	}
+	if (reportDebug())  cout << "PTCorrelator::calculateTransverseMomentumMoments(...) Completed." << endl;
 }
 
