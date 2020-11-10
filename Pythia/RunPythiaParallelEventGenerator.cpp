@@ -22,7 +22,7 @@ int main()
   auto start = chrono::high_resolution_clock::now(); 
 
   cout << "<INFO> PYTHIA Parallel Event Generation - Starting" << endl;
-  long nEventsRequested = 10000000;
+  long nEventsRequested = 1000000;
   int  nThreads    = 50;        // make sure this divides the number of events per tree
   int eventsPerThread = nEventsRequested/nThreads;
   cout << "<INFO> Events per Thread: " << eventsPerThread << endl;
@@ -96,10 +96,11 @@ int main()
        pythia8->ReadString( *pc->options[iOption]);
      }
      auto time = chrono::high_resolution_clock::now();
-     unsigned int seed = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
+     unsigned long seed = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
      seed = ((seed  * (omp_get_thread_num()+ 1)) % 90000000) * ((seed  * (omp_get_thread_num()+ 1)) % 90000000) * ((seed  * (omp_get_thread_num()+ 1)) % 90000000) * ((seed  * (omp_get_thread_num()+ 1)) % 90000000) * ((seed  * (omp_get_thread_num()+ 1)) % 90000000);
      seed = seed % 90000000;
      cout << "Seed from thread " << omp_get_thread_num()+ 1 << " is " << seed << endl;
+     if(seed == 0) seed = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() * (omp_get_thread_num()+ 1);
      TString s = "Random:seed = ";
      pythia8->ReadString(s+ seed);
      pythia8->Initialize(pc->beam,pc->target,pc->energy);

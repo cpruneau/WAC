@@ -33,7 +33,7 @@ int main()
   cout << "<INFO> PYTHIA Model Analysis - Starting" << endl;
 
 //  long nEventsRequested = 100;
-  long nEventsRequested = 1000;
+  long nEventsRequested = 10000;
   int  nEventsReport    = 1;
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -197,10 +197,11 @@ int main()
   CollisionGeometryGenerator* cg = new CollisionGeometryGenerator("PYTHIA_PbPbCollisionGeometryGenerator",ac1, collisionGeometry,nucGenA,nucGenB);
   AACollisionReader* ar =  new AACollisionReader("PYTHIA_PbPbEventGenerator",ac, event,eventFilter,particleFilter, collisionGeometry);
   PTCorrelator* pc = new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM", ac, event, eventFilter, particleFilters1);
+  AACollisionGenerator *ag = new AACollisionGenerator("PYTHIA_PbPbEventGenerator",ac, event,eventFilter,particleFilter, collisionGeometry);
   //eventLoop->addTask( new PythiaEventGenerator("PYTHIA",0, event,eventFilter,particleFilter) );
   eventLoop->addTask(cg );
-  //eventLoop->addTask( new AACollisionGenerator("PYTHIA_PbPbEventGenerator",ac, event,eventFilter,particleFilter, collisionGeometry) );
-  eventLoop->addTask( ar );
+  eventLoop->addTask(  ag);
+  //eventLoop->addTask( ar );
   eventLoop->addTask( pc ); // Note: make sure all filters are distinct
   ar->setReportLevel(MessageLogger::Debug);
   pc->setReportLevel(MessageLogger::Debug);

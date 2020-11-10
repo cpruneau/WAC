@@ -532,7 +532,7 @@ void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments,double ** 
 				if (ac.ptCorrelatorVsMult)	
 				{
 					bin = pT_vsMult[0]->FindBin(mults[iEvent]);
-					calculatePTDeviationMoments(transverseMomentumMoments, 1, iEvent, numParticles[iEvent],pT);
+					calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent, numParticles[iEvent],pT);
 					hS_vsMult[0][iHisto]->Fill(mults[iEvent], SValues[iEvent][iHisto] , 1.0);
 					hS_vsMult[1][iHisto]->Fill(mults[iEvent], (SValues[iEvent][iHisto] / h_counts_vsMult[iHisto]->GetBinContent(bin)), 1.0);
 				}
