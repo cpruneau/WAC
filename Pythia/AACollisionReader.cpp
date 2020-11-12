@@ -33,7 +33,7 @@ void AACollisionReader::initialize()
   if (reportDebug()) cout << "AACollisionReader::initialize() Started" << endl;
   AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
   HeavyIonConfiguration * hc = (HeavyIonConfiguration *) ac;
-  int nthreads = hc->nthreads;
+  int nthreads = hc->nThreads;
   ROOT::EnableImplicitMT(nthreads); // to speed up getting the entry
 
   fileLocation = hc->treeFile;
