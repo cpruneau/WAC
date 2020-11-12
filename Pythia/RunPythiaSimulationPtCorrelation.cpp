@@ -34,7 +34,7 @@ int main()
 
 //  long nEventsRequested = 100;
   long nEventsRequested = 10000;
-  int  nEventsReport    = 1;
+  int  nEventsReport    = 100;
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////
   // Heavy Ion and Analysis Configuration Parameters
@@ -110,6 +110,7 @@ int main()
   ac->eventTreeName =  "PythiaEventTree"; 
   ac->treeFile =  ac->outputPath + "/PythiaEventTree"; // no .root extension on purpose
   ac->numFiles = 5;
+  ac->nThreads = 50;
 
 
 
@@ -200,11 +201,11 @@ int main()
   AACollisionGenerator *ag = new AACollisionGenerator("PYTHIA_PbPbEventGenerator",ac, event,eventFilter,particleFilter, collisionGeometry);
   //eventLoop->addTask( new PythiaEventGenerator("PYTHIA",0, event,eventFilter,particleFilter) );
   eventLoop->addTask(cg );
-  eventLoop->addTask(  ag);
-  //eventLoop->addTask( ar );
+  //eventLoop->addTask(  ag);
+  eventLoop->addTask( ar );
   eventLoop->addTask( pc ); // Note: make sure all filters are distinct
-  ar->setReportLevel(MessageLogger::Debug);
-  pc->setReportLevel(MessageLogger::Debug);
+  //ar->setReportLevel(MessageLogger::Debug);
+  //pc->setReportLevel(MessageLogger::Debug);
 
 
   /*

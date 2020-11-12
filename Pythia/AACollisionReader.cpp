@@ -31,10 +31,10 @@ AACollisionReader::~AACollisionReader()
 void AACollisionReader::initialize()
 {
   if (reportDebug()) cout << "AACollisionReader::initialize() Started" << endl;
-  int nthreads = 5;
-  ROOT::EnableImplicitMT(nthreads); // to speed up getting the entry
   AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
   HeavyIonConfiguration * hc = (HeavyIonConfiguration *) ac;
+  int nthreads = hc->nthreads;
+  ROOT::EnableImplicitMT(nthreads); // to speed up getting the entry
 
   fileLocation = hc->treeFile;
   eventTreeName = hc->eventTreeName;

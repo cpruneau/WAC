@@ -43,5 +43,7 @@ void HeavyIonConfiguration::printConfiguration(ostream & os)
   << "            branchName_pz: " << branchName_pz     << endl
   << "           branchName_ist: " << branchName_ist     << endl
   << "           branchName_pdg: " << branchName_pdg     << endl
-  << "            branchName_pE: " << branchName_pE     << endl;
+  << "            branchName_pE: " << branchName_pE     << endl
+  << "                 nThreads: " << nThreads     << endl;
+
 }

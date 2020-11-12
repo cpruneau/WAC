@@ -33,6 +33,10 @@ numFunc(3)
 	loadHistograms(inputFile);
 }
 
+////////////////////////////////////////////////////
+//DTOR
+//The commented portions are already deleted in the HistogramCollection Dtor
+////////////////////////////////////////////////////
 PTHistos::~PTHistos()
 {
 	//deleteHistograms();
@@ -43,24 +47,24 @@ PTHistos::~PTHistos()
 		delete pT[i];
 		if (ac.ptCorrelatorVsMult) delete pT_vsMult[i];
 		if (ac.ptCorrelatorVsCent) delete pT_vsCent[i];
-	}
+	}*/
 	delete[] pT;
 	if (ac.ptCorrelatorVsMult) delete[] pT_vsMult;
 	if (ac.ptCorrelatorVsCent) delete[] pT_vsCent;
 
-	delete h_events;
+	/*delete h_events;
 	if (ac.ptCorrelatorVsMult) delete h_events_vsMult;
-	if (ac.ptCorrelatorVsCent) delete h_events_vsCent;
+	if (ac.ptCorrelatorVsCent) delete h_events_vsCent;*/
 	for (int i = 0; i < numFunc; ++i)
 	{
 		for(int j = 0; j < size; j++)
 		{
-			delete hS[i][j];
+			/*delete hS[i][j];
 			if (ac.ptCorrelatorVsMult) delete hS_vsMult[i][j];
 			if (ac.ptCorrelatorVsCent) delete hS_vsCent[i][j]; 
 			delete hC[i][j];
 			if (ac.ptCorrelatorVsMult) delete hC_vsMult[i][j];
-			if (ac.ptCorrelatorVsCent) delete hC_vsCent[i][j]; 
+			if (ac.ptCorrelatorVsCent) delete hC_vsCent[i][j];*/ 
 		}
 		delete[] hS[i];
 		if (ac.ptCorrelatorVsMult) delete[] hS_vsMult[i];
@@ -84,12 +88,12 @@ PTHistos::~PTHistos()
 	delete[] names2;
 	delete[] titles2; 
 
-	for(int j = 0; j < size; j++)
+	/*for(int j = 0; j < size; j++)
 	{
 		delete h_counts[j];
 		if (ac.ptCorrelatorVsMult) delete h_counts_vsMult[j];
 		if (ac.ptCorrelatorVsCent) delete h_counts_vsCent[j]; 
-	}
+	}*/
 	delete[] h_counts;
 	if (ac.ptCorrelatorVsMult) delete[] h_counts_vsMult;
 	if (ac.ptCorrelatorVsCent) delete[] h_counts_vsCent; 
@@ -101,7 +105,7 @@ PTHistos::~PTHistos()
 	{
 		delete[] SValues[i];
 	}
-	delete[] SValues;*/
+	delete[] SValues;
 	if (reportDebug())  cout << "PTHistos::DTOR(...) Completed" << endl;
 }
 
@@ -118,11 +122,11 @@ void PTHistos::createHistograms()
 	// Naming convention
 	// ================================================================================
   	// S is the pT deviation moments
-  	// s are the normalized moments
-  	// s* are the moments normalized by inclusive average pT's
+  	// s are the yield-normalized moments
+  	// s* are the moments normalized by average transverse momenta
  	// C is the cumulants
-	// c are the normalized cumulants
- 	// c* are the cumulants normalizd by inclusive average pT's
+	// c are the yield-normalized cumulants
+ 	// c* are the cumulants normalizd by average transverse momenta
 
 	size = (TMath::Factorial(2 * maxOrder)) / (TMath::Factorial(maxOrder ) * TMath::Factorial(maxOrder )) - 1;
 
@@ -130,9 +134,9 @@ void PTHistos::createHistograms()
 	hS_vsMult = new TProfile ** [numFunc];
 	hS_vsCent = new TProfile ** [numFunc];
 
-	hC = new TH1 ** [numFunc];
-	hC_vsMult = new TH1 ** [numFunc];
-	hC_vsCent = new TH1 ** [numFunc];
+	hC = new TProfile ** [numFunc];
+	hC_vsMult = new TProfile ** [numFunc];
+	hC_vsCent = new TProfile ** [numFunc];
 
 	names = new TString* [numFunc];
 	titles = new TString *[numFunc];
@@ -145,9 +149,9 @@ void PTHistos::createHistograms()
 		hS_vsMult[i] = new TProfile * [size];
 		hS_vsCent[i] = new TProfile * [size];
 
-		hC[i] = new TH1 * [size];
-		hC_vsMult[i] = new TH1 * [size];
-		hC_vsCent[i] = new TH1 * [size];
+		hC[i] = new TProfile * [size];
+		hC_vsMult[i] = new TProfile * [size];
+		hC_vsCent[i] = new TProfile * [size];
 
 		names[i] = new TString [size];
 		titles[i] = new TString [size];
@@ -201,6 +205,7 @@ void PTHistos::createHistograms()
 	createHistogramRec(baseName, baseTitle, maxOrder - 1, 0);
 
 	reorder = new int[size];
+	reorder2 = new int[size];
 	int counter = 0;
 	for(int iOrd = 1; iOrd <= maxOrder; iOrd++)
 	{
@@ -209,19 +214,38 @@ void PTHistos::createHistograms()
 			if(orders[iHisto] == iOrd)
 			{
 				reorder[iHisto] = counter;
+				reorder2[counter] = iHisto;
 				counter++;
 
 			}
 		}
 	}
 
+	for(int iHisto = 0; iHisto < size; iHisto++)
+	{
+		for (int iFunc = 0; iFunc < numFunc; ++iFunc)
+		{
+			hS[iFunc][iHisto] = createProfile( names[iFunc][iHisto], 1, ac.min_mult , ac.max_mult ,"mult",titles[iFunc][iHisto] + "}" );
+			if (ac.ptCorrelatorVsMult)	hS_vsMult[iFunc][iHisto] = createProfile(names[iFunc][iHisto] + "_vsMult",ac.nBins_mult,ac.min_mult, ac.max_mult, "mult", titles[iFunc][iHisto] + "}");
+			if (ac.ptCorrelatorVsCent)	hS_vsCent[iFunc][iHisto] = createProfile(names[iFunc][iHisto] + "_vsCent",ac.nBins_mult,ac.min_mult, ac.max_mult , "cent", titles[iFunc][iHisto] + "}");
+		}
+	}
+	for(int iHisto = 0; iHisto < size; iHisto++)
+	{
+		for (int i = 0; i < numFunc; ++i)
+		{
+			hC[i][iHisto] = createProfile( names2[i][iHisto], 1, ac.min_mult, ac.max_mult,"mult",titles2[i][iHisto] + "}" );
+			if (ac.ptCorrelatorVsMult)	hC_vsMult[i][iHisto] = createProfile(names2[i][iHisto] + "_vsMult",ac.nBins_mult,ac.min_mult , ac.max_mult , "mult", titles2[i][iHisto] + "}");
+			if (ac.ptCorrelatorVsCent)	hC_vsCent[i][iHisto] = createProfile(names2[i][iHisto] + "_vsCent",ac.nBins_cent,ac.min_mult , ac.max_mult , "cent", titles2[i][iHisto] + "}");
+		}
+	}
 	histoIndex = 0;
 	if (reportDebug())  cout << "PTHistos::createHistograms(...) ended"<< endl;
 	//h_c123vsMultTest = createProfile("c123Test", ac.nBins_mult,ac.min_mult,ac.max_mult,"mult", "c123Test" );
 }
 
 /////////////////////////////////////////////////////////
-// needs to be fixed
+// need to fix so that it mirrors above
 ////////////////////////////////////////////////////////
 void PTHistos::loadHistograms(TFile * inputFile)
 {
@@ -240,9 +264,9 @@ void PTHistos::loadHistograms(TFile * inputFile)
 	hS_vsMult = new TProfile ** [numFunc];
 	hS_vsCent = new TProfile ** [numFunc];
 
-	hC = new TH1 ** [numFunc];
-	hC_vsMult = new TH1 ** [numFunc];
-	hC_vsCent = new TH1 ** [numFunc];
+	hC = new TProfile ** [numFunc];
+	hC_vsMult = new TProfile ** [numFunc];
+	hC_vsCent = new TProfile ** [numFunc];
 
 	for(int i = 0; i < numFunc; i++)
 	{	
@@ -250,9 +274,9 @@ void PTHistos::loadHistograms(TFile * inputFile)
 		hS_vsMult[i] = new TProfile * [size];
 		hS_vsCent[i] = new TProfile * [size];
 
-		hC[i] = new TH1 * [size];
-		hC_vsMult[i] = new TH1 * [size];
-		hC_vsCent[i] = new TH1 * [size];
+		hC[i] = new TProfile * [size];
+		hC_vsMult[i] = new TProfile * [size];
+		hC_vsCent[i] = new TProfile * [size];
 	}
 
 	h_counts = new TProfile*  [size];
@@ -290,7 +314,10 @@ void PTHistos::loadHistograms(TFile * inputFile)
 	histoIndex = 0;
 }
 
-//overloaded saveHistograms to save histograms in sequence of lowest order to highest order
+///////////////////////////////////////////////////////////////////////////////////////////
+//overloaded HistogramCollection::saveHistograms to save histograms in sequence of lowest order to highest order
+//reorders the histograms from the "recursive" order that they are created in
+///////////////////////////////////////////////////////////////////////////////////////////
 void PTHistos::saveHistograms(TFile * outputFile, bool saveAll)
 {
 
@@ -306,6 +333,7 @@ void PTHistos::saveHistograms(TFile * outputFile, bool saveAll)
 	int extra = numTypes * (maxOrder + 1);
 
 	//saves event and transverse momentum histos
+	//there are "extra" of these
 	for (int k=0; k<extra; k++)
 	{
 		if (isSaved(options[k]) || saveAll)  getObjectAt(k)->Write();
@@ -319,15 +347,20 @@ void PTHistos::saveHistograms(TFile * outputFile, bool saveAll)
 			{
 				if(k < size * numTypes + extra && iFunc == 2 * numFunc)
 				{
-					int k1 = (k - extra);
-					int orderIndex = k1 / numTypes;
-					if ((isSaved(options[k]) || saveAll) && (orders[orderIndex] == i)) getObjectAt(k)->Write();
+					//These are the "yields" histograms
+					//there are size * numTypes of them(plus the "extra" first ones) hence k < size * numTypes + extra
+					//Want them to be saved last hence the iFunc == 2 * numFunc
+					int k1 = (k - extra); //We want to know the relative order of the histogram in its group.
+					int orderIndex = k1 / numTypes; 
+						//We want the count and count_vsMult to be saved right next to each other. 
+						//They are created together, so we are only concerned about the clumps of (numtypes) histograms, hence the "/ numTypes"
+					if ((isSaved(options[k]) || saveAll) && (orders[orderIndex] == i)) getObjectAt(k)->Write(); // want to save them in increasing order
 				}
 				if(k >= size * numTypes + extra && k < size * (numFunc + 1) * numTypes + extra && iFunc < numFunc)
 				{
 					int k1 = k - size * numTypes - extra;
 					int orderIndex = (k1 )/(numTypes * (numFunc ));
-					int funcIndex = (k1 )/numTypes - ( (numFunc )) * ((k1)/(numTypes * (numFunc )));
+					int funcIndex = (k1 )/numTypes - ( (numFunc )) * ((k1)/(numTypes * (numFunc ))); // We wish to save S, then s, then s*.
 					if ((isSaved(options[k]) || saveAll) && (orders[orderIndex] == i) && ((funcIndex) % ( numFunc) == (iFunc % ( numFunc)))) getObjectAt(k)->Write();
 				}
 				if(k >= size * (numFunc + 1) * numTypes + extra && iFunc >= numFunc && iFunc < 2 * numFunc)
@@ -367,9 +400,11 @@ void PTHistos::fillTransverseMomentumHistos(double transverseMomentum, int filte
 }
 
 
-
+///////////////////////////////////////////////////////////////////////////////////
 // recursively create histograms for correlation functions of order 1 - maxOrder
-// Note: these histograms are not in sequence of lowest order to highest order. The reording occurs when the histograms are saved with the saveHistograms function.
+// Note: these histograms are not in sequence of lowest order to highest order. They are in depth first recursive order: 1, 11, 111, 1111, 1112, 1113, 1114, 112, 1121 ...
+//The reording occurs when the histograms are saved with the saveHistograms function.
+/////////////////////////////////////////////////////////////////////////////////
 void PTHistos::createHistogramRec(TString * baseName, TString * baseTitle, int depth, int partIndex)
 {
 	if (reportDebug())  cout << "PTHistos::createHistogramsRec(...) started"<< endl;
@@ -424,7 +459,7 @@ void PTHistos::createHistogramRec(TString * baseName, TString * baseTitle, int d
 }
 
 //////////////////////////////////////////////
-// need to fix
+// need to fix so that it mirrors above
 //////////////////////////////////////////////
 void PTHistos::loadHistogramRec(TString * baseName, int depth, int partIndex, TFile * inputFile)
 {
@@ -472,30 +507,17 @@ void PTHistos::loadHistogramRec(TString * baseName, int depth, int partIndex, TF
 	if (reportDebug())  cout << "PTHistos::loadHistogramRec(...) Completed." << endl;
 }
 
-void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments,double ** yields, double * mults, double * cents, double * numParticles)
+////////////////////////////////////////////////////////////////
+//Fill the Derived Histograms(Moments and Cumulants of tranverse momentum deviations)
+//Uses Histogram addition, division, and multiplication.
+///////////////////////////////////////////////////////////////
+void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments,double ** counts, double * mults, double * cents, double * numParticles)
 {
 	if (reportDebug())  cout << "PTHistos::fillDerivedHistos(...) Starting." << endl;
 	auto start = chrono::high_resolution_clock::now(); 
 	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)*getConfiguration();
-	//double max = ac.nCollisionsMax;
-	/*h_events_vsMult->BufferEmpty();
-	ac.min_mult = h_events->GetXaxis()->GetXmin();
-	ac.max_mult = h_events->GetXaxis()->GetXmax();
 
-	for(int i = 0; i < maxOrder; i++)
-	{
-		PTHistos::pT[i]->GetXaxis()->SetLimits(ac.min_mult, ac.max_mult);
-		if (ac.ptCorrelatorVsMult) pT_vsMult[i]->GetXaxis()->SetLimits(ac.min_mult, ac.max_mult);
-		if (ac.ptCorrelatorVsCent) pT_vsCent[i]->GetXaxis()->SetLimits(ac.min_mult, ac.max_mult);
-	}*/
-
-	//avgpT = new double  [maxOrder];
-	//calculateInclusivePtAverage(acceptances, numParticles, pT);
-
-	//avgCounts = new double [size]();
-	//counts = new double* [totEvents]();
-	//calculateInclusiveYieldsAverage(acceptances, numParticles);
-
+	yields = counts;
 	SValues = new double * [totEvents]();
 	//fill yields
 	for(int iEvent = 0; iEvent < totEvents;iEvent++)
@@ -513,113 +535,117 @@ void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments,double ** 
 	{
 		for(int iHisto = 0; iHisto <size; iHisto++)
 		{
-			if(iEvent == 0)
-			{
-				for (int iFunc = 0; iFunc < numFunc; ++iFunc)
-				{
-					hS[iFunc][iHisto] = createProfile( names[iFunc][iHisto], 1, ac.min_mult , ac.max_mult ,"mult",titles[iFunc][iHisto] + "}" );
-					if (ac.ptCorrelatorVsMult)	hS_vsMult[iFunc][iHisto] = createProfile(names[iFunc][iHisto] + "_vsMult",ac.nBins_mult,ac.min_mult, ac.max_mult, "mult", titles[iFunc][iHisto] + "}");
-					if (ac.ptCorrelatorVsCent)	hS_vsCent[iFunc][iHisto] = createProfile(names[iFunc][iHisto] + "_vsCent",ac.nBins_mult,ac.min_mult, ac.max_mult , "cent", titles[iFunc][iHisto] + "}");
-				}
-			}
 			if(yields[iEvent][iHisto] != 0)
 			{
 				SValues[iEvent] = new double [size];
 				int bin = pT[0]->FindBin(mults[iEvent]);
-				calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent, numParticles[iEvent],pT );
+				calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent, numParticles[iEvent],pT );//calculate the deviation using this bin of the average transverse momentum
 				hS[0][iHisto]->Fill(mults[iEvent], SValues[iEvent][iHisto], 1.0);//weight is always 1.0
-				hS[1][iHisto]->Fill(mults[iEvent], (SValues[iEvent][iHisto] / h_counts[iHisto]->GetBinContent(bin)), 1.0);
 				if (ac.ptCorrelatorVsMult)	
 				{
 					bin = pT_vsMult[0]->FindBin(mults[iEvent]);
-					calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent, numParticles[iEvent],pT);
+					calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent, numParticles[iEvent],pT_vsMult);
 					hS_vsMult[0][iHisto]->Fill(mults[iEvent], SValues[iEvent][iHisto] , 1.0);
-					hS_vsMult[1][iHisto]->Fill(mults[iEvent], (SValues[iEvent][iHisto] / h_counts_vsMult[iHisto]->GetBinContent(bin)), 1.0);
 				}
 				if (ac.ptCorrelatorVsCent)	
 				{
-					bin = pT_vsCent[0]->FindBin(mults[iEvent]);
+					bin = pT_vsCent[0]->FindBin(cents[iEvent]);
 					calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent,  numParticles[iEvent],pT_vsCent);
 					hS_vsCent[0][iHisto]->Fill(cents[iEvent], SValues[iEvent][iHisto] , 1.0);
-					hS_vsCent[1][iHisto]->Fill(cents[iEvent], (SValues[iEvent][iHisto] / h_counts_vsCent[iHisto]->GetBinContent(bin)), 1.0);
 				}
 			}
 
 		}
+	}
+	for(int iHisto = 0; iHisto < size; iHisto++)
+	{
+		hS[1][iHisto]->Add(hS[0][iHisto]);
+		hS[1][iHisto]->Divide(h_counts[iHisto]);
+
+		if (ac.ptCorrelatorVsMult)
+		{
+			hS_vsMult[1][iHisto]->Add(hS_vsMult[0][iHisto]);
+			hS_vsMult[1][iHisto]->Divide(h_counts_vsMult[iHisto]);
+		} 
+		if (ac.ptCorrelatorVsCent)
+		{
+			hS_vsCent[1][iHisto]->Add(hS_vsCent[0][iHisto]);
+			hS_vsCent[1][iHisto]->Divide(h_counts_vsCent[iHisto]);
+		} 
+	}
+
+	histoIndex = 0;
+	fillNormalizedPTValues(maxOrder - 1, 0, hS[0][0], hS[0], pT, hS[2]);//hS[0][0] has no meaning, the pointer is reset in the function anyways
+
+	if (ac.ptCorrelatorVsMult)	
+	{
 		histoIndex = 0;
-		//fillNormalizedPTValues(maxOrder - 1, 0, 1,  SValues[iEvent], mults[iEvent], cents[iEvent]);
+		fillNormalizedPTValues(maxOrder - 1, 0, hS[0][0], hS_vsMult[0], pT_vsMult, hS_vsMult[2]);
+	}
+	if (ac.ptCorrelatorVsCent)
+	{
+		histoIndex = 0;
+		fillNormalizedPTValues(maxOrder - 1, 0, hS[0][0], hS_vsCent[0], pT_vsCent, hS_vsCent[2]);
 		histoIndex = 0;
 	}
 
-	TH1 *** newhCValues = new TH1**[3];
+	
+	TProfile *** newhCValues = new TProfile**[3];
 	for(int iHisto = 0; iHisto < 3; iHisto++)
 	{
-		newhCValues[iHisto] = new TH1*[size];
+		newhCValues[iHisto] = new TProfile*[size];
 	}
-
 	calculateCumulants(hS[0], newhCValues[0], 1 ,ac.min_mult,  ac.max_mult);
 	if (ac.ptCorrelatorVsMult)	calculateCumulants(hS_vsMult[0], newhCValues[1], ac.nBins_mult,ac.min_mult,  ac.max_mult);
 	if (ac.ptCorrelatorVsCent)	calculateCumulants(hS_vsCent[0], newhCValues[2], ac.nBins_cent,ac.min_cent,  ac.max_cent);
 
 	for(int iHisto = 0; iHisto <size; iHisto++)
 	{
-		for (int i = 0; i < numFunc; ++i)
-		{
-			hC[i][iHisto] = createHistogram( names2[i][iHisto], 1, ac.min_mult, ac.max_mult,"mult",titles2[i][iHisto] + "}" );
-			if (ac.ptCorrelatorVsMult)	hC_vsMult[i][iHisto] = createHistogram(names2[i][iHisto] + "_vsMult",ac.nBins_mult,ac.min_mult , ac.max_mult , "mult", titles2[i][iHisto] + "}");
-			if (ac.ptCorrelatorVsCent)	hC_vsCent[i][iHisto] = createHistogram(names2[i][iHisto] + "_vsCent",ac.nBins_cent,ac.min_mult , ac.max_mult , "cent", titles2[i][iHisto] + "}");
-		}
-		int nBins = 1;
-		for(int iBin = 1; iBin <=nBins; iBin++)
-		{
-			if(newhCValues[0][reorder[iHisto]]->GetBinContent(iBin) != 0)
-			{
-				hC[0][iHisto]->SetBinContent(iBin, totEvents * newhCValues[0][reorder[iHisto]]->GetBinContent(iBin));
-				hC[0][iHisto]->SetBinError(iBin, totEvents * newhCValues[0][reorder[iHisto]]->GetBinError(iBin));
-
-				hC[1][iHisto]->SetBinContent(iBin,  totEvents * newhCValues[0][reorder[iHisto]]->GetBinContent(iBin)/h_counts[iHisto]->GetBinContent(iBin));
-				double err = newhCValues[0][reorder[iHisto]]->GetBinContent(iBin)/h_counts[iHisto]->GetBinContent(iBin) * ( newhCValues[0][reorder[iHisto]]->GetBinError(iBin)/newhCValues[0][reorder[iHisto]]->GetBinContent(iBin) + h_counts[iHisto]->GetBinError(iBin)/h_counts[iHisto]->GetBinContent(iBin) );
-				hC[1][iHisto]->SetBinError(iBin, totEvents * err);
-			}
-		}
-
-		if (ac.ptCorrelatorVsMult)	
-		{
-			nBins =ac.nBins_mult;
-			for(int iBin = 1; iBin <=nBins; iBin++)
-			{
-				if(newhCValues[1][reorder[iHisto]]->GetBinContent(iBin) != 0)
-				{
-					hC_vsMult[0][iHisto]->SetBinContent(iBin, totEvents * newhCValues[1][reorder[iHisto]]->GetBinContent(iBin));
-					hC_vsMult[0][iHisto]->SetBinError(iBin, totEvents * newhCValues[1][reorder[iHisto]]->GetBinError(iBin));
-
-					hC_vsMult[1][iHisto]->SetBinContent(iBin,  totEvents * newhCValues[1][reorder[iHisto]]->GetBinContent(iBin)/h_counts[iHisto]->GetBinContent(1));
-					double err = newhCValues[1][reorder[iHisto]]->GetBinContent(iBin)/h_counts[iHisto]->GetBinContent(1) * ( newhCValues[1][reorder[iHisto]]->GetBinError(iBin)/newhCValues[1][reorder[iHisto]]->GetBinContent(iBin) + h_counts_vsMult[iHisto]->GetBinError(iBin)/h_counts_vsMult[iHisto]->GetBinContent(iBin) );
-					hC_vsMult[1][iHisto]->SetBinError(iBin, totEvents * err);
-				}
-			}
-		}
-
-		if (ac.ptCorrelatorVsCent)
-		{
-			nBins = ac.nBins_cent;
-			for(int iBin = 1; iBin <=nBins; iBin++)
-			{
-				if(newhCValues[2][reorder[iHisto]]->GetBinContent(iBin) != 0)
-				{
-					hC_vsCent[0][iHisto]->SetBinContent(iBin, totEvents * newhCValues[2][reorder[iHisto]]->GetBinContent(iBin));
-					hC_vsCent[0][iHisto]->SetBinError(iBin, totEvents * newhCValues[2][reorder[iHisto]]->GetBinError(iBin));
-
-					hC_vsCent[1][iHisto]->SetBinContent(iBin, totEvents * newhCValues[2][reorder[iHisto]]->GetBinContent(iBin)/h_counts[iHisto]->GetBinContent(1));
-					double err = newhCValues[2][reorder[iHisto]]->GetBinContent(iBin)/h_counts_vsCent[iHisto]->GetBinContent(1) * ( newhCValues[2][reorder[iHisto]]->GetBinError(iBin)/newhCValues[2][reorder[iHisto]]->GetBinContent(iBin) + h_counts_vsCent[iHisto]->GetBinError(iBin)/h_counts_vsCent[iHisto]->GetBinContent(iBin) );
-					hC_vsCent[1][iHisto]->SetBinError(iBin, totEvents * err);
-				}
-			}
-		}
-
+		hC[0][iHisto]->Add( newhCValues[0][reorder[iHisto]]);
+		if (ac.ptCorrelatorVsMult) hC_vsMult[0][iHisto]->Add(newhCValues[1][reorder[iHisto]]);
+		if (ac.ptCorrelatorVsCent) hC_vsCent[0][iHisto]->Add(newhCValues[2][reorder[iHisto]]);
 	}
 
-	//fillNormalizedPTValues(maxOrder - 1, 0, 1,  newhCValues, reorder, new int[3]{1,ac.nBins_mult, ac.nBins_cent});
+	for(int iHisto = 0; iHisto < size; iHisto++)
+	{
+		hC[1][iHisto]->Add(hC[0][iHisto]);
+		hC[1][iHisto]->Divide(h_counts[iHisto]);
+
+		if (ac.ptCorrelatorVsMult)
+		{
+			hC_vsMult[1][iHisto]->Add(hC_vsMult[0][iHisto]);
+			hC_vsMult[1][iHisto]->Divide(h_counts_vsMult[iHisto]);
+		} 
+		if (ac.ptCorrelatorVsCent)
+		{
+			hC_vsCent[1][iHisto]->Add(hC_vsCent[0][iHisto]);
+			hC_vsCent[1][iHisto]->Divide(h_counts_vsCent[iHisto]);
+		} 
+	}
+	histoIndex = 0;
+	fillNormalizedPTValues(maxOrder - 1, 0, hS[0][0], hC[0], pT, hC[2]);//hS[0][0] has no meaning, the pointer is reset in the function anyways
+
+	if (ac.ptCorrelatorVsMult)	
+	{
+		histoIndex = 0;
+		fillNormalizedPTValues(maxOrder - 1, 0, hS[0][0], hC_vsMult[0], pT_vsMult, hC_vsMult[2]);
+	}
+	if (ac.ptCorrelatorVsCent)
+	{
+		histoIndex = 0;
+		fillNormalizedPTValues(maxOrder - 1, 0, hS[0][0], hC_vsCent[0], pT_vsCent, hC_vsCent[2]);
+		histoIndex = 0;
+	}
+
+	for(int iHisto = 0; iHisto < 2; iHisto++)
+	{
+		for(int i = 0; i < size; i++)
+		{
+			delete newhCValues[iHisto][i];
+		}
+		delete[] newhCValues[iHisto];
+	}
+	delete[] newhCValues;
 
 	auto stop = chrono::high_resolution_clock::now(); 
 	auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
@@ -632,90 +658,58 @@ void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments,double ** 
 }
 
 ////////////////////////////////////////////
-//fill  S or C Values normalized by overall event average transverse momenta
+//fill  S or C Values normalized by average transverse momenta
 /////////////////////////////////////////////
-/*void PTHistos::fillNormalizedPTValues( int depth, int partIndex, double product, double * values, double  mult, double  cent)
+void PTHistos::fillNormalizedPTValues( int depth, int partIndex, TProfile * product, TProfile **OldSHistos, TProfile** pTHistos, TProfile **newSHistos)
 {
 	if (reportDebug())  cout << "PTHistos::fillNormalizedPTValues(...) Starting." << endl;
 	AnalysisConfiguration & ac = *getConfiguration();
 
 	for(int i = partIndex; i < maxOrder; i++)
-	{		
-		double newProduct = product * avgpT[i];
-
-		if(values[histoIndex] != 0)
+	{	
+		TProfile * newProduct; TH1D *h1; TH1D *h2; 
+		TString s = OldSHistos[i]->GetTitle();
+		if(depth != maxOrder - 1) 
 		{
-			hS[2][histoIndex]->Fill(mult, (values[histoIndex] / newProduct), 1.0);
-			if (ac.ptCorrelatorVsMult)	hS_vsMult[2][histoIndex]->Fill(mult, (values[histoIndex] / newProduct), 1.0);
-			if (ac.ptCorrelatorVsCent)	hS_vsCent[2][histoIndex]->Fill(cent, (values[histoIndex] / newProduct), 1.0);
+			//Use a unique name for the histogram so that there are no naming conflicts and therefore no memory leaks
+			//(histograms with the same name as an existing histogram overwrite the existing histogram)
+			newProduct = new TProfile( s + (histoIndex ) + "s", s + (histoIndex ) + "s", product->GetNbinsX() ,ac.min_mult, ac.max_mult,  "mult");
+			newProduct->Add(product);
+			h1 = newProduct->ProjectionX();
+			h2 = pTHistos[i]->ProjectionX();
+			h1->Multiply(h2);
+			delete h1; delete h2;
 		}
+		else  
+		{
+			//if depth is maxOrder - 1, product is bogus pointer. 
+ 			//We would like to multiply histograms, but there is no "identity" histogram, like "1" is the identity number for multiplication
+ 			//If these were numbers, productC would start as 1, and there would be no need to differentiate here
+			newProduct = new TProfile(s + histoIndex  , s + histoIndex ,pTHistos[i]->GetNbinsX() ,ac.min_mult, ac.max_mult,  "mult");
+			newProduct->Add(pTHistos[i]);
+		}	
+
+		newSHistos[histoIndex]->Add(OldSHistos[histoIndex]);
+		newSHistos[histoIndex]->Divide(newProduct);
 		if(histoIndex != size - 1)	histoIndex++;
 
-		if(depth != 0)	fillNormalizedPTValues(depth - 1, i, newProduct, values, mult, cent);
+		if(depth != 0)	fillNormalizedPTValues(depth - 1, i, newProduct, OldSHistos, pTHistos, newSHistos);
+		delete newProduct;
 	}
 	if (reportDebug())  cout << "PTHistos::fillNormalizedPTValues(...) Completed." << endl;
 }
 
-void PTHistos::fillNormalizedPTValues( int depth, int partIndex, double product, TH1 *** values, int* reorder, int*  nBin)
-{
-	if (reportDebug())  cout << "PTHistos::fillNormalizedPTValues(...) Starting." << endl;
-	AnalysisConfiguration & ac = *getConfiguration();
 
-	for(int i = partIndex; i < maxOrder; i++)
-	{
 
-		
-		double newProduct = product * avgpT[i];
-
-		for(int iBin = 1; iBin <=nBin[0]; iBin++)
-		{
-			if(values[0][reorder[histoIndex]]->GetBinContent(iBin) != 0)
-			{
-				hC[2][histoIndex]->SetBinContent(iBin, totEvents * values[0][reorder[histoIndex]]->GetBinContent(iBin) / newProduct);
-				double err = values[0][reorder[histoIndex]]->GetBinContent(iBin)/newProduct * ( values[0][reorder[histoIndex]]->GetBinError(iBin)/values[0][reorder[histoIndex]]->GetBinContent(iBin));
-				hC[2][histoIndex]->SetBinError(iBin, totEvents * err);
-			}
-		}
-		if (ac.ptCorrelatorVsMult)	
-		{
-			for(int iBin = 1; iBin <=nBin[1]; iBin++)
-			{
-				if(values[1][reorder[histoIndex]]->GetBinContent(iBin) != 0)
-				{
-					hC_vsMult[2][histoIndex]->SetBinContent(iBin, totEvents * values[1][reorder[histoIndex]]->GetBinContent(iBin) / newProduct);
-					double err = values[1][reorder[histoIndex]]->GetBinContent(iBin)/newProduct * ( values[1][reorder[histoIndex]]->GetBinError(iBin)/values[1][reorder[histoIndex]]->GetBinContent(iBin));
-					hC_vsMult[2][histoIndex]->SetBinError(iBin, totEvents * err);
-				}
-			}
-		}
-		if (ac.ptCorrelatorVsCent)	
-		{
-			for(int iBin = 1; iBin <=nBin[2]; iBin++)
-			{
-				if(values[2][reorder[histoIndex]]->GetBinContent(iBin) != 0)
-				{
-					hC_vsCent[2][histoIndex]->SetBinContent(iBin, totEvents * values[2][reorder[histoIndex]]->GetBinContent(iBin) / newProduct);
-					double err = values[1][reorder[histoIndex]]->GetBinContent(iBin)/newProduct * ( values[2][reorder[histoIndex]]->GetBinError(iBin)/values[2][reorder[histoIndex]]->GetBinContent(iBin));
-					hC_vsCent[2][histoIndex]->SetBinError(iBin, totEvents * err);
-				}
-			}
-		}
-		
-		if(histoIndex != size - 1)	histoIndex++;
-
-		if(depth != 0)	fillNormalizedPTValues(depth - 1, i, newProduct, values, reorder, nBin);
-	}
-	if (reportDebug())  cout << "PTHistos::fillNormalizedPTValues(...) Completed." << endl;
-}*/
 
 ///////////////////////////////////////////
 //calculate the cumulants of the moments
 //////////////////////////////////////////
-void PTHistos::calculateCumulants(TProfile ** SHistos, TH1 **CHistos, int nBins, double min, double max)
+void PTHistos::calculateCumulants(TProfile ** SHistos, TProfile **CHistos, int nBins, double min, double max)
 {	
 	if (reportDebug())  cout << "PTHistos::calculateCumulants(...) Starting." << endl;
 
-	//HeavyIonConfiguration & ac = (HeavyIonConfiguration&)( *getConfiguration());
+	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)( *getConfiguration());
 
 	TProfile ** newSHistos = new TProfile *[size];
 	int counter = 0;
@@ -734,43 +728,34 @@ void PTHistos::calculateCumulants(TProfile ** SHistos, TH1 **CHistos, int nBins,
 
 	int maxSize = TMath::Factorial( maxOrder);
 	double * used = new double[maxSize];
-	for(int iBin = 1; iBin <=nBins; iBin++)
+	for(int iHisto = 0; iHisto < size; iHisto++)
 	{
-		for(int iHisto = 0; iHisto < size; iHisto++)
+		int len = 0;
+		int * ind = convert(iHisto, len);
+
+		int curInd = 0;
+		int * set = new int[len];
+		for(int i = 0; i < len; i++)
 		{
-			double sum = 0;
-			double absESq = 0;
-			
-			int len = 0;
-			int * ind = convert(iHisto, len);
+			set[i] = i+1;
+		}
 
-			int curInd = 0;
-			int * set = new int[len];
-			for(int i = 0; i < len; i++)
-			{
-				set[i] = i+1;
-			}
+		TString name = "s";
 
-			calcRecSum( CHistos, iBin, absESq, 0, ind, set, len, set, len, 1, used, curInd, 1, sum );
+		//Use a unique name for the histogram so that there are no naming conflicts and therefore no memory leaks
+		//(histograms with the same name as an existing histogram overwrite the existing histogram)
+		CHistos[iHisto] = new TProfile(name + (nBins * size + iHisto), name + (nBins * size + iHisto), nBins, min, max);
+		TProfile * sum = new TProfile(name + (nBins * size + iHisto) +"s", name  + (nBins * size + iHisto) + "s", nBins, min, max);
 
-			TString name = nBins * size + iHisto;
-			
-			if(iBin == 1) CHistos[iHisto] = new TProfile(name, name, nBins, min, max);
+		calcRecSum( CHistos, ind, set, len, set, len, sum, used, curInd, 1, sum,0 );//the first "sum" has no meaning, the pointer is reset in the function anyways			
+		CHistos[iHisto]->Add(newSHistos[iHisto], sum, 1, -1);
 
-			double content = newSHistos[iHisto]->GetBinContent(iBin) - sum;
-			double error = sqrt(newSHistos[iHisto]->GetBinError(iBin) * newSHistos[iHisto]->GetBinError(iBin) + absESq);
-
-			if(newSHistos[iHisto]->GetBinContent(iBin) != 0)
-			{
-				CHistos[iHisto]->SetBinContent(iBin, content); 
-				CHistos[iHisto]->SetBinError(iBin, error);
-			}			
-			//if (abs(CHistos[iHisto]->GetBinContent(iBin)) < pow(10, -15)) CHistos[iHisto]->SetBinContent(iBin, 0); // doubles are accurate to 15 decimal places
+		//sum is unecessary
+		delete sum;
 
 			//ind is now uneccesary
-			delete[] ind;
+		delete[] ind;
 
-		}
 	}
 	
 	return;
@@ -791,9 +776,10 @@ void PTHistos::calculateCumulants(TProfile ** SHistos, TH1 **CHistos, int nBins,
 //     	After this function concludes, C(1, 2, 3) = S(1, 2, 3) - sum
 // note that C(1) = S(1) because sum = 0
 ///////////////////////////////////////////////////
-void PTHistos::calcRecSum(TH1 **CHistos, int iBin, double& absESq, double curRelESq, int* iHisto, int* Subset, int len,  int * set, int lenSet, double productC, double* used, int& curInd, int productS, double& sum)
+void PTHistos::calcRecSum(TProfile **CHistos,  int* iHisto, int* Subset, int len,  int * set, int lenSet, TProfile * productC, double* used, int& curInd, int productS, TProfile *  sum, int depth)
 {
 	if (reportDebug())  cout << "PTHistos::calcRecSum(...) Starting." << endl;
+	AnalysisConfiguration & ac = *getConfiguration();
 	int lenSub = 0;
 	int lenCompSub = 0;
 	if(len != 1)
@@ -810,18 +796,56 @@ void PTHistos::calcRecSum(TH1 **CHistos, int iBin, double& absESq, double curRel
 			convertToBinary(iSubset, bin, len);
 			subset = getSubset(bin, Subset, len, lenSub);
 			int * s = getSubset(bin, iHisto, len, lenSub);
+
+			TH1D *h1; TH1D *h2;
 			
 			int iSub = convert(s, lenSub);
-			double tempProduct = productC * CHistos[iSub]->GetBinContent(iBin);
-			double tempRelErr = curRelESq + CHistos[iSub]->GetBinError(iBin) * CHistos[iSub]->GetBinError(iBin) / CHistos[iSub]->GetBinContent(iBin) / CHistos[iSub]->GetBinContent(iBin);
+			TProfile * tempProduct;
+			if(depth == 0) 
+ 			{
+ 				//if depth is 0, productC is bogus pointer. 
+ 				//We would like to multiply histograms, but there is no "identity" histogram, like "1" is the identity number for multiplication
+ 				//If these were numbers, productC would start as 1, and there would be no need to differentiate here
+				TString s1 = CHistos[iSub]->GetTitle();
+				//Use a unique name for the histogram so that there are no naming conflicts and therefore no memory leaks
+				//(histograms with the same name as an existing histogram overwrite the existing histogram)
+				tempProduct = new TProfile( s1 + depth, s1 + depth, CHistos[iSub]->GetNbinsX() ,ac.min_mult, ac.max_mult,  "mult");
+				tempProduct->Add(CHistos[iSub]);
+
+			}
+			else
+			{
+				TString s1 = CHistos[iSub]->GetTitle();
+				tempProduct = new TProfile( s1+ depth, s1 + depth, CHistos[iSub]->GetNbinsX() ,ac.min_mult, ac.max_mult,  "mult");
+				tempProduct->Add(productC);
+				h1 = tempProduct->ProjectionX();
+				h2 = CHistos[iSub]->ProjectionX();
+				h1->Multiply(h2);
+				delete h1; delete h2; //avoid naming conflicts and histogram conflicts
+			}
 
 			//One of the terms in the cumulant corresponds to the product of the subset cumulant and the complementary subset cumulant. The remaining terms are further partitions which are counted when recursed
 			comp = getComplementarySubset(bin, Subset, len, lenCompSub);
 			compSubset = getComplementarySubset(bin, iHisto, len, lenCompSub);
 			int iComp = convert(compSubset, lenCompSub);
+			TProfile * tempProduct2;
+			if(!depth)
+			{
+				TString s1 = CHistos[iSub]->GetTitle();
+				tempProduct2 = new TProfile( s1 + "s" + depth, s1 + "s" + depth, CHistos[iSub]->GetNbinsX() ,ac.min_mult, ac.max_mult,  "mult");
+				tempProduct2->Add(CHistos[iComp]);
 
-			double tempProduct2 = tempProduct * CHistos[iComp]->GetBinContent(iBin);
-			double tempRelErr2  = tempRelErr  + CHistos[iComp]->GetBinError(iBin) * CHistos[iComp]->GetBinError(iBin) / CHistos[iComp]->GetBinContent(iBin) / CHistos[iComp]->GetBinContent(iBin);
+			}
+			else
+			{
+				TString s1 = CHistos[iSub]->GetTitle();
+				tempProduct2 = new TProfile( s1 + "s" + depth, s1 + "s" + depth, CHistos[iSub]->GetNbinsX() ,ac.min_mult, ac.max_mult,  "mult");
+				tempProduct2->Add(productC);
+				h1 = tempProduct2->ProjectionX();
+				h2 = CHistos[iComp]->ProjectionX();
+				h1->Multiply(h2);
+				delete h1; delete h2;
+			}
 
 			int tempProduct3 = productS * getSubsetNumber(subset, lenSub, set, lenSet);
 			int tempProduct4 = tempProduct3 * getSubsetNumber(comp, lenCompSub, set, lenSet);
@@ -834,8 +858,7 @@ void PTHistos::calcRecSum(TH1 **CHistos, int iBin, double& absESq, double curRel
 			}
 			if(accept) 
 			{
-				sum += tempProduct2;
-				absESq += tempProduct2 * tempProduct2 * tempRelErr2;
+				sum->Add( tempProduct2);
 				used[curInd] = tempProduct4;
 				curInd++;
 			}
@@ -843,8 +866,10 @@ void PTHistos::calcRecSum(TH1 **CHistos, int iBin, double& absESq, double curRel
 			delete [] subset;
 			delete[] s;
 			//partition the complementary subset into smaller subsets and multiply them by tempProduct and add to the sum
-			calcRecSum(CHistos, absESq, tempRelErr, iBin, compSubset, comp, lenCompSub, set, lenSet, tempProduct, used, curInd, tempProduct3, sum);
+			calcRecSum(CHistos, compSubset, comp, lenCompSub, set, lenSet, tempProduct, used, curInd, tempProduct3, sum, depth + 1);
 			
+			delete tempProduct2;
+			delete tempProduct;
 			delete [] comp;
 			delete[] compSubset;
 
@@ -858,6 +883,10 @@ void PTHistos::calcRecSum(TH1 **CHistos, int iBin, double& absESq, double curRel
 	
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//Use the pT moments, stored from each event to calculate the pT deviation moments
+//Note this is done on a bin by bin and event by event basis
+/////////////////////////////////////////////////////////////////////////////
 void PTHistos::calculatePTDeviationMoments(double *** transverseMomentumMoments, int bin, int iEvent, int nParticles, TProfile ** pTHisto)
 {
 	if (reportDebug())  cout << "PTHistos::calculatePTDeviationMoments(...) Starting." << endl;
@@ -870,7 +899,9 @@ void PTHistos::calculatePTDeviationMoments(double *** transverseMomentumMoments,
 	double * tempSValues = new double [size]();
 	for(int iFilter = 0; iFilter < maxOrder; iFilter++)
 	{
-
+		//Use the pT moments, stored from each event to calculate the pT deviation moments
+		//These equations come simply from binomial theorem
+		nParticles = yields[iEvent][reorder2[iFilter]];
 		n1[iFilter]= transverseMomentumMoments[iEvent][iFilter][0] - nParticles * pTHisto[iFilter]->GetBinContent(bin);
 		n2[iFilter]= transverseMomentumMoments[iEvent][iFilter][1] - 2 * transverseMomentumMoments[iEvent][iFilter][0] * pTHisto[iFilter]->GetBinContent(bin) + nParticles * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin);
 		n3[iFilter]= transverseMomentumMoments[iEvent][iFilter][2] - 3 * transverseMomentumMoments[iEvent][iFilter][1] * pTHisto[iFilter]->GetBinContent(bin) 
@@ -890,7 +921,7 @@ void PTHistos::calculatePTDeviationMoments(double *** transverseMomentumMoments,
 		for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
 		{
 			double same12 = iFilter2 == iFilter1? n2[iFilter1] : 0;
-			tempSValues[counter] = n1[iFilter1] * n1[iFilter2] - same12;
+			tempSValues[counter] = n1[iFilter1] * n1[iFilter2] - same12; //subtract out overcounting the same particle Note: These formulas are well known as Newton sums, to convert moments((x+y+z), (x^3 + y^3 + z^3)) to cyclic sums((x + y + z), (xy + xz + yz))
 			counter++;
 		}
 	}
@@ -899,7 +930,6 @@ void PTHistos::calculatePTDeviationMoments(double *** transverseMomentumMoments,
 	{
 		for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
 		{
-			int same12 = iFilter2 == iFilter1? 1 : 0;
 			for(int iFilter3 = iFilter2; iFilter3 < maxOrder; iFilter3++)
 			{
 				if(iFilter1 == iFilter2)

@@ -28,6 +28,8 @@ public:
 
   int totEvents; //total number of events
 
+  int nThreads; //number of threads for implicit parallel processing
+
   // event wise parameters
 
 

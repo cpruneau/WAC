@@ -51,7 +51,7 @@ public:
   int correlatorIndex;
 
   //store the moments of the transverse momentum per event
-  // first index is event, second is filter number, third is moment (1st, 2nd ...)
+  // first index is event, second is filter number, third is moment (1st, 2nd ...) maxorder^2 entries per event
   double *** transverseMomentumMoments;
 
   //store the yields of each combination of particles per event

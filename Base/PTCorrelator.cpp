@@ -288,7 +288,7 @@ void PTCorrelator::fillYieldValues()
 		{
 			for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
 			{
-				int same1 = iFilter2 == iFilter1? 1 : 0;
+				int same1 = iFilter2 == iFilter1? 1 : 0; //subtract out the counting te same particle twice
 				if(n[iFilter1] > 0 && (n[iFilter2] - same1) > 0) tempCounts[counter] = n[iFilter1]*(n[iFilter2] - same1);
 				counter++;
 			}
@@ -298,11 +298,11 @@ void PTCorrelator::fillYieldValues()
 		{
 			for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
 			{
-				int same12 = iFilter2 == iFilter1? 1 : 0;
+				int same12 = iFilter2 == iFilter1? 1 : 0;//subtract out the counting te same particle twice
 				for(int iFilter3 = iFilter2; iFilter3 < maxOrder; iFilter3++)
 				{
-					int same13 = iFilter3 == iFilter1? 1 : 0;
-					int same23 = iFilter2 == iFilter3? 1 : 0;
+					int same13 = iFilter3 == iFilter1? 1 : 0;//subtract out the counting te same particle twice
+					int same23 = iFilter2 == iFilter3? 1 : 0;//subtract out the counting te same particle twice
 					if(n[iFilter1] > 0 && (n[iFilter2] - same12) > 0 && (n[iFilter3] - same13 - same23) > 0) tempCounts[counter] = n[iFilter1]*(n[iFilter2] - same12)*(n[iFilter3] - same13 - same23);
 					counter++;
 				}
@@ -336,6 +336,7 @@ void PTCorrelator::fillYieldValues()
 		{
 			yields[eventsProcessed][iHisto] = tempCounts[histos->reorder[iHisto]];
 		}
+		delete[] tempCounts;
 	if (reportDebug())  cout << "PTCorrelator::fillYieldValues(...) Completed." << endl;
 }
 
