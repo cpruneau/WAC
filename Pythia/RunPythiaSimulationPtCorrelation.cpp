@@ -109,7 +109,7 @@ int main()
   ac->branchName_pE = "pE";
   ac->eventTreeName =  "PythiaEventTree"; 
   ac->treeFile =  ac->outputPath + "/PythiaEventTree"; // no .root extension on purpose
-  ac->numFiles = 5;
+  ac->numFiles = 50;
   ac->nThreads = 50;
 
 

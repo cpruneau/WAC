@@ -22,8 +22,8 @@ int main()
   auto start = chrono::high_resolution_clock::now(); 
 
   cout << "<INFO> PYTHIA Parallel Event Generation - Starting" << endl;
-  long nEventsRequested = 100000;
-  int  nThreads    = 5;        // make sure this divides the number of events per tree
+  long nEventsRequested = 1000000;
+  int  nThreads    = 50;        // make sure this divides the number of events per tree
   int eventsPerThread = nEventsRequested/nThreads;
   cout << "<INFO> Events per Thread: " << eventsPerThread << endl;
   TString outputFolder = getenv("OUTPUT_PATH");
