@@ -18,6 +18,7 @@
 #include "EventFilter.hpp"
 #include "ParticleFilter.hpp"
 #include "ParticleHistos.hpp"
+#include "ParticleAnalyzerConfiguration.hpp"
 
 class ParticleAnalyzer : public Task
 {
@@ -26,17 +27,19 @@ public:
   //ParticleAnalyzer();
 
   ParticleAnalyzer(const TString &  name,
-                   TaskConfiguration * configuration,
+                   ParticleAnalyzerConfiguration * configuration,
                    Event * event,
                    EventFilter * eventFilter,
                    int nParticleFilters,
-                   ParticleFilter ** particleFilters);
+                   ParticleFilter ** particleFilters,
+                   LogLevel requiredLevel=Info);
   virtual ~ParticleAnalyzer();
   virtual void execute();
   virtual void createHistograms();
   virtual void loadHistograms(TFile * inputFile);
   virtual void saveHistograms(TFile * outputFile);
   virtual void scaleHistograms(double factor);
+  virtual void resetHistograms();
 
   int nParticleFilters;
   EventFilter     *  eventFilter;
@@ -44,6 +47,7 @@ public:
   ParticleHistos  ** particleHistos;
   TString         ** partNames;
   double          *  nAccepted;
+  double          *  totalEnergy;
 
   ClassDef(ParticleAnalyzer,0)
 };

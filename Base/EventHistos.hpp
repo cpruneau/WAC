@@ -10,21 +10,19 @@
 #ifndef WAC_EventHistos
 #define WAC_EventHistos
 #include "Histograms.hpp"
+#include "EventAnalyzerConfiguration.hpp"
 
 class EventHistos : public Histograms
 {
 public:
   
   
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // CTOR
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////
   EventHistos(const TString & name,
-              AnalysisConfiguration * configuration,
+              EventAnalyzerConfiguration * configuration,
               LogLevel  debugLevel);
   EventHistos(TFile * inputFile,
               const TString & name,
-              AnalysisConfiguration * configuration,
+              EventAnalyzerConfiguration * configuration,
               LogLevel  debugLevel);
   virtual ~EventHistos();
   virtual void initialize();

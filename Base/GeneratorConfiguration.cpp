@@ -34,12 +34,50 @@ etaMaximum   ( 2.0),
 chargedOnly  (true),
 eventsSource ("")
 {
-
+  // no ops
 }
 
-GeneratorConfiguration::~GeneratorConfiguration()
+GeneratorConfiguration::
+GeneratorConfiguration(const GeneratorConfiguration & source)
+:
+TaskConfiguration (source),
+dataInputPath     (  source.dataInputPath ),
+dataFileMinIndex  ( source.dataFileMinIndex ),
+dataFileMaxIndex  ( source.dataFileMaxIndex ),
+impactParameterMinimum (  source.impactParameterMinimum ),
+impactParameterMaximum (  source.impactParameterMaximum ),
+ptMinimum    ( source.ptMinimum ),
+ptMaximum    ( source.ptMaximum ),
+yMinimum     ( source.yMinimum ),
+yMaximum     ( source.yMaximum ),
+etaMinimum   ( source.etaMinimum ),
+etaMaximum   ( source.etaMaximum ),
+chargedOnly  ( source.chargedOnly ),
+eventsSource ( source.eventsSource )
 {
+  // no ops
+}
 
+GeneratorConfiguration & GeneratorConfiguration::operator=(const GeneratorConfiguration & source)
+{
+  if (this != &source)
+    {
+    TaskConfiguration::operator=(source);
+    dataInputPath  = source.dataInputPath;
+    dataFileMinIndex = source.dataFileMinIndex;
+    dataFileMaxIndex = source.dataFileMaxIndex;
+    impactParameterMinimum = source.impactParameterMinimum;
+    impactParameterMaximum = source.impactParameterMaximum;
+    ptMinimum = source.ptMinimum;
+    ptMaximum = source.ptMaximum;
+    yMinimum  = source.yMinimum;
+    yMaximum    = source.yMaximum;
+    etaMinimum   = source.etaMinimum;
+    etaMaximum   = source.etaMaximum;
+    chargedOnly  = source.chargedOnly;
+    eventsSource = source.eventsSource;
+    }
+  return *this;
 }
 
 void GeneratorConfiguration::printConfiguration(ostream & os)

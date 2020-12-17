@@ -13,7 +13,7 @@
 
  Class defining Task
  */
-
+#include "TParameter.h"
 #include "Task.hpp"
 
 ClassImp(Task);
@@ -24,15 +24,19 @@ ClassImp(Task);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Task::Task(const TString & name,
            TaskConfiguration * configuration,
-           Event * selectedEvent)
+           Event * selectedEvent,
+           LogLevel selectedLevel)
 :
+MessageLogger(selectedLevel),
 taskName             ( name ),
 taskConfiguration    ( configuration ),
 taskRandomGenerator  ( gRandom),
 event                ( selectedEvent ),
-eventsProcessed      ( 0 )
+nEventProcessed      ( 0 ),
+nEventAccepted      ( 0 ),
+subSampleIndex       ( 0 )
 {
-  if (reportDebug()) cout << "Task::Task() No ops." << endl;
+// no ops
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,7 +44,7 @@ eventsProcessed      ( 0 )
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Task::~Task()
 {
-  if (reportDebug()) cout << "Task::~Task() No ops." << endl;
+  // no ops
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -48,10 +52,12 @@ Task::~Task()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Task::initialize()
 {
-  if (reportDebug()) cout << "Task::initialize() Started." << endl;
   if (isTaskOk() && taskConfiguration->loadHistograms)   loadHistograms();
   if (isTaskOk() && taskConfiguration->createHistograms) createHistograms();
-  if (reportDebug()) cout << "Task::initialize() Completed." << endl;
+  nEventProcessed = 0;
+  nEventAccepted = 0;
+  if (reportEnd("Task",getTaskName(),"initialize()"))
+    ;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -59,7 +65,8 @@ void Task::initialize()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Task::execute()
 {
-  if (reportDebug()) cout << "Task::execute() No ops." << endl;
+  if (reportNoOps("Task",getTaskName(),"execute()"))
+    ;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -67,42 +74,68 @@ void Task::execute()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Task::finalize()
 {
-  if (reportDebug()) cout << "Task::finalize() Started task " << getName() << endl;
-  if (isTaskOk() && taskConfiguration->scaleHistograms)            scaleHistograms();
-  if (isTaskOk() && taskConfiguration->calculateDerivedHistograms) calculateDerivedHistograms();
-  if (isTaskOk() && taskConfiguration->saveHistograms)             saveHistograms();
-  if (reportDebug()) cout << "Task::finalize() Completed task " << getName()  << endl;
+  if (reportStart("Task",getTaskName(),"finalize()"))
+    ;
+  if (nEventAccepted>0 && nEventProcessed>0)
+    {
+    if (reportInfo("Task",getTaskName(),"finalize()"))
+      {
+      cout << " nEventProcessed:" << nEventProcessed << endl;
+      cout << " nEventAccepted:" << nEventAccepted << endl;
+      }
+    if (isTaskOk() && taskConfiguration->scaleHistograms)            scaleHistograms();
+    if (isTaskOk() && taskConfiguration->calculateDerivedHistograms) calculateDerivedHistograms();
+    if (isTaskOk() && taskConfiguration->saveHistograms)             saveHistograms();
+    }
+  else
+    {
+    if (reportWarning("Task",getTaskName(),"finalize()"))
+      {
+      cout << " nEventProcessed:" << nEventProcessed << endl;
+      cout << " nEventAccepted:" << nEventAccepted << endl;
+      }
+    }
+  if (reportEnd("Task",getTaskName(),"finalize()"))
+    ;
 }
 
-//  if (analysisConfiguration->scaleHistograms)
-//    {
-//    cout << "Task::finalize() Scale  histograms by 1/nEventsAccepted with nEventsAccepted = " << nEventsAccepted << endl;
-//    double scalingFactor = 1.0/nEventsAccepted;
-//    if (analysisConfiguration->externalScaling != 1.0)
-//      {
-//      if (reportInfo()) cout << "Task::finalize() Additionally scale  histograms by external factor = " << analysisConfiguration->externalScaling << endl;
-//      scalingFactor *= analysisConfiguration->externalScaling;
-//      }
-//    scale(scalingFactor);
-//    /* now be consistent with the stored information */
-//    nEventsAccepted = 1;
-//    }
-//  if (analysisConfiguration->calculateDerived) calculateDerivedHistograms();
-//  if (analysisConfiguration->saveHistosToRootFile) saveHistograms(analysisConfiguration->outputPath + analysisConfiguration->rootOutputFileName, analysisConfiguration->forceRewrite);
-//  if (analysisConfiguration->saveHistosToTextFile) saveHistogramsAsText(); //analysisConfiguration->outputPath + "histograms.txt");
-//}
-//else
-//{
-//  if (reportWarning()) cout  << "Task::finalize() Cannot proceed because nEventsAccepted = " << nEventsAccepted << endl;
-//    }
-//    if (reportDebug())  cout << "Task::finalize() Completed" << endl;
-//    }
+void Task::savePartialResults()
+{
+  if (reportStart("Task",getTaskName(),"savePartialResults()"))
+    ;
+  if (nEventAccepted>0 && nEventProcessed>0)
+    {
+    if (reportInfo("Task",getTaskName(),"savePartialResults()"))
+      {
+      cout << " nEventProcessed:" << nEventProcessed << endl;
+      cout << " nEventAccepted:" << nEventAccepted << endl;
+      }
+    if (isTaskOk() && taskConfiguration->scaleHistograms)            scaleHistograms();
+    if (isTaskOk() && taskConfiguration->calculateDerivedHistograms) calculateDerivedHistograms();
+    if (isTaskOk() && taskConfiguration->saveHistograms)             saveHistograms();
+    }
+  else
+    {
+    if (reportWarning("Task",getTaskName(),"savePartialResults()"))
+      {
+      cout << " nEventProcessed:" << nEventProcessed << endl;
+      cout << " nEventAccepted:" << nEventAccepted << endl;
+      }
+    }
+  if (reportEnd("Task",getTaskName(),"savePartialResults()"))
+    ;
+}
+
 
 void Task::reset()
 {
-  if (reportDebug()) cout << "Task::reset() Started." << endl;
-  if (isTaskOk() && taskConfiguration->resetHistograms)   resetHistograms();
-  if (reportDebug()) cout << "Task::reset() Completed." << endl;
+  if (reportStart("Task",getTaskName(),"reset()"))
+    ;
+  nEventProcessed = 0;
+  nEventAccepted  = 0;
+  if (isTaskOk())   resetHistograms();
+  if (reportEnd("Task",getTaskName(),"reset()"))
+    ;
 }
 
 ////////////////////////////////////////////
@@ -110,9 +143,11 @@ void Task::reset()
 ////////////////////////////////////////////
 void Task::clear()
 {
-  if (reportDebug()) cout << "Task::reset() Started." << endl;
-  if (isTaskOk() && taskConfiguration->clearHistograms)   clearHistograms();
-  if (reportDebug()) cout << "Task::reset() Completed." << endl;
+  if (reportStart("Task",getTaskName(),"clear()"))
+    ;
+  reset();
+  if (reportEnd("Task",getTaskName(),"clear()"))
+    ;
 }
 
 TaskConfiguration * Task::getTaskConfiguration()
@@ -122,142 +157,212 @@ TaskConfiguration * Task::getTaskConfiguration()
 
 void Task::setTaskConfiguration(TaskConfiguration * config)
 {
-  taskConfiguration = config;
+  if (!config)
+    {
+    taskConfiguration = config;
+    if (reportInfo("Task",getTaskName(),"setTaskConfiguration(...)"))
+      {
+      cout << "Task configuration was changed." << endl;
+      }
+    }
+  else
+    {
+    if (reportError("Task",getTaskName(),"setTaskConfiguration(...)"))
+      {
+      cout << "Attempting to set task configuration to a null pointer."  << endl;
+      }
+    postTaskError();
+    }
 }
 
 ////////////////////////////////////////////
 // Print task configuration
 ////////////////////////////////////////////
-void Task::printConfiguration(ostream & output)
+void Task::printTaskConfiguration(ostream & output)
 {
-  if (reportInfo(output))
-    {
-    output << "Task Name : " << taskName <<  endl;
-    taskConfiguration->printTaskConfiguration(output);
-    }
+  output << "Task Name : " << taskName <<  endl;
+  taskConfiguration->printTaskConfiguration(output);
 }
-
-TString Task::getName() const
-{
-  return taskName;
-}
-
-void Task::setName(const TString & name)
-{
-  taskName = name;
-}
-
 
 void Task::setRandomGenerator(TRandom * randomGenerator)
 {
   if (!randomGenerator)
+    {
     taskRandomGenerator = randomGenerator;
+    if (reportInfo("Task",getTaskName(),"setRandomGenerator(TRandom * randomGenerator)"))
+      {
+      cout << "Default random generator was changed." << endl;
+      }
+    }
   else
     {
-    if (reportError()) cout << "Task:: setRandomGenerator(...) Null pointer. Random generator will not be set.";
+    postTaskWarning();
+    if (reportError("Task",getTaskName(),"setTaskConfiguration(...)"))
+      {
+      cout << "Null pointer. Random generator will not be set." << endl;
+      }
     }
 }
 
 void Task::createHistograms()
 {
-  if (reportDebug()) cout << "Task::createHistograms() No ops" << endl;
+  if (reportNoOps("Task",getTaskName(),"createHistograms()"))
+    ;
 }
 
 void Task::loadHistograms()
 {
-  if (reportDebug()) cout << "Task::loadHistograms() Started." << endl;
+  if (reportStart("Task",getTaskName(),"loadHistograms()"))
+    ;
   TFile * inputFile;
   TString inputFileName = taskConfiguration->getInputRootFileName();
-  if (reportInfo()) cout << "Task::loadHistograms() Opening root input file " << inputFileName << endl;
+  if (reportInfo("Task",getTaskName(),"loadHistograms()")) cout << "Opening input file: " << inputFileName << endl;
   inputFile = new TFile(inputFileName,"OLD");
   if (!inputFile)
      {
-     if (reportError()) cout << "Task::loadHistograms() Could not open root input file   " << inputFileName << endl;
+     if (reportError("Task",getTaskName(),"loadHistograms()")) cout << "Could not open input file:" << inputFileName << endl;
      postTaskError();
      return;
     }
   loadHistograms(inputFile);
-  if (reportDebug()) cout << "Task::loadHistograms() Completed." << endl;
+  if (reportEnd("Task",getTaskName(),"loadHistograms()"))
+    ;
 }
 
 void Task::loadHistograms(TFile * inputFile)
 {
-  if (!inputFile)
-    {
-    if (reportError("Task",getName(),"loadHistograms(TFile * inputFile)")) cout << "Null pointer supplied." << endl;
-    }
+  inputFile = nullptr;
+  if (reportNoOps("Task",getTaskName(),"loadHistograms(TFile * inputFile)"))
+    ;
 }
 
 void Task::resetHistograms()
 {
- if (reportDebug()) cout << "Task::resetHistograms() No ops." << endl;
+  if (reportNoOps("Task",getTaskName(),"resetHistograms()"))
+    ;
 }
 
 void Task::clearHistograms()
 {
- if (reportDebug()) cout << "Task::loadHistograms() No ops." << endl;
+  if (reportNoOps("Task",getTaskName(),"clearHistograms()"))
+    ;
 }
 
 void Task::scaleHistograms()
 {
-  if (reportDebug()) cout << "Task::scaleHistograms() Started." << endl;
-  if (reportInfo())  cout << "Processed number of events: " <<  eventsProcessed << endl;
-  double scalingFactor = 1.0/double(eventsProcessed);
-  scaleHistograms(scalingFactor);
-if (reportDebug()) cout << "Task::scaleHistograms() Completed." << endl;
+  if (reportStart("Task",getTaskName(),"scaleHistograms()"))
+    ;
+  if (reportInfo("Task",getTaskName(),"scaleHistograms()"))
+    {
+    cout << "Accepted number of events: " <<  nEventAccepted << endl;
+    }
+  if (nEventAccepted>0)
+    {
+    double scalingFactor = 1.0/double(nEventAccepted);
+    scaleHistograms(scalingFactor);
+    }
+  else
+    {
+    if (reportWarning("Task",getTaskName(),"scaleHistograms()"))
+      {
+      cout << "Accepted number of events is null: " <<  nEventAccepted << endl;
+      }
+    }
+
+  if (reportStart("Task",getTaskName(),"scaleHistograms()"))
+    ;
 }
 
 void Task::scaleHistograms(double factor)
 {
-  if (reportDebug()) cout << "Task::scaleHistograms(double factor) factor:" << factor << endl;
+  factor=0;
+  if (reportNoOps("Task",getTaskName(),"scaleHistograms(double factor)"))
+    ;
 }
 
 void Task::saveHistogramsAsText()
 {
-  if (reportDebug()) cout << "Task::saveHistogramsAsText() no ops:"  << endl;
+  if (reportNoOps("Task",getTaskName(),"saveHistogramsAsText()"))
+    ;
 }
 
 void Task::saveHistograms()
 {
-  if (reportDebug()) cout << "Task::saveHistograms() Started for " << getName() << endl;
+  if (reportStart("Task",getTaskName(),"saveHistograms()"))
+    ;
   TFile * outputFile;
   TString outputFileName = taskConfiguration->outputPath;
   outputFileName += taskConfiguration->rootOuputFileName;
-  outputFileName += getName();
+  outputFileName += getTaskName();
+  if (taskConfiguration->subsampleAnalysis)
+    {
+    outputFileName += "_";
+    outputFileName += subSampleIndex++;
+    }
   outputFileName += ".root";
 
   if (taskConfiguration->forceHistogramsRewrite)
     {
-    if (reportInfo()) cout << "Task::saveHistograms()  Opening root output (RECREATE) file  " << outputFileName << endl;
+    if (reportInfo("Task",getTaskName(),"saveHistograms()")) cout << "Opening output (RECREATE) file  " << outputFileName << endl;
     outputFile = new TFile(outputFileName,"RECREATE"); // obliterate past work...
     if (!outputFile)
       {
-      if (reportError()) cout << "Task::saveHistograms(outputFileName)  Could not open (RECREATE) file  " << outputFileName << endl;
+      if (reportError("Task",getTaskName(),"saveHistograms()")) cout << "Could not open (RECREATE) file  " << outputFileName << endl;
+      postTaskWarning();
       return;
       }
     }
   else
     {
-      if (reportInfo()) cout << "Task::saveHistograms()  Opening root output (NEW) file  " << outputFileName << endl;
-        outputFile = new TFile(outputFileName,"NEW"); // protect past work...
+    if (reportInfo("Task",getTaskName(),"saveHistograms()")) cout << "Opening  output (NEW) file  " << outputFileName << endl;
+    outputFile = new TFile(outputFileName,"NEW"); // protect past work...
     if (!outputFile)
       {
-      if (reportError()) cout << "Task::saveHistograms(outputFileName)  Could not open (NEW) file  " << outputFileName << endl;
+      if (reportError("Task",getTaskName(),"saveHistograms()")) cout << "Could not open (NEW) file  " << outputFileName << endl;
+      postTaskWarning();
       return;
       }
     }
+  saveNEventProcessed(outputFile);
+  saveNEventAccepted(outputFile);
   saveHistograms(outputFile);
   outputFile->Close();
- if (reportDebug()) cout << "Task::saveHistograms() Completed." << endl;
+  if (reportEnd("Task",getTaskName(),"saveHistograms()"))
+    ;
 }
 
 void Task::saveHistograms(TFile * outputFile)
 {
-  if (reportDebug()) cout << "Task::saveHistograms(TFile * outputFile) No ops  for " << getName() << endl;
-  if (!outputFile && reportError())
-    {
-    cout << "Task::saveHistograms(TFile * outputFile)  Given file pointer is null." << endl;
-    }
+  outputFile = nullptr;
+  if (reportNoOps("Task",getTaskName(),"saveHistograms(TFile * outputFile)"))
+    ;
+}
+
+void Task::saveNEventProcessed(TFile * outputFile)
+{
+  outputFile->cd();
+  TParameter<Long64_t>("EventProcessed",nEventProcessed,'+').Write();
+}
+
+void Task::saveNEventAccepted(TFile * outputFile)
+{
+  outputFile->cd();
+  TParameter<Long64_t>("EventAccepted",nEventAccepted,'+').Write();
+}
+
+long Task::loadNEventProcessed(TFile * inputFile)
+{
+  TParameter<Long64_t> *par = (TParameter<Long64_t> *) inputFile->Get("nEventProcessed");
+  nEventProcessed = par->GetVal();
+  delete par;
+  return nEventProcessed;
+}
+long Task::loadNEventAccepted(TFile * inputFile)
+{
+  TParameter<Long64_t> *par = (TParameter<Long64_t> *) inputFile->Get("nEventAccepted");
+  nEventAccepted = par->GetVal();
+  delete par;
+  return nEventAccepted;
 }
 
 //////////////////////////////////////////////////////////////
@@ -265,17 +370,20 @@ void Task::saveHistograms(TFile * outputFile)
 //////////////////////////////////////////////////////////////
 void Task::addHistogramsToExtList(TList *list, bool all)
 {
-  if (reportDebug()) cout << "Task::addHistogramsToExtList(TList *list) No ops" << endl;
+  if (reportInfo("Task",getTaskName(),"addHistogramsToExtList(...)"))
+    ;
   if (!list && reportError())
     {
-    cout << "Task::addHistogramsToExtList(TList *list)  Given file pointer is null." << endl;
+    postTaskWarning();
+    if (reportError("Task",getTaskName(),"addHistogramsToExtList(...)")) cout << "Given file pointer is null." << endl;
     }
   all = false; // silence warning.
 }
 
 void Task::calculateDerivedHistograms()
 {
-  if (reportDebug()) cout << "Task::calculateDerivedHistograms() No ops" << endl;
+  if (reportNoOps("Task",getTaskName(),"calculateDerivedHistograms()"))
+    ;
 }
 
 Event * Task::getEvent()
@@ -288,52 +396,7 @@ Event * Task::getEvent()
 
 Task::TaskStatus Task::taskStatus = Task::TaskOk;
 
-Task::TaskStatus Task::getTaskStatus()
-{
-  return taskStatus;
-}
 
-void Task::setTaskStatus(Task::TaskStatus newStatus)
-{
-  taskStatus = newStatus;
-}
-
-void Task::postTaskOk()
-{
-  taskStatus = TaskOk;
-}
-
-void Task::postTaskEof()
-{
-  taskStatus = TaskEof;
-}
-
-
-void Task::postTaskEod()
-{
-  taskStatus = TaskEod;
-}
-
-void Task::postTaskWarning()
-{
-  taskStatus = TaskWarning;
-}
-
-void Task::postTaskError()
-{
-  taskStatus = TaskError;
-}
-
-void Task::postTaskFatal()
-{
-  taskStatus = TaskFatal;
-}
-
-
-bool Task::isTaskOk()
-{
-  return (taskStatus == TaskOk);
-}
 
 
 TString Task::getTaskStatusName()
@@ -351,5 +414,45 @@ TString Task::getTaskStatusName()
     }
   return statusName;
 }
+
+
+double Task::readParameter(TFile * inputFile, const TString & parameterName)
+{
+  if (reportDebug ("Task",getTaskName(),"readParameter(...)")) cout << "Reading parameter: " << parameterName << endl;
+  TParameter<Long64_t> *par = (TParameter<Long64_t> *) inputFile->Get(parameterName);
+  if (!par)
+    {
+    if (reportError("Task",getTaskName(),"execute()")) cout << "Parameter not found." << endl;
+    postTaskError();
+    return -1;
+    }
+  double value = par->GetVal();
+  delete par;
+  if (reportDebug ("Task",getTaskName(),"readParameter(...)")) cout << "Parameter value : " << value << endl;
+  return value;
+}
+
+TFile *  Task::openRootFile(const TString & inputPath, const TString & fileName, const TString & ioOption)
+{
+  TString inputFileName = inputPath;
+  inputFileName += "/";
+  inputFileName += fileName;
+  inputFileName += ".root";
+  if (reportDebug ("Task",getTaskName(),"openRootFile(...)"))
+    cout << "Opening file: " << inputFileName << " with option: " << ioOption << endl;
+  TFile * inputFile = new TFile(inputFileName,ioOption);
+  if (!inputFile)
+    {
+    if (reportError("SubSampleStatCalculator",getTaskName(),"execute()")) cout << "file: " << inputFileName << " not found." << endl;
+    postTaskError();
+    return nullptr;
+    }
+  else
+    {
+    if (reportDebug ("SubSampleStatCalculator",getTaskName(),"execute()")) cout << "file opened successfully." << endl;
+    }
+  return inputFile;
+}
+
 
 //enum TaskStatus   { Unknown, TaskOk, TaskEof, TaskEod, TaskWarning, TaskError, TaskFatal};

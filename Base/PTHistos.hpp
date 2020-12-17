@@ -1,7 +1,7 @@
 #ifndef WAC_PTHistos
 #define WAC_PTHistos
 #include "Histograms.hpp"
-#include "Event.hpp"
+#include "NuDynConfiguration.hpp"
 #include "TMath.h"
 #include <cstdlib>
 #include <cmath>
@@ -12,14 +12,9 @@ class PTHistos : public Histograms
 public:
 
   PTHistos(const TString & collectionName,
-    AnalysisConfiguration * analysisConfiguration,
-    LogLevel  debugLevel,
-    int ord);
-  PTHistos(TFile * inputFile,
-    const TString & collectionName,
-    AnalysisConfiguration * analysisConfiguration,
-    LogLevel  debugLevel,
-    int ord);
+           NuDynConfiguration * analysisConfiguration,
+           LogLevel  debugLevel,
+           int ord);
   virtual ~PTHistos();
 
   virtual void createHistograms();

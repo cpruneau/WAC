@@ -28,27 +28,27 @@ class TaskCollection : public Task
 public:
 
 
-  ////////////////////////////////////////////
+  // ====================
   // Member functions
-  ////////////////////////////////////////////
+  // ====================
 
   TaskCollection(const TString & name,
                  TaskConfiguration * configuration,
-                 int             nTasksMax = 100);
+                 int             nTasksMax = 100,
+                 LogLevel selectedLevel=Info);
   virtual ~TaskCollection();
   virtual void initialize();
   virtual void execute();
   virtual void finalize();
   virtual void reset();
   virtual void clear();
-  virtual void printConfiguration(ostream & output);
+  virtual void savePartialResults();
+  virtual void printTaskConfiguration(ostream & output);
+  Task *  addTask(Task * task);
 
-  void addTask(Task * task);
-
-
-  ////////////////////////////////////////////
+  // ====================
   // Member Data
-  ////////////////////////////////////////////
+  // ====================
 
 protected:
 

@@ -7,7 +7,7 @@
 #include "Task.hpp"
 #include "EventFilter.hpp"
 #include "ParticleFilter.hpp"
-#include "PythiaEventGenerator.hpp"
+#include "HeavyIonConfiguration.hpp"
 #include "CollisionGeometry.hpp"
 
 class AACollisionGenerator : public Task
@@ -19,15 +19,15 @@ public:
   // CTOR
   //////////////////////////////////////////////////////////////
   AACollisionGenerator(const TString & name,
-  TaskConfiguration * configuration,
-  Event * event,
-  EventFilter * ef,
-  ParticleFilter * pf,
-  CollisionGeometry * collisionGeo);
+                       HeavyIonConfiguration * configuration,
+                       Event * event,
+                       EventFilter * ef,
+                       ParticleFilter * pf,
+                       CollisionGeometry * collisionGeo,
+                       LogLevel selectedLevel);
   virtual ~AACollisionGenerator();
   virtual void initialize();
   virtual void finalize();
-  virtual void reset();
   void execute();
 
 

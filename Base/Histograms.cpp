@@ -17,10 +17,8 @@
 #include "Histograms.hpp"
 ClassImp(Histograms);
 
-
-
 Histograms::Histograms(const TString & name,
-                       AnalysisConfiguration * config,
+                       TaskConfiguration * config,
                        int initialCapacity,
                        LogLevel  debugLevel)
 :
@@ -40,32 +38,9 @@ Histograms::~Histograms()
   /* */
 }
 
-// overload this method only if you need to do more than
-// create histogram - overload createHistograms to create histograms.
-void Histograms::initialize()
-{
-  if (reportDebug()) cout << "Histograms::initialize() Started." << endl;
-  createHistograms();
-  if (reportDebug()) cout << "Histograms::initialize() Completed." << endl;
-}
-
-void Histograms::finalize()
-{
-  if (reportDebug()) cout << "Histograms::finalize() No ops." << endl;
-}
-
 void Histograms::reset()
 {
   if (reportDebug()) cout << "Histograms::reset()" << endl;
-  for (int iHisto=0; iHisto<getNHistograms(); iHisto++)
-    {
-    getHisto(iHisto)->Reset();
-    }
-}
-
-void Histograms::clear()
-{
-  if (reportDebug()) cout << "Histograms::clear()" << endl;
   for (int iHisto=0; iHisto<getNHistograms(); iHisto++)
     {
     getHisto(iHisto)->Reset();
@@ -87,19 +62,19 @@ void Histograms::loadHistograms(TFile * inputFile)
   if (reportDebug()) cout << "Histograms::loadHistograms(...) No ops." << endl;
 }
 
-AnalysisConfiguration * Histograms::getConfiguration() const
+TaskConfiguration * Histograms::getConfiguration() const
 {
   return configuration;
 }
 
-void Histograms::setConfiguration(AnalysisConfiguration * config)
+void Histograms::setConfiguration(TaskConfiguration * config)
 {
   configuration = config;
 }
 
 TString Histograms::getHistoBaseName() const
 {
-//  AnalysisConfiguration & ac = *(AnalysisConfiguration*) getConfiguration();
+//  TaskConfiguration & ac = *(TaskConfiguration*) getConfiguration();
   TString bn; //ac.histoBaseName;
 //  bn += "_";
   bn = getName();

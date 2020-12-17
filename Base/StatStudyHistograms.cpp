@@ -8,17 +8,7 @@ StatStudyHistograms::StatStudyHistograms(int nSubSamplesUsed,
 Histograms(collectionName,0,400,debugLevel),
 nSubSamples(nSubSamplesUsed)
 {
-  initialize();
-}
-
-
-StatStudyHistograms::StatStudyHistograms(TFile * inputFile,
-                                         const TString & collectionName,
-                                         LogLevel  debugLevel)
-:
-Histograms(collectionName,0,400,debugLevel)
-{
-  loadHistograms(inputFile);
+ // no ops
 }
 
 StatStudyHistograms::~StatStudyHistograms()

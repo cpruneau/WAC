@@ -12,7 +12,11 @@ class GeneratorConfiguration : public TaskConfiguration
 public:
 
   GeneratorConfiguration(const TString & name, const TString & type, const TString & version);
-  virtual ~GeneratorConfiguration();
+  GeneratorConfiguration(const GeneratorConfiguration & source);
+  virtual ~GeneratorConfiguration(){} 
+  GeneratorConfiguration & operator=(const GeneratorConfiguration & source);
+
+
   virtual void printConfiguration(ostream & os);
 
   // ////////////////////////////////////////////

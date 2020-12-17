@@ -10,9 +10,6 @@ public:
   StatStudyHistograms(int nSubSamplesUsed,
                       const TString & collectionName,
                       LogLevel  debugLevel);
-  StatStudyHistograms(TFile * inputFile,
-                      const TString & collectionName,
-                      LogLevel  debugLevel);
   virtual ~StatStudyHistograms();
   virtual void createHistograms();
   virtual void loadHistograms(TFile * inputFile);

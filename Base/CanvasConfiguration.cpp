@@ -243,7 +243,7 @@ void CanvasConfiguration::setAxes(CanvasAxes axes)
       case Linear:    logx = 0;  logy = 0;  logz = 0; break;
       case LogX:      logx = 1;  logy = 0;  logz = 0; break;
       case LogY:      logx = 0;  logy = 1;  logz = 0; break;
-      case LogZ:      logx = 0;  logy = 0;  logz = 0; break;
+      case LogZ:      logx = 0;  logy = 0;  logz = 1; break;
       case LogXY:     logx = 1;  logy = 1;  logz = 0; break;
       case LogXZ:     logx = 1;  logy = 0;  logz = 1; break;
       case LogYZ:     logx = 0;  logy = 1;  logz = 1; break;

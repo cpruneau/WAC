@@ -54,6 +54,26 @@ TCanvas *  Plotter::plot(TString  canvasName, CanvasConfiguration * cc, GraphCon
   return canvas;
 }
 
+TCanvas *  Plotter::plot(TString   canvasName, CanvasConfiguration * cc, GraphConfiguration * gc,
+                TString   xTitle,  double xMin, double xMax,
+                TString   yTitle,  double yMin, double yMax,
+                TString   zTitle,  double zMin, double zMax,
+                TH1 * h,  const TString & _plotOption)
+{
+  TCanvas * canvas  = createCanvas(canvasName,*cc);
+  setProperties(h,*gc);
+  h->GetXaxis()->SetTitle(xTitle);
+  h->GetYaxis()->SetTitle(yTitle);
+  h->GetZaxis()->SetTitle(zTitle);
+  h->SetMinimum(zMin);
+  h->SetMaximum(zMax);
+  h->GetXaxis()->SetRangeUser(xMin,xMax);
+  h->GetYaxis()->SetRangeUser(yMin,yMax);
+  h->Draw(_plotOption);
+  return canvas;
+}
+
+
 TCanvas *  Plotter::plot(int nGraphs, TString  canvasName, CanvasConfiguration * cc, GraphConfiguration ** gc,
                           TString  xTitle,  double xMin, double xMax,
                           TString  yTitle,  double yMin, double yMax,

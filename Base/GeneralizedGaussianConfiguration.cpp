@@ -28,16 +28,36 @@ GeneralizedGaussianConfiguration::GeneralizedGaussianConfiguration(const TString
  omegaeta(0.0),
  omegaphi(0.0)
 {
-
+  // no ops
 }
 
-GeneralizedGaussianConfiguration::~GeneralizedGaussianConfiguration()
+GeneralizedGaussianConfiguration::GeneralizedGaussianConfiguration(const GeneralizedGaussianConfiguration & source)
+:
+ TaskConfiguration(source),
+ amplitude( source.amplitude ),
+ gammaeta( source.gammaeta ),
+ gammaphi( source.gammaphi ),
+ omegaeta( source.omegaeta ),
+ omegaphi( source.omegaphi )
 {
+  // no ops
+}
+
+GeneralizedGaussianConfiguration & GeneralizedGaussianConfiguration::operator=(const GeneralizedGaussianConfiguration & source)
+{
+  if (this != &source)
+    {
+    TaskConfiguration::operator=(source);
+    amplitude = source.amplitude;
+    gammaeta =  source.gammaeta;
+    gammaphi =  source.gammaphi;
+    omegaeta =  source.omegaeta;
+    }
+  return *this;
 }
 
 void GeneralizedGaussianConfiguration::printConfiguration(ostream & os)
 {
-
   os
   << " ------------------------------------------------------------------------------------------" << endl
   << " ------------------------------------------------------------------------------------------" << endl

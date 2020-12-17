@@ -34,38 +34,10 @@ h_epsilonXYVsB_Prof(0),
 h_psi2VsB_Prof(0),
 h_psi2VsB(0)
 {
-  initialize();
+  // no ops
 }
 
-CollisionGeometryHistograms::CollisionGeometryHistograms(TFile * inputFile,
-                                                         const TString & collectionName,
-                                                         CollisionGeometryConfiguration * _configuration,
-                                                         LogLevel  debugLevel)
-:
-Histograms(collectionName,nullptr,100,debugLevel),
-configuration(_configuration),
-nEventNcollGE1(0),
-nEventNcollGE0(0),
-h_crossSection(0),
-h_b(0),
-h_nPart(0),
-h_nBinary(0),
-h_nPartVsB_Prof(0),
-h_nBinaryVsB_Prof(0),
-h_nPartVsB(0),
-h_nBinaryVsB(0),
-h_xyNNIntVsB(0),
-h_varXVsB_Prof(0),
-h_varYVsB_Prof(0),
-h_covXYVsB_Prof(0),
-h_epsilonXVsB_Prof(0),
-h_epsilonYVsB_Prof(0),
-h_epsilonXYVsB_Prof(0),
-h_psi2VsB_Prof(0),
-h_psi2VsB(0)
-{
-  loadHistograms(inputFile);
-}
+
 
 // for now use the same boundaries for eta and y histogram
 void CollisionGeometryHistograms::createHistograms()
@@ -117,7 +89,7 @@ void CollisionGeometryHistograms::createHistograms()
   bValues10[10] = 14.7986;
   bValues10[11] = 20.0;
 
-  int nSlices10 = 12;
+  int nSlices10 = 11;
   int nSlices100 = 100;
   //double xSlice = 16.5*16.5/10.0;  761.632
   double xSlice = 761.632/3.1415927; // PbPb total xsection in fm^2 divided Pi
@@ -173,7 +145,15 @@ void CollisionGeometryHistograms::createHistograms()
   h_nBinary_80_90     = createHistogram(bn+TString("nBinary_80_90"),   ac.nBins_nBinary,  ac.min_nBinary,   ac.max_nBinary,   "N_{Bin}", "Counts", 0, 1);
   h_nBinary_90_100    = createHistogram(bn+TString("nBinary_90_100"),  ac.nBins_nBinary,  ac.min_nBinary,   ac.max_nBinary,   "N_{Bin}", "Counts", 0, 1);
 
-
+// =============
+  // plots to make
+  // to compare to Loizides PHYSICAL REVIEW C 94, 024914 (2016)
+  // Calculated total cross sections for PbPb and pPb collisions as a function of σNN
+  // Ncoll/(Npart/2) vs Npart
+  // S(fm^2) vs Npart
+  // eccentricity epsilon2 vs npart
+  // triangularity epsilon3 vs npart
+  
 
   h_xyNNIntVsB       = createHistogram(bn+TString("xyNNIntVsB"),     ac.nBins_b,  ac.min_b,  ac.max_b,  40, -10.0, 10.0, 40, -10.0, 10.0, "b", "x", "y", "Counts",0,1);
 
@@ -346,63 +326,31 @@ void CollisionGeometryHistograms::fill(CollisionGeometry * collisionGeometry, do
   if (impactPar<bValues10[11] && impactPar>=bValues10[10])  h_nBinary_90_100->Fill(nBinary,       weight);
 
 
+  calculateMomentsFromBinaryColl(collisionGeometry);
+  calculateMomentsFromParticipants(collisionGeometry);
 
 
-  double x,x2; //x3,x4,x6,x8;
-  double y,y2; //y3,y4,y6,y8;
-  double xy;
-  double counts = 0.0;
-  double momX = 0.0; double momX2 = 0.0; //double momX3 = 0.0; double momX4 = 0.0; double momX6 = 0.0; double momX8 = 0.0;
-  double momY = 0.0; double momY2 = 0.0; //double momY3 = 0.0; double momY4 = 0.0; double momY6 = 0.0; double momY8 = 0.0;
-  double momXY = 0.0;
-  for (int iBinary=0; iBinary<nBinary; iBinary++)
-    {
-    x = collisionGeometry->x[iBinary];  x2 = x*x; //x3 = x2*x; x4 = x3*x; x6 = x3*x3; x8 = x4*x4;
-    y = collisionGeometry->y[iBinary];  y2 = y*y; //y3 = y2*y; y4 = y3*y; y6 = y3*y3; y8 = y4*y4;
-    xy = x*y;
-    h_xyNNIntVsB->Fill(impactPar, x, y, weight);
-    counts += weight;
-     momX  += weight*x; momX2 += weight*x2; //momX3 += weight*x3; momX4 += weight*x4; momX6 += weight*x6; momX8 += weight*x8;
-     momY  += weight*y; momY2 += weight*y2; //momY3 += weight*y3; momY4 += weight*y4; momY6 += weight*y6; momY8 += weight*y8;
-     momXY += weight*xy;
-    }
 
-  momX /= counts; momX2 /= counts; //momX3 /= counts; momX4 /= counts; momX6 /= counts; momX8 /= counts;
-  momY /= counts; momY2 /= counts; //momY3 /= counts; momY4 /= counts; momY6 /= counts; momY8 /= counts;
-  momXY /= counts;
 
-  double varX  = momX2 - momX*momX;
-  double varY  = momY2 - momY*momY;
-  double varXY = momXY - momX*momY;
-
-  double epsDenom = varX + varY;      //cout << " eps_denom:" << eps_denom << endl;
-
-  if (epsDenom<1E-4) return;
-
-  double epsX     = (varY - varX)/epsDenom;      //cout << " eps_x:" << eps_x << endl;
-  double epsY     = 2*varXY/epsDenom;             //cout << " eps_y:" << eps_y << endl;
-  double epsMod   = sqrt(epsX*epsX + epsY*epsY); //cout << " eps_mod:" << eps_mod << endl;
-  double psi2     = atan2(epsY,epsX);
-
-  h_varXVsB_Prof       ->Fill(impactPar, varX,   weight);
-  h_varYVsB_Prof       ->Fill(impactPar, varY,   weight);
-  h_covXYVsB_Prof      ->Fill(impactPar, varXY,  weight);
-  h_epsilonXVsB_Prof   ->Fill(impactPar, epsX,   weight);
-  h_epsilonYVsB_Prof   ->Fill(impactPar, epsY,   weight);
-  h_epsilonXYVsB_Prof  ->Fill(impactPar, epsMod, weight);
-  h_epsilonXYVsB       ->Fill(impactPar, epsX, epsY, weight);
-  h_psi2VsB_Prof       ->Fill(impactPar, psi2,   weight);
-  h_psi2VsB            ->Fill(impactPar, psi2,   weight);
+//  h_varXVsB_Prof       ->Fill(impactPar, varX,   weight);
+//  h_varYVsB_Prof       ->Fill(impactPar, varY,   weight);
+//  h_covXYVsB_Prof      ->Fill(impactPar, varXY,  weight);
+//  h_epsilonXVsB_Prof   ->Fill(impactPar, epsX,   weight);
+//  h_epsilonYVsB_Prof   ->Fill(impactPar, epsY,   weight);
+//  h_epsilonXYVsB_Prof  ->Fill(impactPar, epsMod, weight);
+//  h_epsilonXYVsB       ->Fill(impactPar, epsX, epsY, weight);
+//  h_psi2VsB_Prof       ->Fill(impactPar, psi2,   weight);
+//  h_psi2VsB            ->Fill(impactPar, psi2,   weight);
 
 }
 
 void CollisionGeometryHistograms::calculateDerivedHistograms()
 {
   double nEvents      = h_crossSection->GetBinContent(1);
-  double nEventsWColl = h_crossSection->GetBinContent(2); double eNEventsWColl = h_crossSection->GetBinError(2);
+  double nEventsWColl = h_crossSection->GetBinContent(2); double eNEventWColl = h_crossSection->GetBinError(2);
   double area = h_crossSection->GetBinContent(4);
   double ratio1  = nEvents>0      ? nEventsWColl/nEvents : 1.0e-30;
-  double eRatio1 = nEvents>0      ? eNEventsWColl/nEvents : 1.0e-30;
+  double eRatio1 = nEvents>0      ? eNEventWColl/nEvents : 1.0e-30;
   double ratio2  = nEventNcollGE0 ? double(nEventNcollGE1)/double(nEventNcollGE0) : 1.0e-30;
   double eRatio2 = nEventNcollGE0 ? sqrt(double(nEventNcollGE1))/double(nEventNcollGE0) : 1.0e-30;
   double xSect1  = ratio1*area;
@@ -478,4 +426,265 @@ void CollisionGeometryHistograms::calculateRms(TProfile * h1, TProfile * h1Sq,  
 void CollisionGeometryHistograms::calculateInelCrossSection()
 {
   
+}
+
+
+// calculate the moments from the binary colls and save them
+// in the geometry event...
+// calculate eccentricities from n=1 to n=10;
+void CollisionGeometryHistograms::calculateMomentsFromBinaryColl(CollisionGeometry * collisionGeometry)
+{
+  double sum;
+  double meanX, meanY;
+  double varX, varY, varXY;
+  double w, n;
+  double r, rw, phi;
+  double cphiN[10], sphiN[10], rN[10], psiN[10], eccN[10];
+  double area;
+  double x, x2, y, y2, xy;
+  double epsX;
+  double epsY;
+  double epsDenom, epsMod;
+  double psi2;
+
+  // mean and variances
+  int nBinary   = collisionGeometry->nBinary;
+  sum    = 0.0;
+  meanX  = 0.0;
+  meanY  = 0.0;
+  varX   = 0.0;
+  varY   = 0.0;
+  varXY  = 0.0;
+  epsDenom  = -999.0;
+  epsX      = -999.0;
+  epsY      = -999.0;
+  epsMod    = -999.0;
+  psi2      = -999.0;
+  area      = -999.0;
+  // compute 1st and 2nd moments
+  for (int iBinary=0; iBinary<nBinary; iBinary++)
+    {
+    w  = 1.0;
+    x  = collisionGeometry->x[iBinary];  x2 = x*x;
+    y  = collisionGeometry->y[iBinary];  y2 = y*y;
+    xy = x*y;
+    sum += w;
+    meanX += w*x;
+    meanY += w*y;
+    varX  += w*x2;
+    varY  += w*y2;
+    varXY += w*xy;
+    }
+  if (sum>0)
+    {
+    meanX /= sum;
+    meanY /= sum;
+    varX  /= sum; varX  -= meanX*meanX;
+    varY  /= sum; varY  -= meanY*meanY;
+    varXY /= sum; varXY -= meanX*meanY;
+    epsDenom = varX + varY;
+    if (epsDenom>0)
+      {
+      epsX     = (varY - varX)/epsDenom;
+      epsY     = 2*varXY/epsDenom;
+      epsMod   = sqrt(epsX*epsX + epsY*epsY);
+      psi2     = atan2(epsY,epsX);
+      }
+    }
+
+  // compute n>=0 moments with weights...
+  for (int iN=1; iN<10; iN++)
+  {
+  cphiN[iN] = 0.0; sphiN[iN] = 0.0; rN[iN] = 0.0; psiN[iN] = 0.0; eccN[iN] = 0.0;
+  }
+  sum = 0.0;
+  for (int iBinary=0; iBinary<nBinary; iBinary++)
+  {
+  sum  += 1.0;
+  x  = collisionGeometry->x[iBinary] - meanX;
+  y  = collisionGeometry->y[iBinary] - meanY;
+  r  = TMath::Sqrt(x*x+y*y);
+  phi = TMath::ATan2(y,x);
+  for (int iN=1; iN<10; iN++)
+    {
+    n = iN+1;
+    w = (iN==0) ? 3 : n;
+    rw = TMath::Power(r,w);
+    cphiN[iN] += rw*TMath::Cos(n*phi);
+    sphiN[iN] += rw*TMath::Sin(n*phi);
+    rN[iN]    += rw;
+    }
+  }
+  for (int iN=1; iN<10; iN++)
+  {
+  psiN[iN] = TMath::ATan2(sphiN[iN],cphiN[iN]) + TMath::Pi()/double(iN);
+  eccN[iN] = TMath::Sqrt(sphiN[iN]*sphiN[iN]  + cphiN[iN]*cphiN[iN]) / rN[iN];
+  }
+
+  // copy values to the geometry event
+  collisionGeometry->binaryMoments. meanX  =  meanX;
+  collisionGeometry->binaryMoments. meanY  =  meanY;
+  collisionGeometry->binaryMoments. varX   =  varX;
+  collisionGeometry->binaryMoments. varY   =  varY;
+  collisionGeometry->binaryMoments. varXY  =  varXY;
+  collisionGeometry->binaryMoments. epsX   =  epsX;
+  collisionGeometry->binaryMoments. epsY   =  epsY;
+  collisionGeometry->binaryMoments. epsMod =  epsMod;
+  collisionGeometry->binaryMoments. psi2   =  psi2;
+  collisionGeometry->binaryMoments. area   =  area;
+  for (int iN=0;iN<10;iN++)
+  {
+  collisionGeometry->binaryMoments. cphiN[iN]  =  cphiN[iN];
+  collisionGeometry->binaryMoments. sphiN[iN]  =  sphiN[iN];
+  collisionGeometry->binaryMoments. sphiN[iN]  =  sphiN[iN];
+  collisionGeometry->binaryMoments. psiN[iN]   =  psiN[iN];
+  collisionGeometry->binaryMoments. eccN[iN]   =  eccN[iN];
+  }
+}
+
+// calculate the moments from the participants and save them
+// in the geometry event...
+// calculate eccentricities from n=1 to n=10;
+void CollisionGeometryHistograms::calculateMomentsFromParticipants(CollisionGeometry * collisionGeometry)
+{
+  double sum;
+  double meanX, meanY;
+  double varX, varY, varXY;
+  double w, n;
+  double r, rw, phi;
+  double cphiN[10], sphiN[10], rN[10], psiN[10], eccN[10];
+  double area;
+  double x, x2, y, y2, xy;
+  double epsX;
+  double epsY;
+  double epsDenom, epsMod;
+  double psi2;
+
+  // mean and variances
+  int nA = collisionGeometry->nucleusA->nNucleons;
+  int nB = collisionGeometry->nucleusA->nNucleons;
+  sum    = 0.0;
+  meanX  = 0.0;
+  meanY  = 0.0;
+  varX   = 0.0;
+  varY   = 0.0;
+  varXY  = 0.0;
+  epsDenom  = -999.0;
+  epsX      = -999.0;
+  epsY      = -999.0;
+  epsMod    = -999.0;
+  psi2      = -999.0;
+  area      = -999.0;
+  // compute 1st and 2nd moments
+  // based on the position of the nucleons at impact
+  for (int iA=0; iA<nA; iA++)
+    {
+    w  = 1.0;
+    x  = collisionGeometry->nucleusA->getNucleon(iA)->x;  x2 = x*x;
+    y  = collisionGeometry->nucleusA->getNucleon(iA)->y;  y2 = y*y;
+    xy = x*y;
+    sum += w;
+    meanX += w*x;
+    meanY += w*y;
+    varX  += w*x2;
+    varY  += w*y2;
+    varXY += w*xy;
+    }
+  for (int iB=0; iB<nB; iB++)
+    {
+    w  = 1.0;
+    x  = collisionGeometry->nucleusB->getNucleon(iB)->x;  x2 = x*x;
+    y  = collisionGeometry->nucleusB->getNucleon(iB)->y;  y2 = y*y;
+    xy = x*y;
+    sum += w;
+    meanX += w*x;
+    meanY += w*y;
+    varX  += w*x2;
+    varY  += w*y2;
+    varXY += w*xy;
+    }
+
+
+  if (sum>0)
+    {
+    meanX /= sum;
+    meanY /= sum;
+    varX  /= sum; varX  -= meanX*meanX;
+    varY  /= sum; varY  -= meanY*meanY;
+    varXY /= sum; varXY -= meanX*meanY;
+    epsDenom = varX + varY;
+    if (epsDenom>0)
+      {
+      epsX     = (varY - varX)/epsDenom;
+      epsY     = 2*varXY/epsDenom;
+      epsMod   = sqrt(epsX*epsX + epsY*epsY);
+      psi2     = atan2(epsY,epsX);
+      }
+    }
+
+  // compute n>=0 moments with weights...
+  for (int iN=1; iN<10; iN++)
+  {
+  cphiN[iN] = 0.0; sphiN[iN] = 0.0; rN[iN] = 0.0; psiN[iN] = 0.0; eccN[iN] = 0.0;
+  }
+  sum = 0.0;
+  for (int iA=0; iA<nA; iA++)
+  {
+  sum  += 1.0;
+  x  = collisionGeometry->nucleusA->getNucleon(iA)->x - meanX;
+  y  = collisionGeometry->nucleusA->getNucleon(iA)->y - meanY;
+  r  = TMath::Sqrt(x*x+y*y);
+  phi = TMath::ATan2(y,x);
+  for (int iN=1; iN<10; iN++)
+    {
+    n = iN+1;
+    w = (iN==0) ? 3 : n;
+    rw = TMath::Power(r,w);
+    cphiN[iN] += rw*TMath::Cos(n*phi);
+    sphiN[iN] += rw*TMath::Sin(n*phi);
+    rN[iN]    += rw;
+    }
+  }
+  for (int iB=0; iB<nA; iB++)
+  {
+  sum  += 1.0;
+  x  = collisionGeometry->nucleusB->getNucleon(iB)->x - meanX;
+  y  = collisionGeometry->nucleusB->getNucleon(iB)->y - meanY;
+  r  = TMath::Sqrt(x*x+y*y);
+  phi = TMath::ATan2(y,x);
+  for (int iN=1; iN<10; iN++)
+    {
+    n = iN+1;
+    w = (iN==0) ? 3 : n;
+    rw = TMath::Power(r,w);
+    cphiN[iN] += rw*TMath::Cos(n*phi);
+    sphiN[iN] += rw*TMath::Sin(n*phi);
+    rN[iN]    += rw;
+    }
+  }
+  for (int iN=1; iN<10; iN++)
+  {
+  psiN[iN] = TMath::ATan2(sphiN[iN],cphiN[iN]) + TMath::Pi()/double(iN);
+  eccN[iN] = TMath::Sqrt(sphiN[iN]*sphiN[iN]  + cphiN[iN]*cphiN[iN]) / rN[iN];
+  }
+
+  // copy values to the geometry event
+  collisionGeometry->participantMoments. meanX  =  meanX;
+  collisionGeometry->participantMoments. meanY  =  meanY;
+  collisionGeometry->participantMoments. varX   =  varX;
+  collisionGeometry->participantMoments. varY   =  varY;
+  collisionGeometry->participantMoments. varXY  =  varXY;
+  collisionGeometry->participantMoments. epsX   =  epsX;
+  collisionGeometry->participantMoments. epsY   =  epsY;
+  collisionGeometry->participantMoments. epsMod =  epsMod;
+  collisionGeometry->participantMoments. psi2   =  psi2;
+  collisionGeometry->participantMoments. area   =  area;
+  for (int iN=0;iN<10;iN++)
+  {
+  collisionGeometry->participantMoments. cphiN[iN]  =  cphiN[iN];
+  collisionGeometry->participantMoments. sphiN[iN]  =  sphiN[iN];
+  collisionGeometry->participantMoments. sphiN[iN]  =  sphiN[iN];
+  collisionGeometry->participantMoments. psiN[iN]   =  psiN[iN];
+  collisionGeometry->participantMoments. eccN[iN]   =  eccN[iN];
+  }
 }

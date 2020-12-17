@@ -13,11 +13,11 @@ ClassImp(ParticlePairFilter);
 // CTOR
 //////////////////////////////////////////////////////////////////////////////////////////
 ParticlePairFilter::ParticlePairFilter(double minDpt,
-              double maxDpt,
-              double minDphi,
-              double maxDphi,
-              double minDeta,
-              double maxDeta)
+                                       double maxDpt,
+                                       double minDphi,
+                                       double maxDphi,
+                                       double minDeta,
+                                       double maxDeta)
 :
 min_dpt    (minDpt),
 max_dpt    (maxDpt),
@@ -26,7 +26,7 @@ max_dphi   (maxDphi),
 min_deta   (minDeta),
 max_deta   (maxDeta)
 {
-// no ops
+  // no ops
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -34,7 +34,7 @@ max_deta   (maxDeta)
 //////////////////////////////////////////////////////////////////////////////////////////
 ParticlePairFilter::~ParticlePairFilter()
 {
-// no ops
+  // no ops
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

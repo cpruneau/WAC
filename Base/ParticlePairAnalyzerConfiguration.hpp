@@ -7,53 +7,31 @@
  *
  * For the licensing terms see LICENSE.
  **********************************************************************/
-#ifndef WAC_AnalysisConfiguration
-#define WAC_AnalysisConfiguration
-#include "TMath.h"
-#include "TaskConfiguration.hpp"
-#include "ParticleFilter.hpp"
-#include "ParticlePairFilter.hpp"
-#include "CanvasConfiguration.hpp"
-#include "GraphConfiguration.hpp"
+#ifndef WAC_ParticlePairAnalyzerConfiguration
+#define WAC_ParticlePairAnalyzerConfiguration
+#include "ParticleAnalyzerConfiguration.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration of a given analysis
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-class AnalysisConfiguration : public TaskConfiguration
+class ParticlePairAnalyzerConfiguration : public ParticleAnalyzerConfiguration
 {
 public:
   
-  AnalysisConfiguration(const TString & name,
+  ParticlePairAnalyzerConfiguration(const TString & name,
                         const TString & type,
                         const TString & version);
-  AnalysisConfiguration(const AnalysisConfiguration & source);
-  virtual ~AnalysisConfiguration(){}
+  ParticlePairAnalyzerConfiguration(const ParticlePairAnalyzerConfiguration & source);
+  virtual ~ParticlePairAnalyzerConfiguration(){}
 
-  AnalysisConfiguration & operator=(const AnalysisConfiguration & source);
+  ParticlePairAnalyzerConfiguration & operator=(const ParticlePairAnalyzerConfiguration & source);
 
-  void printConfiguration(ostream & os);
-  int getIxEtaPhi(double eta, double phi);
-  int getIxYPhi(double y, double phi);
+  virtual void validate();
+  virtual void printConfiguration(ostream & os);
 
   ////////////////////////////////////////////////////
   // Data Members
   ////////////////////////////////////////////////////
-  TString histoBaseName;
-
-  // event wise parameters
-  int nBins_nPartTot;      double min_nPartTot;      double max_nPartTot;
-  int nBins_nCell;         double min_nCell;         double max_nCell;
-  int nBins_nPartPerCell;  double min_nPartPerCell;  double max_nPartPerCell;
-
-  // single particle
-  int nBins_pt;  double min_pt;  double max_pt;  double range_pt;
-  int nBins_eta; double min_eta; double max_eta; double range_eta;
-  int nBins_y;   double min_y;   double max_y;   double range_y;
-  int nBins_phi; double min_phi; double max_phi; double range_phi;
-  int nBins_phiEta;
-  int nBins_phiEtaPt;
-  int nBins_phiY;
-  int nBins_phiYPt;
 
   // pair multiplicity bin correction
   float binCorrPM;
@@ -70,19 +48,10 @@ public:
   int nBins_Dy;          double min_Dy;          double max_Dy;         double width_Dy;
 
   bool fillPairs;
-  bool fill3D;
   bool fill6D;
   bool fillQ3D;
-  bool fillY;
 
-  bool nuDynVsMult;
-  bool nuDynVsCent;
-  bool ptCorrelatorVsMult;
-  bool ptCorrelatorVsCent;
-  int nBins_mult;  double min_mult; double max_mult;
-  int nBins_cent;  double min_cent; double max_cent;
-
-ClassDef(AnalysisConfiguration,0)
+ClassDef(ParticlePairAnalyzerConfiguration,0)
 };
 
-#endif /* WAC_AnalysisConfiguration */
+#endif /* WAC_ParticlePairAnalyzerConfiguration */

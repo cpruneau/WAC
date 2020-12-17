@@ -18,13 +18,9 @@ class NuDynDerivedHistos : public Histograms
 public:
 
   NuDynDerivedHistos(const TString & collectionName,
-                      AnalysisConfiguration * analysisConfiguration,
+                     NuDynConfiguration * analysisConfiguration,
                       LogLevel  debugLevel);
-  NuDynDerivedHistos(TFile * inputFile,
-                      const TString & collectionName,
-                      AnalysisConfiguration * analysisConfiguration,
-                      LogLevel  debugLevel);
-  virtual ~NuDynDerivedHistos();
+  virtual ~NuDynDerivedHistos() {} 
   void createHistograms();
   void loadHistograms(TFile * inputFile);
   void calculateDerivedHistograms(NuDynHistos * source);
@@ -53,15 +49,6 @@ public:
   TH1 ** h_R3_vsMult;
   TH1 ** h_R4_vsMult;
   TH1 ** h_nudyn_vsMult;
-
-  // vs Cent
-  TH1 ** h_F2_vsCent;
-  TH1 ** h_F3_vsCent;
-  TH1 ** h_F4_vsCent;
-  TH1 ** h_R2_vsCent;
-  TH1 ** h_R3_vsCent;
-  TH1 ** h_R4_vsCent;
-  TH1 ** h_nudyn_vsCent;
 
   ClassDef(NuDynDerivedHistos,0)
 };

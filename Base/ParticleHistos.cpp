@@ -11,22 +11,12 @@
 ClassImp(ParticleHistos);
 
 ParticleHistos::ParticleHistos(const TString & name,
-                               AnalysisConfiguration * configuration,
+                               ParticleAnalyzerConfiguration * configuration,
                                LogLevel  debugLevel)
 :
 Histograms(name,configuration,100,debugLevel)
 {
-  initialize();
-}
-
-ParticleHistos::ParticleHistos(TFile * inputFile,
-                               const TString & name,
-                               AnalysisConfiguration * configuration,
-                               LogLevel  debugLevel)
-:
-Histograms(name,configuration,100,debugLevel)
-{
-  loadHistograms(inputFile);
+  // no ops
 }
 
 ParticleHistos::~ParticleHistos()
@@ -37,9 +27,10 @@ ParticleHistos::~ParticleHistos()
 // for now use the same boundaries for eta and y histogram
 void ParticleHistos::createHistograms()
 {
-  AnalysisConfiguration & ac = *getConfiguration();
+  ParticleAnalyzerConfiguration & ac = *(ParticleAnalyzerConfiguration*)getConfiguration();
   TString bn = getHistoBaseName();
   h_n1         = createHistogram(bn+TString("n1"),            1000,  0.0,  1000.0,  "n_1","N", true,true,true,false);
+  h_n1_eTotal  = createHistogram(bn+TString("n1_eTotal"),     1000,  0.0,  1000.0,  "n_1_eTotal","N", true,true,true,false);
   h_n1_pt      = createHistogram(bn+TString("n1_pt"),         ac.nBins_pt,  ac.min_pt,  ac.max_pt,  "p_{T}","N", true,true,true,false);
   h_n1_ptXS    = createHistogram(bn+TString("n1_ptXS"),       ac.nBins_pt,  ac.min_pt,  ac.max_pt,  "p_{T}","1/p_{T} dN/p_{T}", true,true,true,false);
   h_n1_eta     = createHistogram(bn+TString("n1_eta"),        ac.nBins_eta, ac.min_eta, ac.max_eta, "#eta","N", true,true,true,false);
@@ -64,22 +55,22 @@ void ParticleHistos::createHistograms()
     h_pt_phiY  = createHistogram(bn+TString("pt1_phiY"),    ac.nBins_y, ac.min_y, ac.max_y, ac.nBins_phi, ac.min_phi, ac.max_phi,"y","#varphi","#LTp_{T}#GT", false,true,false,false);
     }
 
-  if (ac.fill3D)
-    {
-    h_n1_ptPhiEta = createHistogram(bn+TString("n1_ptPhiEta"),
-                                    ac.nBins_eta, ac.min_eta, ac.max_eta,
-                                    ac.nBins_phi, ac.min_phi, ac.max_phi,
-                                    ac.nBins_pt, ac.min_pt, ac.max_pt,
-                                    "#eta","#varphi","p_{T}","N", true,true,false,false);
-    if (ac.fillY)
-      {
-      h_n1_ptPhiY = createHistogram(bn+TString("n1_ptPhiY"),
-                                    100, ac.min_y, ac.max_y,
-                                    100, ac.min_phi, ac.max_phi,
-                                    100, ac.min_pt,  ac.max_pt,
-                                    "y","#varphi","p_{T}","N", true,true,false,false);
-      }
-    }
+ //  if (ac.fill3D)
+//    {
+//    h_n1_ptPhiEta = createHistogram(bn+TString("n1_ptPhiEta"),
+//                                    ac.nBins_eta, ac.min_eta, ac.max_eta,
+//                                    ac.nBins_phi, ac.min_phi, ac.max_phi,
+//                                    ac.nBins_pt, ac.min_pt, ac.max_pt,
+//                                    "#eta","#varphi","p_{T}","N", true,true,false,false);
+//    if (ac.fillY)
+//      {
+//      h_n1_ptPhiY = createHistogram(bn+TString("n1_ptPhiY"),
+//                                    100, ac.min_y, ac.max_y,
+//                                    100, ac.min_phi, ac.max_phi,
+//                                    100, ac.min_pt,  ac.max_pt,
+//                                    "y","#varphi","p_{T}","N", true,true,false,false);
+//      }
+//    }
 
 
 }
@@ -89,12 +80,18 @@ void ParticleHistos::loadHistograms(TFile * inputFile)
 {
   if (!inputFile)
     {
-    if (reportFatal()) cout << "-Fatal- Attempting to load ParticleHistos from an invalid file pointer" << endl;
+    if (reportFatal()) cout << "Attempting to load ParticleHistos from an invalid file pointer" << endl;
     return;
     }
-  AnalysisConfiguration & ac = *getConfiguration();
+  ParticleAnalyzerConfiguration & ac = *(ParticleAnalyzerConfiguration*) getConfiguration();
   TString bn = getHistoBaseName();
   h_n1         = loadH1(inputFile,bn+TString("n1"));
+  if (!h_n1)
+    {
+    if (reportError()) cout << "Could not load histogram: " << bn+TString("n1") << endl;
+    return;
+    }
+  h_n1_eTotal  = loadH1(inputFile,bn+TString("n1_eTotal"));
   h_n1_pt      = loadH1(inputFile,bn+TString("n1_pt"));
   h_n1_ptXS    = loadH1(inputFile,bn+TString("n1_ptXS"));
   h_n1_eta     = loadH1(inputFile,bn+TString("n1_eta"));
@@ -113,7 +110,7 @@ void ParticleHistos::loadHistograms(TFile * inputFile)
     }
   if (ac.fillY)
     {
-    h_n1_y     = loadH1(inputFile,bn+TString("n1_Y"));
+    h_n1_y     = loadH1(inputFile,bn+TString("n1_y"));
     h_n1_ptY   = loadH2(inputFile,bn+TString("n1_ptY"));
     h_n1_phiY  = loadH2(inputFile,bn+TString("n1_phiY"));
     h_spt_phiY = loadH2(inputFile,bn+TString("sumpt1_phiY"));
@@ -134,7 +131,7 @@ void ParticleHistos::fill(Particle & particle, double weight)
   double pt   = particle.pt;
   double eta  = particle.eta;
   double phi  = particle.phi; if (phi<0) phi += TMath::TwoPi();
-  AnalysisConfiguration & ac = *getConfiguration();
+  ParticleAnalyzerConfiguration & ac = *(ParticleAnalyzerConfiguration*) getConfiguration();
   h_n1_pt     ->Fill(pt, weight);
   h_n1_ptXS   ->Fill(pt, weight/pt);
   h_n1_eta    ->Fill(eta, weight);
@@ -144,7 +141,6 @@ void ParticleHistos::fill(Particle & particle, double weight)
   h_spt_phi    ->Fill(phi, pt*weight);
   h_spt_eta    ->Fill(eta, pt*weight);
   h_spt_phiEta ->Fill(eta, phi, pt*weight);
-
   if (ac.fillY)
     {
     double y    = particle.y;
@@ -154,9 +150,6 @@ void ParticleHistos::fill(Particle & particle, double weight)
     h_spt_y     ->Fill(y, pt*weight);
     h_spt_phiY  ->Fill(y, phi, pt*weight);
     }
-
-  //    if (analysisConfiguration->fill3D) h_n1_ptPhiEta->Fill(eta, phi, pt, weight);
-  //    if (analysisConfiguration->fill3D && analysisConfiguration->fillY) h_n1_ptPhiY->Fill(y, phi, pt, weight);
 }
 
 
@@ -166,7 +159,7 @@ void ParticleHistos::fill(TLorentzVector & p, double weight)
   double eta   = p.Eta();
   double phi   = p.Phi(); if (phi<0) phi += TMath::TwoPi();
   double y     = p.Rapidity();
-  AnalysisConfiguration & ac = *getConfiguration();
+  ParticleAnalyzerConfiguration & ac = *(ParticleAnalyzerConfiguration*)getConfiguration();
   h_n1_pt      ->Fill(pt, weight);
   h_n1_ptXS    ->Fill(pt, weight/pt);
   // delayed fill h_n1_eta     ->Fill(eta, weight);
@@ -190,16 +183,18 @@ void ParticleHistos::fill(TLorentzVector & p, double weight)
   if (ac.fill3D && ac.fillY) h_n1_ptPhiY->Fill(y, phi, pt, weight);
 }
 
-void ParticleHistos::fillMultiplicity(double nAccepted, double weight)
+void ParticleHistos::fillMultiplicity(double nAccepted, double totalEnergy, double weight)
 {
   h_n1->Fill(nAccepted, weight);
+  h_n1_eTotal->Fill(totalEnergy, weight);
+
 }
 
 // complete filling the addicional histograms by projecting the
 // higher dimensional ones
 void ParticleHistos::completeFill()
 {
-  AnalysisConfiguration & ac = *getConfiguration();
+  ParticleAnalyzerConfiguration & ac = *(ParticleAnalyzerConfiguration*)getConfiguration();
 
   TH1* h_eta = h_n1_phiEta->ProjectionX();
   h_n1_eta->Reset();
@@ -236,7 +231,7 @@ void ParticleHistos::completeFill()
 
 void ParticleHistos::calculateAverages()
 {
-  AnalysisConfiguration & ac = *getConfiguration();
+  ParticleAnalyzerConfiguration & ac = *(ParticleAnalyzerConfiguration*) getConfiguration();
   calculateAveragePt(h_spt_phi,h_n1_phi,h_pt_phi);
   calculateAveragePt(h_spt_eta,h_n1_eta,h_pt_eta);
   calculateAveragePtH2(h_spt_phiEta,h_n1_phiEta,h_pt_phiEta);

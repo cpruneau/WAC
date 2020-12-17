@@ -44,24 +44,29 @@ pythia8->ReadString("HardQCD:all = on");
 class PythiaConfiguration : public TaskConfiguration
 {
 public:
-  
+
   PythiaConfiguration(int    beam,
                       int    target,
                       double energy,
                       int    nOptions,
-                      TString ** options);
+                      TString ** options,
+                      bool   ppOnly=true,
+                      bool   removePhotons=true,
+                      int    clonesArraySize=10000);
   virtual ~PythiaConfiguration(){}
   void printConfiguration(ostream & os);
 
   ////////////////////////////////////////////////////
   // Data Members
   ////////////////////////////////////////////////////
+  int    clonesArraySize;
+  bool   removePhotons;
+  bool   ppOnly; // true for pp collision or specific beam+target
   int    beam;  // PDG Code   proton is 2212
   int    target;
   double energy; // in GeV
   int    nOptions;
   TString ** options;
-
 
 
 ClassDef(PythiaConfiguration,0)

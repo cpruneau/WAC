@@ -42,6 +42,12 @@ protected:
   double impactParameter;
   double other;
 
+  int    nFilters;
+  double *nFiltered;
+  double *eFiltered;
+  double *qFiltered;
+  double *bFiltered;
+
   static Event * getEvent();
 
   ClassDef(Event,0)

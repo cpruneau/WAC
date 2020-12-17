@@ -23,6 +23,7 @@
 #include "ParticlePairHistos.hpp"
 #include "ParticlePairDerivedHistos.hpp"
 #include "ParticlePairCombinedHistos.hpp"
+#include "ParticlePairAnalyzerConfiguration.hpp"
 
 class TwoPartCorrelationAnalyzer : public Task
 {
@@ -32,11 +33,12 @@ public:
   // CTOR
   //////////////////////////////////////////////////////////////
   TwoPartCorrelationAnalyzer(const TString &  name,
-                             TaskConfiguration * configuration,
+                             ParticlePairAnalyzerConfiguration * configuration,
                              Event * event,
                              EventFilter * eventFilter,
                              ParticleFilter * particleFilter1,
-                             ParticleFilter * particleFilter2);
+                             ParticleFilter * particleFilter2,
+                             LogLevel selectedLevel=Info);
   virtual ~TwoPartCorrelationAnalyzer();
   virtual void execute();
   virtual void createHistograms();
@@ -46,6 +48,7 @@ public:
   virtual void addHistogramsToExtList(TList *list, bool all=false);
   virtual void scaleHistograms(double factor);
   virtual void calculateDerivedHistograms();
+  virtual void resetHistograms();
 
   //////////////////////////////////////////////////////////////
   // Data Members

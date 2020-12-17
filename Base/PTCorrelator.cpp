@@ -6,7 +6,6 @@
 
 #include <chrono>
 #include "PTCorrelator.hpp"
-#include "AnalysisConfiguration.hpp"
 #include "HeavyIonConfiguration.hpp"
 
 
@@ -17,26 +16,25 @@ ClassImp(PTCorrelator);
 // CTOR
 //////////////////////////////////////////////////////////////
 PTCorrelator::PTCorrelator(const TString &  name,
-	TaskConfiguration * configuration,
-	Event * event,
-	EventFilter * ef,
-	ParticleFilter ** pf)
+                           NuDynConfiguration * configuration,
+                           Event * event,
+                           EventFilter * ef,
+                           ParticleFilter ** pf,
+                           LogLevel requiredLevel)
 :
-Task(name,configuration,event),
+Task(name,configuration,event,requiredLevel),
 histos(NULL),
 eventFilter(ef),
 particleFilters(pf),
-maxOrder(0),
-correlatorIndex(0),
-maxEvents(0)
+maxEvents(0),maxOrder(0),
+correlatorIndex(0)
 {
-	if (reportDebug())  cout << "PTCorrelator::CTOR(...) Started." << endl;
-	AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
-	HeavyIonConfiguration * hc = (HeavyIonConfiguration *) ac;
+  if (reportStart("PTCorrelator",getTaskName(),"CTOR"))
+    ;
+  //NuDynConfiguration * hc = (NuDynConfiguration *) getTaskConfiguration();
 
-
-	maxEvents      = hc->totEvents;
-	maxOrder      = hc->maxOrder;
+	//maxEvents      = hc->totEvents;
+	//maxOrder      = hc->maxOrder;
 	partNames     = new TString[maxOrder];
 	pT            = new double * [maxEvents];
 	acceptances   = new bool **[maxEvents];
@@ -47,7 +45,7 @@ maxEvents(0)
 
 	if (!eventFilter)
 	{
-		if (reportError()) cout << "PTCorrelator::CTOR(...) eventFilter is null pointer." << endl;
+		if (reportError("PTCorrelator",getTaskName(),"CTOR")) cout << "eventFilter is a null pointer." << endl;
 		postTaskError();
 		return;
 	}
@@ -55,23 +53,22 @@ maxEvents(0)
 	{
 		if (!particleFilters[i])
 		{
-			if (reportError()) cout << "PTCorrelator::CTOR(...) particleFilter" << i +1 << " is null pointer." << endl;
+			if (reportError("PTCorrelator",getTaskName(),"CTOR")) cout << "PTCorrelator::CTOR(...) particleFilter" << i +1 << " is a null pointer." << endl;
 			postTaskError();
 			return;
 		}
 	}
 
-	TString newName = getName();
+	TString newName = getTaskName();
 	newName += "_";
 	newName += eventFilter->getName();
-	setName(newName);
+	setTaskName(newName);
 	for(int i = 0; i < maxOrder; i++)
 	{
 		partNames[i] = particleFilters[i]->getName();
 	}
-
-
-
+  if (reportEnd("PTCorrelator",getTaskName(),"CTOR"))
+    ;
 }
 
 
@@ -80,17 +77,45 @@ maxEvents(0)
 //////////////////////////////////////////////////////////////
 PTCorrelator::~PTCorrelator()
 {
-	if (reportDebug())  cout << "PTCorrelator::DTOR(...) Started" << endl;
+  if (reportStart("PTCorrelator",getTaskName(),"DTOR"))
+    ;
 	if (histos != NULL) delete histos;
-	if (reportDebug())  cout << "PTCorrelator::DTOR(...) Completed" << endl;
+  if (reportEnd("PTCorrelator",getTaskName(),"DTOR"))
+    ;
 }
 
 
 void PTCorrelator::createHistograms()
 {
-	if (reportDebug())  cout << "PTCorrelator::createHistograms(...) started"<< endl;
-	HeavyIonConfiguration * ac = (HeavyIonConfiguration *) getTaskConfiguration();
+  if (reportStart("PTCorrelator",getTaskName(),"createHistograms()"))
+    ;
+  HeavyIonConfiguration * ac = (HeavyIonConfiguration *) getTaskConfiguration();
 	//LogLevel debugLevel = getReportLevel();
+	TString histoName;
+	histoName = partNames[0];
+	for(int i = 1; i < maxOrder; i++)
+	{
+		histoName += partNames[i];
+	}
+	histos = new PTHistos(histoName,ac,MessageLogger::Error, maxOrder);
+  histos->createHistograms();
+	for(int i = 0; i < maxEvents; i++)
+	{
+		counts[i] = new int[histos->size];
+	}
+  if (reportEnd("PTCorrelator",getTaskName(),"createHistograms()"))
+    ;
+}
+
+
+//////////////////////////////////////////////////////////////
+// load histograms from given files needs to be fixed
+//////////////////////////////////////////////////////////////
+void PTCorrelator::loadHistograms(TFile * inputFile)
+{
+  if (reportStart("PTCorrelator",getTaskName(),"loadHistograms(TFile * inputFile)"))
+    ;
+  NuDynConfiguration * ac = (NuDynConfiguration *) getTaskConfiguration();
 
 	TString histoName;
 	histoName = partNames[0];
@@ -100,47 +125,13 @@ void PTCorrelator::createHistograms()
 	}
 
 	histos = new PTHistos(histoName,ac,MessageLogger::Error, maxOrder);
-	
-
-
+  histos->loadHistograms(inputFile);
 	for(int i = 0; i < maxEvents; i++)
 	{
 		counts[i] = new int[histos->size];
 	}
-
-	if (reportDebug())  cout << "PTCorrelator::createHistograms(...) completed"<< endl;
-
-
-}
-
-
-//////////////////////////////////////////////////////////////
-// load histograms from given files needs to be fixed
-//////////////////////////////////////////////////////////////
-void PTCorrelator::loadHistograms(TFile * inputFile)
-{
-	if (reportDebug())  cout << "PTCorrelator::loadHistograms(...) Starting." << endl;
-  /* first load the number of events as from the  cumulated parameter */
-	TParameter<Long64_t> *par = (TParameter<Long64_t> *) inputFile->Get("NoOfEvents");
-	eventsProcessed = par->GetVal();
-	delete par;
-	AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
-	//LogLevel debugLevel = getReportLevel();
-
-	TString histoName;
-	histoName = partNames[0];
-	for(int i = 1; i < maxOrder; i++)
-	{
-		histoName += partNames[i];
-	}
-
-	histos = new PTHistos(inputFile,histoName,ac,MessageLogger::Error, maxOrder);
-
-	for(int i = 0; i < maxEvents; i++)
-	{
-		counts[i] = new int[histos->size];
-	}
-	if (reportDebug())  cout << "PTCorrelator::loadHistograms(...) Completed." << endl;
+  if (reportStart("PTCorrelator",getTaskName(),"loadHistograms(TFile * inputFile)"))
+    ;
 }
 
 
@@ -149,39 +140,26 @@ void PTCorrelator::loadHistograms(TFile * inputFile)
 //////////////////////////////////////////////////////////////
 void PTCorrelator::saveHistograms(TFile * outputFile)
 {
-	if (reportDebug()) cout << "PTCorrelator::saveHistograms(...) Saving Event histograms to file." << endl;
-	if (!outputFile)
+  if (reportStart("PTCorrelator",getTaskName(),"saveHistograms(TFile * outputFile)"))
+    ;
+  if (!outputFile)
 	{
-		if (reportError()) cout << "PTCorrelator::saveHistograms(...) outputFile is a null  pointer." << endl;
+		if (reportError("PTCorrelator",getTaskName(),"saveHistograms(TFile * outputFile)")) cout << "outputFile is a null  pointer." << endl;
 		postTaskError();
 		return;
 	}
 	outputFile->cd();
-  /* first save the number of events as a cumulated parameter */
-	TParameter<Long64_t>("NoOfEvents",eventsProcessed,'+').Write();
-	histos->saveHistograms(outputFile);
-	if (reportDebug()) cout << "PTCorrelator::saveHistograms(...) Completed." << endl;
+  if (reportEnd("PTCorrelator",getTaskName(),"saveHistograms(TFile * outputFile)"))
+    ;
 }
 
 
 void PTCorrelator::execute()
 {
-
-	auto start = chrono::high_resolution_clock::now(); 
-	if (event != NULL)
-	{
-		if (reportDebug()) cout << "PTCorrelator::execute(...) analyzing " << event->nParticles << " particles" << endl;
-	}
-	else
-	{
-		if (reportError()) cout << "PTCorrelator::execute(...) event pointer is NULL. Abort." << endl;
-		postTaskError();
-		return;
-	}
-
-  //if (reportDebug()) cout <<"PTCorrelator::analyze(...) check if event is acceptable" << endl;
-	if (!eventFilter->accept(*event)) return;
-  //if (reportDebug()) cout <<"PTCorrelator::analyze(...) acceptable event" << endl;
+	auto start = chrono::high_resolution_clock::now();
+  incrementEventProcessed();
+  if (!eventFilter->accept(*event)) return;
+  incrementEventAccepted(); // count events used to fill histograms and for scaling at the end...
 
 	HeavyIonConfiguration * ac = (HeavyIonConfiguration *) getTaskConfiguration();
 	if (!ac)
@@ -190,31 +168,22 @@ void PTCorrelator::execute()
 		postTaskError();
 		return;
 	}
-
-
 	correlatorIndex = 0;
-	int count = 0;
-	int *filters = new int [maxOrder];
-	int *particles = new int [maxOrder];
+	//int count = 0;
+	//int *filters = new int [maxOrder];
+	//int *particles = new int [maxOrder];
 
 	histos->fillEventHistos( event->multiplicity, event->centrality, 1.0); 
 	storeEventInfo();
-
 	correlatorIndex = 0;
-	eventsProcessed++;
-
-
 	auto stop = chrono::high_resolution_clock::now(); 
 	auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
-	if (reportDebug()) cout << "Analyzed event "<< eventsProcessed << " Time taken by event: " << duration.count() << " microseconds" << " Multiplicity: " << event->multiplicity << endl; 
-
-	if(eventsProcessed == maxEvents)
+	if (reportDebug()) cout << "Analyzed event "<< getNEventProcessed() << " Time taken by event: " << duration.count() << " microseconds" << " Multiplicity: " << event->multiplicity << endl;
+	if(getNEventProcessed() == maxEvents)
 	{
 		cout << "Max number of collisions: " << ac->nCollisionsMax << endl;
 		histos->fillDerivedHistos(acceptances, multiplicity, centrality, numParticles, pT);
 	}
-
-	if (reportDebug()) cout << "PTCorrelator::execute() Completed" << endl;
 }
 
 
@@ -225,9 +194,11 @@ void PTCorrelator::execute()
 //////////////////////////////////////////////////////////////
 void PTCorrelator::scaleHistograms(double factor)
 {
-	if (reportDebug())  cout << "PTCorrelator::scaleHistograms(..) Scale all primary histograms by " << factor << endl;
-	histos->scale(factor);
-	if (reportDebug())  cout << "PTCorrelator::scale(..) Completed"  << endl;
+  if (reportInfo("PTCorrelator",getTaskName(),"scaleHistograms(double factor)"))
+    cout << "Scaling histograms by a factor: " << factor << endl;
+  histos->scale(factor);
+  if (reportEnd("PTCorrelator",getTaskName(),"scaleHistograms(double factor)"))
+    ;
 }
 
 
@@ -239,29 +210,42 @@ void PTCorrelator::scaleHistograms(double factor)
 ////////////////////////////////////////////////////////
 void PTCorrelator::storeEventInfo()
 {
-	if (reportDebug())  cout << "PTCorrelator::storeEventInfo(...) Starting." << endl;
-	//the transverse momentum
-	pT[eventsProcessed] = new double [event->nParticles];
+  if (reportStart("PTCorrelator",getTaskName(),"storeEventInfo()"))
+    ;	//the transverse momentum
+	pT[getNEventProcessed()] = new double [event->nParticles];
 	for(int iParticle = 0; iParticle < event->nParticles; iParticle++)
 	{
 		Particle & particle = * event->getParticleAt(iParticle);
-		pT[eventsProcessed][iParticle] = particle.pt;
+		pT[getNEventProcessed()][iParticle] = particle.pt;
 	}
 
 	//The acceptances
-	acceptances[eventsProcessed] = new bool *[maxOrder];
+	acceptances[getNEventProcessed()] = new bool *[maxOrder];
 	for(int i = 0; i < maxOrder; i++)
 	{
-		acceptances[eventsProcessed][i] = new bool [event->nParticles];
+		acceptances[getNEventProcessed()][i] = new bool [event->nParticles];
 		for(int iParticle = 0; iParticle < event->nParticles; iParticle++)
 		{
 			Particle & particle = * event->getParticleAt(iParticle);
-			acceptances[eventsProcessed][i][iParticle] = particleFilters[i]->accept(particle);
+			acceptances[getNEventProcessed()][i][iParticle] = particleFilters[i]->accept(particle);
 		}
 	}
 
-	numParticles[eventsProcessed] = event->nParticles;
-	multiplicity[eventsProcessed] = event->multiplicity;
-	centrality[eventsProcessed] = event->centrality;
-	if (reportDebug())  cout << "PTCorrelator::storeEventInfo(...) Completed." << endl;
+	numParticles[getNEventProcessed()] = event->nParticles;
+	multiplicity[getNEventProcessed()] = event->multiplicity;
+	centrality[getNEventProcessed()] = event->centrality;
+  if (reportEnd("PTCorrelator",getTaskName(),"storeEventInfo()"))
+    ;
+}
+
+
+void PTCorrelator::calculateDerivedHistograms()
+{
+
+}
+
+
+void PTCorrelator::resetHistograms()
+{
+  histos->reset();
 }

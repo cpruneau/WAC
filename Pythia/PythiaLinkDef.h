@@ -10,4 +10,7 @@
 #pragma link C++ class AACollisionGenerator+;
 #pragma link C++ class HeavyIonConfiguration+;
 
+#pragma link C++ class AACollisionPythiaGenerator+;
+#pragma link C++ class AACollisionPythiaGenerator+;
+
 #endif

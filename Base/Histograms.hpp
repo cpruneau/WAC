@@ -10,7 +10,7 @@
 #ifndef WAC_Histograms
 #define WAC_Histograms
 #include "HistogramCollection.hpp"
-#include "AnalysisConfiguration.hpp"
+#include "TaskConfiguration.hpp"
 
 class Histograms : public HistogramCollection
 {
@@ -21,30 +21,27 @@ public:
   // CTOR
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   Histograms(const TString & name,
-             AnalysisConfiguration * configuration,
+             TaskConfiguration * configuration,
              int nHistogramsMax,
              LogLevel  debugLevel);
   Histograms(TFile * inputFile,
              const TString & name,
-             AnalysisConfiguration * configuration,
+             TaskConfiguration * configuration,
              int nHistogramsMax,
              LogLevel  debugLevel);
   ~Histograms();
-  virtual void initialize();
-  virtual void finalize();
   virtual void reset();
-  virtual void clear();
   virtual void createHistograms();
   virtual void loadHistograms(TFile * inputFile);
 
-  AnalysisConfiguration * getConfiguration() const;
-  void setConfiguration(AnalysisConfiguration * config);
+  TaskConfiguration * getConfiguration() const;
+  void setConfiguration(TaskConfiguration * config);
 
   virtual TString getHistoBaseName() const;
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Data Members
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
-  AnalysisConfiguration * configuration;
+  TaskConfiguration * configuration;
 
     ClassDef(Histograms,0)
 };

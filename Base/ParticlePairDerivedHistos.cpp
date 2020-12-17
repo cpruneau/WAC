@@ -9,38 +9,19 @@
 #include "ParticlePairDerivedHistos.hpp"
 ClassImp(ParticlePairDerivedHistos);
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////
- // CTOR
- //////////////////////////////////////////////////////////////////////////////////////////////////////
 ParticlePairDerivedHistos::ParticlePairDerivedHistos(const TString & name,
-                                                     AnalysisConfiguration * configuration,
+                                                     ParticlePairAnalyzerConfiguration * configuration,
                                                      LogLevel  debugLevel)
  :
  Histograms(name,configuration,150,debugLevel)
  {
-   initialize();
- }
-
- //////////////////////////////////////////////////////////////////////////////////////////////////////
- // CTOR
- //////////////////////////////////////////////////////////////////////////////////////////////////////
- ParticlePairDerivedHistos::ParticlePairDerivedHistos(TFile * inputFile,
-                           const TString & name,
-                           AnalysisConfiguration * configuration,
-                           LogLevel  debugLevel)
- :
- Histograms(name,configuration,150,debugLevel)
- {
-   loadHistograms(inputFile);
+  // no ops
  }
 
 
- //////////////////////////////////////////////////////////////////////////////////////////////////////
- // DTOR
- //////////////////////////////////////////////////////////////////////////////////////////////////////
  ParticlePairDerivedHistos::~ParticlePairDerivedHistos()
  {
-/* */
+ // no ops
  }
 
 
@@ -51,7 +32,7 @@ ParticlePairDerivedHistos::ParticlePairDerivedHistos(const TString & name,
  {
    if (reportDebug()) cout << "ParticlePairDerivedHistos::loadHistograms(...)" << endl;
 
-   AnalysisConfiguration & ac = * getConfiguration();
+   ParticlePairAnalyzerConfiguration & ac = * (ParticlePairAnalyzerConfiguration*) getConfiguration();
   TString bn = getHistoBaseName();
    h_n1n1_phiEtaPhiEta    = loadH2(inputFile, bn+TString("n1n1_phiEtaPhiEta"));
    h_n1n1_etaEta          = loadH2(inputFile, bn+TString("n1n1_etaEta"));
@@ -148,7 +129,7 @@ ParticlePairDerivedHistos::ParticlePairDerivedHistos(const TString & name,
    if (reportDebug()) cout << "ParticlePairDerivedHistos::initialize() starting"<< endl;
    TString name;
    ijNormalization = false;
-   AnalysisConfiguration & ac = * (AnalysisConfiguration*) getConfiguration();
+   ParticlePairAnalyzerConfiguration & ac = * (ParticlePairAnalyzerConfiguration*) getConfiguration();
     TString bn = getHistoBaseName();
    ac.nBins_phiEta    = ac.nBins_eta*ac.nBins_phi;
    ac.nBins_Dphi_shft = ac.nBins_phi/4;
@@ -270,16 +251,16 @@ ParticlePairDerivedHistos::ParticlePairDerivedHistos(const TString & name,
      h_bf21_DyDphi       = createHistogram(bn+TString("bf21_DyDphi"),       ac.nBins_Dy,  ac.min_Dy,  ac.max_Dy,  ac.nBins_Dphi,  ac.min_Dphi,      ac.max_Dphi,      "#Delta y", "#Delta#varphi", "n_{2}^{21}/n_{1}^{1}", false, true, false, false);
      h_bf21_DyDphi_shft  = createHistogram(bn+TString("bf21_DyDphi_shft"),  ac.nBins_Dy,  ac.min_Dy,  ac.max_Dy,  ac.nBins_Dphi,  ac.min_Dphi_shft, ac.max_Dphi_shft, "#Delta y", "#Delta#varphi", "n_{2}^{21}/n_{1}^{1}", false, true, false, false);
 
-     h_n1n1_Q3D          = createHistogram(bn+TString("n1n1_Q3D"),
-                                            ac.nBins_DeltaPlong, ac.min_DeltaPlong, ac.max_DeltaPlong,
-                                            ac.nBins_DeltaPside, ac.min_DeltaPside, ac.max_DeltaPside,
-                                            ac.nBins_DeltaPout,  ac.min_DeltaPout,  ac.max_DeltaPout,
-                                            "Q_{long} (GeV/c)", "Q_{side}  (GeV/c)", "Q_{out}  (GeV/c)","Yield", 0,1,0,0);
-     h_R2_Q3D             = createHistogram(bn+TString("R2_Q3D"),
-                                            ac.nBins_DeltaPlong, ac.min_DeltaPlong, ac.max_DeltaPlong,
-                                            ac.nBins_DeltaPside, ac.min_DeltaPside, ac.max_DeltaPside,
-                                            ac.nBins_DeltaPout,  ac.min_DeltaPout,  ac.max_DeltaPout,
-                                            "Q_{long} (GeV/c)", "Q_{side}  (GeV/c)", "Q_{out}  (GeV/c)","Yield", 0,1,0,0);
+//     h_n1n1_Q3D          = createHistogram(bn+TString("n1n1_Q3D"),
+//                                            ac.nBins_DeltaPlong, ac.min_DeltaPlong, ac.max_DeltaPlong,
+//                                            ac.nBins_DeltaPside, ac.min_DeltaPside, ac.max_DeltaPside,
+//                                            ac.nBins_DeltaPout,  ac.min_DeltaPout,  ac.max_DeltaPout,
+//                                            "Q_{long} (GeV/c)", "Q_{side}  (GeV/c)", "Q_{out}  (GeV/c)","Yield", 0,1,0,0);
+//     h_R2_Q3D             = createHistogram(bn+TString("R2_Q3D"),
+//                                            ac.nBins_DeltaPlong, ac.min_DeltaPlong, ac.max_DeltaPlong,
+//                                            ac.nBins_DeltaPside, ac.min_DeltaPside, ac.max_DeltaPside,
+//                                            ac.nBins_DeltaPout,  ac.min_DeltaPout,  ac.max_DeltaPout,
+//                                            "Q_{long} (GeV/c)", "Q_{side}  (GeV/c)", "Q_{out}  (GeV/c)","Yield", 0,1,0,0);
    }
 
    if (reportDebug()) cout << "ParticlePairDerivedHistos::initialize() completed."<< endl;
@@ -457,7 +438,7 @@ ParticlePairDerivedHistos::ParticlePairDerivedHistos(const TString & name,
  void ParticlePairDerivedHistos::calculateDerivedHistograms(ParticleHistos * part1Histos, ParticleHistos * part2Histos, ParticlePairHistos * pairHistos, double bincorrection)
  {
    if (reportDebug()) cout << "ParticlePairDerivedHistos::calculateDerivedHistograms() started."<< endl;
- AnalysisConfiguration & ac = * (AnalysisConfiguration*) getConfiguration();
+ ParticlePairAnalyzerConfiguration & ac = * (ParticlePairAnalyzerConfiguration*) getConfiguration();
    /////////////////////////////////////////////////////////////////////////////////////////////////////////
    // R2 related histograms
    /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -483,40 +464,40 @@ ParticlePairDerivedHistos::ParticlePairDerivedHistos(const TString & name,
    /////////////////////////////////////////////////////////////////////////////////////////////////////////
    // Q3D related Histograms
    /////////////////////////////////////////////////////////////////////////////////////////////////////////
- if (ac.fillQ3D)
-   {
-     if (reportDebug()) cout << "ParticlePairDerivedHistos::calculateDerivedHistograms() Q3D Histograms projection."<< endl;
-
-     symmetrize3D(pairHistos->h_n2_Q3D);
-
-     h_n2_Q3D_xy = (TH2 *) pairHistos->h_n2_Q3D->Project3D("xy");     add(h_n2_Q3D_xy, 0,1,0,0);
-     h_n2_Q3D_xz = (TH2 *) pairHistos->h_n2_Q3D->Project3D("xz");     add(h_n2_Q3D_xz, 0,1,0,0);
-     h_n2_Q3D_yz = (TH2 *) pairHistos->h_n2_Q3D->Project3D("yz");     add(h_n2_Q3D_yz, 0,1,0,0);
-
-     if (ac.fillY)
-     {
-       calculateN1N1H2H2_Q3D_MCY(part1Histos->h_n1_ptY, part2Histos->h_n1_ptY, h_n1n1_Q3D,  1.0, 1.0);
-       symmetrize3D(h_n1n1_Q3D);
-     }
-     else
-     {
-       calculateN1N1H2H2_Q3D_MCEta(part1Histos->h_n1_ptEta, part2Histos->h_n1_ptEta, h_n1n1_Q3D,  1.0, 1.0);
-       symmetrize3D(h_n1n1_Q3D);
-     }
-     h_n1n1_Q3D_xy = (TH2 *) h_n1n1_Q3D->Project3D("xy"); add(h_n1n1_Q3D_xy, 0,1,0,0);
-     h_n1n1_Q3D_xz = (TH2 *) h_n1n1_Q3D->Project3D("xz"); add(h_n1n1_Q3D_xz, 0,1,0,0);
-     h_n1n1_Q3D_yz = (TH2 *) h_n1n1_Q3D->Project3D("yz"); add(h_n1n1_Q3D_yz, 0,1,0,0);
-
-     calculateR2_Q3D(pairHistos->h_n2_Q3D,h_n1n1_Q3D,h_R2_Q3D, 1.0, 1.0);
-     h_R2_Q3D_xy = (TH2 *) h_R2_Q3D->Project3D("xy");     add(h_R2_Q3D_xy,  0,1,0,0);
-     h_R2_Q3D_xz = (TH2 *) h_R2_Q3D->Project3D("xz");     add(h_R2_Q3D_xz,  0,1,0,0);
-     h_R2_Q3D_yz = (TH2 *) h_R2_Q3D->Project3D("yz");     add(h_R2_Q3D_yz,  0,1,0,0);
-     //h_R2_Q3D_x  = h_R2_Q3D->Project3D("x");              add(h_R2_Q3D_x,   notScaled, notSaved, plotted, notPrinted);
-     //h_R2_Q3D_y  = h_R2_Q3D->Project3D("y");              add(h_R2_Q3D_y,   notScaled, notSaved, plotted, notPrinted);
-     //h_R2_Q3D_z  = h_R2_Q3D->Project3D("z");              add(h_R2_Q3D_z,   notScaled, notSaved, plotted, notPrinted);
-
-     if (reportDebug()) cout << "ParticlePairDerivedHistos::calculateDerivedHistograms() Q3D Histograms projection completed!!!!!"<< endl;
-   }
+// if (ac.fillQ3D)
+//   {
+//     if (reportDebug()) cout << "ParticlePairDerivedHistos::calculateDerivedHistograms() Q3D Histograms projection."<< endl;
+//
+//     symmetrize3D(pairHistos->h_n2_Q3D);
+//
+//     h_n2_Q3D_xy = (TH2 *) pairHistos->h_n2_Q3D->Project3D("xy");     append(h_n2_Q3D_xy, 0,1,0,0);
+//     h_n2_Q3D_xz = (TH2 *) pairHistos->h_n2_Q3D->Project3D("xz");     append(h_n2_Q3D_xz, 0,1,0,0);
+//     h_n2_Q3D_yz = (TH2 *) pairHistos->h_n2_Q3D->Project3D("yz");     append(h_n2_Q3D_yz, 0,1,0,0);
+//
+//     if (ac.fillY)
+//     {
+//       calculateN1N1H2H2_Q3D_MCY(part1Histos->h_n1_ptY, part2Histos->h_n1_ptY, h_n1n1_Q3D,  1.0, 1.0);
+//       symmetrize3D(h_n1n1_Q3D);
+//     }
+//     else
+//     {
+//       calculateN1N1H2H2_Q3D_MCEta(part1Histos->h_n1_ptEta, part2Histos->h_n1_ptEta, h_n1n1_Q3D,  1.0, 1.0);
+//       symmetrize3D(h_n1n1_Q3D);
+//     }
+//     h_n1n1_Q3D_xy = (TH2 *) h_n1n1_Q3D->Project3D("xy"); append(h_n1n1_Q3D_xy, 0,1,0,0);
+//     h_n1n1_Q3D_xz = (TH2 *) h_n1n1_Q3D->Project3D("xz"); append(h_n1n1_Q3D_xz, 0,1,0,0);
+//     h_n1n1_Q3D_yz = (TH2 *) h_n1n1_Q3D->Project3D("yz"); append(h_n1n1_Q3D_yz, 0,1,0,0);
+//
+//     calculateR2_Q3D(pairHistos->h_n2_Q3D,h_n1n1_Q3D,h_R2_Q3D, 1.0, 1.0);
+//     h_R2_Q3D_xy = (TH2 *) h_R2_Q3D->Project3D("xy");     append(h_R2_Q3D_xy,  0,1,0,0);
+//     h_R2_Q3D_xz = (TH2 *) h_R2_Q3D->Project3D("xz");     append(h_R2_Q3D_xz,  0,1,0,0);
+//     h_R2_Q3D_yz = (TH2 *) h_R2_Q3D->Project3D("yz");     append(h_R2_Q3D_yz,  0,1,0,0);
+//     //h_R2_Q3D_x  = h_R2_Q3D->Project3D("x");              append(h_R2_Q3D_x,   notScaled, notSaved, plotted, notPrinted);
+//     //h_R2_Q3D_y  = h_R2_Q3D->Project3D("y");              append(h_R2_Q3D_y,   notScaled, notSaved, plotted, notPrinted);
+//     //h_R2_Q3D_z  = h_R2_Q3D->Project3D("z");              append(h_R2_Q3D_z,   notScaled, notSaved, plotted, notPrinted);
+//
+//     if (reportDebug()) cout << "ParticlePairDerivedHistos::calculateDerivedHistograms() Q3D Histograms projection completed!!!!!"<< endl;
+//   }
 
 
    /////////////////////////////////////////////////////////////////////////////////////////////////////////

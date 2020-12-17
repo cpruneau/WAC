@@ -17,22 +17,56 @@
 ClassImp(MessageLogger);
 
 
-bool MessageLogger::reportDebug(TString className, TString fctName, TString taskName, ostream & output)
+bool MessageLogger::reportDebug(TString className, TString taskName, TString fctName, ostream & output) const
 {
  if (reportLevel<=Debug)
    {
-   output << " <DEBUG> " << className << "(" << taskName << ")::" << fctName << "  ";
+   output << " <DEBUG> " << className << "[" << taskName << "]::" << fctName << "  ";
    return true;
    }
  else
    return false;
 }
 
-bool MessageLogger::reportInfo(TString  className, TString  fctName, TString  taskName, ostream & output)
+bool MessageLogger::reportNoOps(TString  className, TString taskName, TString fctName, ostream & output) const
+{
+ if (reportLevel<=Debug)
+   {
+   output << " <DEBUG> " << className << "[" << taskName << "]::" << fctName << "  No ops." << endl;
+   return true;
+   }
+ else
+   return false;
+}
+
+bool MessageLogger::reportStart(TString  className, TString taskName, TString fctName, ostream & output) const
+{
+ if (reportLevel<=Debug)
+   {
+   output << " <DEBUG> " << className << "[" << taskName << "]::" << fctName << "  Started." << endl;
+   return true;
+   }
+ else
+   return false;
+}
+
+bool MessageLogger::reportEnd(TString  className, TString taskName, TString fctName, ostream & output) const
+{
+ if (reportLevel<=Debug)
+   {
+   output << " <DEBUG> " << className << "[" << taskName << "]::" << fctName << "  Completed." << endl;
+   return true;
+   }
+ else
+   return false;
+}
+
+
+bool MessageLogger::reportInfo(TString  className, TString taskName, TString fctName, ostream & output) const
 {
  if (reportLevel<=Info)
    {
-   output << " <INFO> " << className << "(" << taskName << ")::" << fctName << "  ";
+   output << " <INFO> " << className << "[" << taskName << "]::" << fctName << "  ";
    return true;
    }
  else
@@ -40,7 +74,7 @@ bool MessageLogger::reportInfo(TString  className, TString  fctName, TString  ta
 }
 
 
-bool MessageLogger::reportWarning(TString  className, TString  fctName, TString  taskName, ostream & output)
+bool MessageLogger::reportWarning(TString  className, TString taskName, TString fctName, ostream & output) const
 {
  if (reportLevel<=Warning)
    {
@@ -52,7 +86,7 @@ bool MessageLogger::reportWarning(TString  className, TString  fctName, TString 
 }
 
 
-bool MessageLogger::reportError(TString  className, TString  fctName, TString  taskName, ostream & output)
+bool MessageLogger::reportError(TString  className, TString taskName, TString fctName, ostream & output) const
 {
  if (reportLevel<=Error)
    {
@@ -63,7 +97,7 @@ bool MessageLogger::reportError(TString  className, TString  fctName, TString  t
    return false;
 }
 
-bool MessageLogger::reportFatal(TString  className, TString  fctName, TString  taskName, ostream & output)
+bool MessageLogger::reportFatal(TString  className, TString taskName, TString fctName, ostream & output) const
 {
  if (reportLevel<=Fatal)
    {
@@ -76,7 +110,7 @@ bool MessageLogger::reportFatal(TString  className, TString  fctName, TString  t
 
 
 
-bool MessageLogger::reportDebug(ostream & output)
+bool MessageLogger::reportDebug(ostream & output) const
 {
   if (reportLevel<=Debug)
     {
@@ -87,7 +121,7 @@ bool MessageLogger::reportDebug(ostream & output)
     return false;
 }
 
-bool MessageLogger::reportInfo(ostream & output)
+bool MessageLogger::reportInfo(ostream & output) const
 {
   if (reportLevel<=Info)
     {
@@ -98,7 +132,7 @@ bool MessageLogger::reportInfo(ostream & output)
     return false;
 }
 
-bool MessageLogger::reportWarning(ostream & output)
+bool MessageLogger::reportWarning(ostream & output) const
 {
   if (reportLevel<=Warning)
     {
@@ -109,7 +143,7 @@ bool MessageLogger::reportWarning(ostream & output)
     return false;
 }
 
-bool MessageLogger::reportError(ostream & output)
+bool MessageLogger::reportError(ostream & output) const
 {
   if (reportLevel<=Error)
     {
@@ -120,7 +154,7 @@ bool MessageLogger::reportError(ostream & output)
     return false;
 }
 
-bool MessageLogger::reportFatal(ostream & output)
+bool MessageLogger::reportFatal(ostream & output) const
 {
   if (reportLevel<=Fatal)
     {

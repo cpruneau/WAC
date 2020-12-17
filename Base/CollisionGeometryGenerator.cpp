@@ -16,24 +16,55 @@
 #include "CollisionGeometryGenerator.hpp"
 ClassImp(CollisionGeometryGenerator);
 
-CollisionGeometryGenerator::CollisionGeometryGenerator(const TString & name,
-                                                       CollisionGeometryConfiguration * configuration,
-                                                       CollisionGeometry * _collisionGeometry,
-                                                       NucleusGenerator * _nucleusGeneratorA,
-                                                       NucleusGenerator * _nucleusGeneratorB)
+CollisionGeometryGenerator::CollisionGeometryGenerator(const TString & _name,
+                                                       CollisionGeometryConfiguration * _collisionGeometryConfiguration,
+                                                       LogLevel requiredLevel)
 :
-Task(name, configuration, nullptr),
-collisionGeometry(_collisionGeometry),
-nucleusGeneratorA(_nucleusGeneratorA),
-nucleusGeneratorB(_nucleusGeneratorB)
+Task(_name, _collisionGeometryConfiguration, nullptr,requiredLevel),
+collisionGeometry(nullptr),
+nucleusGeneratorA(nullptr),
+nucleusGeneratorB(nullptr)
 {
-  minB   = configuration->minB;
+  if (reportStart("CollisionGeometryGenerator",getTaskName(),"CTOR()"))
+    ;
+  CollisionGeometryConfiguration * cgc = _collisionGeometryConfiguration;
+  if (reportInfo("CollisionGeometryGenerator",getTaskName(),"CTOR()"))
+    {
+    cout << endl;
+    cgc->printConfiguration(cout);
+    }
+  collisionGeometry = new CollisionGeometry(cgc->nProtonsA,cgc->nNeutronsA, cgc->nProtonsB, cgc->nNeutronsB);
+  nucleusGeneratorA = new NucleusGenerator("PYTHIA_PbPbNucleusGeneratorA",
+                                           cgc->aGeneratorType,
+                                           cgc->aParA,
+                                           cgc->aParB,
+                                           cgc->aParC,
+                                           cgc->aNR,
+                                           cgc->aMinR,
+                                           cgc->aMaxR);
+  nucleusGeneratorB = new NucleusGenerator("PYTHIA_PbPbNucleusGeneratorB",
+                                           cgc->bGeneratorType,
+                                           cgc->bParA,
+                                           cgc->bParB,
+                                           cgc->bParC,
+                                           cgc->bNR,
+                                           cgc->bMinR,
+                                           cgc->bMaxR);
+  minB   = cgc->minB;
   minBSq = minB*minB;
-  maxB   = configuration->maxB;
+  maxB   = cgc->maxB;
   maxBSq = maxB*maxB;
-  nnCrossSection  = configuration->nnCrossSection;
+  nnCrossSection  = cgc->nnCrossSection;
   maxNNDistanceSq = nnCrossSection/3.1415927;
-  if (reportDebug()) cout << "CollisionGeometryGenerator::CollisionGeometryGenerator(...) No ops" << endl;
+  if (reportEnd("CollisionGeometryGenerator",getTaskName(),"CTOR()"))
+    ;
+}
+
+CollisionGeometryGenerator::~CollisionGeometryGenerator()
+{
+  delete collisionGeometry;
+  delete nucleusGeneratorA;
+  delete nucleusGeneratorB;
 }
 
 
@@ -49,8 +80,8 @@ void CollisionGeometryGenerator::reset()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void CollisionGeometryGenerator::execute()
 {
-  if (reportDebug()) cout << "CollisionGeometryGenerator::execute() Started" << endl;
-
+  if (reportStart("CollisionGeometryGenerator",getTaskName(),"CTOR()"))
+    ;
   Nucleus * nucleusA = collisionGeometry->getNucleusA();
   Nucleus * nucleusB = collisionGeometry->getNucleusB();
   nucleusGeneratorA->generate(nucleusA);
@@ -93,6 +124,11 @@ void CollisionGeometryGenerator::execute()
       }
     }
   collisionGeometry->countParticipants();
+  if (reportEnd("CollisionGeometryGenerator",getTaskName(),"CTOR()"))
+    ;
+}
 
-  if (reportDebug()) cout << "CollisionGeometryGenerator::execute() Completed" << endl;
+CollisionGeometry * CollisionGeometryGenerator::getCollisionGeometry()
+{
+  return collisionGeometry;
 }

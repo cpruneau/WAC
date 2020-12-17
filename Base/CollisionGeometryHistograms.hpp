@@ -20,10 +20,6 @@ public:
   CollisionGeometryHistograms(const TString & collectionName,
                               CollisionGeometryConfiguration * configuration,
                               LogLevel  debugLevel);
-  CollisionGeometryHistograms(TFile * inputFile,
-                              const TString & collectionName,
-                              CollisionGeometryConfiguration * configuration,
-                              LogLevel  debugLevel);
   virtual ~CollisionGeometryHistograms() { }
   virtual void createHistograms();
   virtual void loadHistograms(TFile * inputFile);
@@ -31,7 +27,9 @@ public:
   virtual void calculateDerivedHistograms();
   virtual void calculateRms(TProfile * h1, TProfile * h1Sq, TH1* h1Rms, TH1* h1Omega, TH1* h1R2);
   virtual void calculateInelCrossSection();
-
+  virtual void calculateMomentsFromBinaryColl(CollisionGeometry * collisionGeometry);
+  virtual void calculateMomentsFromParticipants(CollisionGeometry * collisionGeometry);
+  
   ////////////////////////////////////////////////////////////////////////////
   // Data Members - Histograms
   ////////////////////////////////////////////////////////////////////////////

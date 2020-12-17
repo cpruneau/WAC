@@ -40,11 +40,25 @@ public:
                  double minY,
                  double maxY);
   virtual ~ParticleFilter();
-  bool accept(Particle & particle);
-  TString getName();
-  TString getTitle();
-  TString getLongName();
-  TString getLongTitle();
+  virtual bool accept(Particle & particle);
+  virtual bool acceptCharge(double charge);
+  virtual bool acceptPid(double pid);
+  inline bool acceptPt(double pt)
+  {
+    return (min_pt<pt) &&  (pt<= max_pt);
+  }
+  inline bool acceptEta(double eta)
+  {
+    return (min_eta<eta) && (eta<= max_eta);
+  }
+  inline bool acceptY(double y)
+  {
+    return (min_y<y) && (y<= max_y);
+  }
+  virtual TString getName();
+  virtual TString getTitle();
+  virtual TString getLongName();
+  virtual TString getLongTitle();
 
   //////////////////////////////////////////////////////////////////////////////////////////
   // Data Members

@@ -18,20 +18,18 @@
 #define WAC_ParticlePairHistos
 
 #include "Histograms.hpp"
+#include "ParticlePairAnalyzerConfiguration.hpp"
+#include "Particle.hpp"
 
 class ParticlePairHistos : public Histograms
 {
 public:
 
   ParticlePairHistos(const TString & name,
-                     AnalysisConfiguration * configuration,
-                     LogLevel  debugLevel);
-  ParticlePairHistos(TFile * inputFile,
-                     const TString & name,
-                     AnalysisConfiguration * configuration,
+                     ParticlePairAnalyzerConfiguration * configuration,
                      LogLevel  debugLevel);
   virtual ~ParticlePairHistos();
-  void initialize();
+  void createHistograms();
   void fill(Particle & particle1, Particle & particle2, double weight);
   void completeFill();
   void loadHistograms(TFile * inputFile);

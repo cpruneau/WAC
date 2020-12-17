@@ -6,6 +6,7 @@
 #include "Task.hpp"
 #include "Event.hpp"
 #include "EventFilter.hpp"
+#include "ParticleFilter.hpp"
 #include "PTHistos.hpp"
 
 class PTCorrelator : public Task
@@ -17,10 +18,11 @@ public:
   // CTOR
   //////////////////////////////////////////////////////////////
   PTCorrelator(const TString &  name,
-            TaskConfiguration * configuration,
-            Event * event,
-            EventFilter * eventFilter,
-            ParticleFilter ** particleFilter1);
+               NuDynConfiguration * configuration,
+               Event * event,
+               EventFilter * ef,
+               ParticleFilter ** pf,
+               LogLevel requiredLevel);
   virtual ~PTCorrelator();
   virtual void execute();
   virtual void createHistograms();
@@ -28,11 +30,13 @@ public:
   virtual void saveHistograms(TFile * outputFile);
   virtual void scaleHistograms(double factor);
   virtual void storeEventInfo();
+  virtual void calculateDerivedHistograms();
+  virtual void resetHistograms();
 
   //////////////////////////////////////////////////////////////
   // Data Members
   //////////////////////////////////////////////////////////////
-  PTHistos * histos;
+  PTHistos        * histos;
   EventFilter     * eventFilter;
   ParticleFilter  ** particleFilters;
   TString * partNames;

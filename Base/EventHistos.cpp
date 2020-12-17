@@ -18,7 +18,7 @@
 ClassImp(EventHistos);
 
 EventHistos::EventHistos(const TString & name,
-                         AnalysisConfiguration * configuration,
+                         EventAnalyzerConfiguration * configuration,
                          LogLevel  debugLevel)
 :
 Histograms(name,configuration,5,debugLevel)
@@ -31,7 +31,7 @@ Histograms(name,configuration,5,debugLevel)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 EventHistos::EventHistos(TFile * inputFile,
                          const TString & name,
-                         AnalysisConfiguration * configuration,
+                         EventAnalyzerConfiguration * configuration,
                          LogLevel  debugLevel)
 :
 Histograms(name,configuration,5,debugLevel)
@@ -53,7 +53,7 @@ EventHistos::~EventHistos()
 void EventHistos::initialize()
 {
   if (reportDebug()) cout << "EventHistos::initialize() Started." << endl;
-  AnalysisConfiguration & ac = *getConfiguration();
+  EventAnalyzerConfiguration & ac = *(EventAnalyzerConfiguration*) getConfiguration();
   TString baseName = ac.histoBaseName;
   h_nPartTot = createHistogram(baseName + "EventNpartTot",ac.nBins_nPartTot,ac.min_nPartTot,ac.max_nPartTot,"Event N_{part}","Counts");
   if (reportDebug()) cout << "EventHistos::initialize() Completed." << endl;
@@ -65,7 +65,7 @@ void EventHistos::initialize()
 void EventHistos::loadHistograms(TFile * inputFile)
 {
   if (reportDebug()) cout << "EventHistos::loadHistograms() Started." << endl;
-  h_nPartTot =  loadH1(inputFile,getConfiguration()->histoBaseName + "EventNpart");
+  h_nPartTot =  loadH1(inputFile,getConfiguration()->getHistoBaseName() + "EventNpart");
   if (reportDebug()) cout << "EventHistos::loadHistograms() Completed." << endl;
 }
 

@@ -47,19 +47,9 @@ ParticleFilter::~ParticleFilter()
   // no ops
 }
 
-// ==========================================================================================
-// accept/reject the given particle based on filter parameter
-// Filtering is based on
-// Charge : enum ChargeSelection   { AllCharges, Negative, Positive, Charged, Neutral };
-// Species: enum SpeciesSelection  { AllSpecies, Photon, Lepton, Electron, Muon, Hadron, Pion, Kaon, Baryon, Proton, Lambda };
-// pt     : accept conditionally if min_pt < pt <= max_pt  OR  if min_pt >= max_pt
-// eta    : accept conditionally if min_eta< eta<= max_eta OR  if min_eta>= max_eta
-// y      : accept conditionally if   min_y< y  <= max_y OR    if min_y>  = max_y
-// ==========================================================================================
-bool ParticleFilter::accept(Particle & particle)
+bool ParticleFilter::acceptCharge(double charge)
 {
   bool accepting = true;
-  double charge = particle.charge;
   switch (chargeRequested)
     {
       case AllCharges: accepting = true; break;
@@ -68,8 +58,12 @@ bool ParticleFilter::accept(Particle & particle)
       case Charged:    accepting = (charge != 0); break;
       case Neutral:    accepting = (charge == 0); break;
     }
-  if (!accepting) return false;
-  double pid = TMath::Abs(particle.pid);
+  return accepting;
+}
+
+bool ParticleFilter::acceptPid(double pid)
+{
+  bool accepting = true;
   switch (pidRequested)
     {
       case AllSpecies:   accepting = true; break;
@@ -84,29 +78,28 @@ bool ParticleFilter::accept(Particle & particle)
       case Proton:  accepting = (pid == 2212); break;
       case Lambda:  accepting = (pid == 3122); break;
     }
-  if (!accepting) return false;
-
-  if (filterOnPt)
-    {
-    double pt  = particle.pt;
-    accepting = (min_pt<pt) &&  (pt<= max_pt);
-    }
-  if (!accepting) return false;
-
-  if (filterOnEta)
-    {
-    double eta = particle.eta;
-    accepting = (min_eta<eta) &&  (eta<= max_eta);
-    }
-  if (!accepting) return false;
-
-  if (filterOnY)
-    {
-    double y = particle.y;
-    accepting = (min_y<y) &&  (y<= max_y);
-    }
-
   return accepting;
+}
+
+
+
+// ==========================================================================================
+// accept/reject the given particle based on filter parameter
+// Filtering is based on
+// Charge : enum ChargeSelection   { AllCharges, Negative, Positive, Charged, Neutral };
+// Species: enum SpeciesSelection  { AllSpecies, Photon, Lepton, Electron, Muon, Hadron, Pion, Kaon, Baryon, Proton, Lambda };
+// pt     : accept conditionally if min_pt < pt <= max_pt  OR  if min_pt >= max_pt
+// eta    : accept conditionally if min_eta< eta<= max_eta OR  if min_eta>= max_eta
+// y      : accept conditionally if   min_y< y  <= max_y OR    if min_y>  = max_y
+// ==========================================================================================
+bool ParticleFilter::accept(Particle & particle)
+{
+  if (!acceptCharge(particle.charge))          return false;
+  if (!acceptPid(TMath::Abs(particle.pid)))    return false;
+  if (filterOnPt  && !acceptPt(particle.pt) )  return false;
+  if (filterOnEta && !acceptEta(particle.eta)) return false;
+  if (filterOnY   && !acceptY(particle.y))     return false;
+  return true;
 }
 
 // ==========================================================================================
@@ -191,23 +184,29 @@ TString ParticleFilter::getLongName()
   if (filterOnPt)
     {
     name += "PtGeq";
-    name += int(1000.0*min_pt);
+    if (min_pt<0.0) name += "M";
+    name += abs(int(1000.0*min_pt));
     name += "Lt";
-    name += int(1000.0*max_pt);
+    if (max_pt<0.0) name += "M";
+    name += abs(int(1000.0*max_pt));
     }
   if (filterOnEta)
     {
     name += "EtaGeq";
-    name += int(1000.0*min_eta);
+    if (min_eta<0.0) name += "M";
+    name += abs(int(1000.0*min_eta));
     name += "Lt";
-    name += int(1000.0*max_eta);
+    if (max_eta<0.0) name += "M";
+    name += abs(int(1000.0*max_eta));
     }
   if (filterOnY)
     {
     name += "YGeq";
-    name += int(1000.0*min_y);
+    if (min_y<0.0) name += "M";
+    name += abs(int(1000.0*min_y));
     name += "Lt";
-    name += int(1000.0*max_y);
+    if (max_y<0.0) name += "M";
+    name += abs(int(1000.0*max_y));
     }
   return name;
 }

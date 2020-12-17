@@ -36,7 +36,7 @@ public:
 
   TString getInputRootFileName();
   TString getOutputRootFileName();
-
+  TString getHistoBaseName() const;
 
   ////////////////////////////////////////////////////
   // Data members
@@ -52,17 +52,24 @@ public:
   bool resetHistograms;
   bool clearHistograms;
   bool forceHistogramsRewrite;
+  bool subsampleAnalysis;
 
   TString inputPath;
-//  TString configurationFileName;
   TString outputPath;
 
+  bool    dataInputUsed;
   TString dataInputPath;
   TString dataInputFileName;
   TString dataInputTreeName;
-  int dataInputFileMinIndex;
-  int dataInputFileMaxIndex;
+  int     dataInputFileMinIndex;
+  int     dataInputFileMaxIndex;
 
+  bool    dataOutputUsed;
+  TString dataOutputPath;
+  TString dataOutputFileName;
+  TString dataOutputTreeName;
+
+  bool    dataConversionToWac;
 
 
   TString dataSourceName;      // e.g., Pythia, AMPT, ALICE, etc

@@ -7,7 +7,7 @@ HeavyIonConfiguration::HeavyIonConfiguration(const TString & name,
                                              const TString & type,
                                              const TString & version)
 :
-AnalysisConfiguration(name,type,version),
+NuDynConfiguration(name,type,version),
 hardBoost(true),
 nCollisionsMax(1),
 param_a(0.5), param_b(1),
@@ -22,7 +22,7 @@ maxOrder(0), totEvents(0)
 void HeavyIonConfiguration::printConfiguration(ostream & os)
 {
   printTaskConfiguration(os);
-  AnalysisConfiguration::printConfiguration(os);
+  NuDynConfiguration::printConfiguration(os);
   os
   << "    Heavy Ion Collision Parameters: " << endl
   << " ------------------------------------------------------------------------------------------" << endl

@@ -18,17 +18,18 @@ ClassImp(CollisionGeometryAnalyzer);
 
 CollisionGeometryAnalyzer::CollisionGeometryAnalyzer(const TString & name,
                                                      CollisionGeometryConfiguration * configuration,
-                                                     CollisionGeometry * _collisionGeometry)
+                                                     CollisionGeometry * _collisionGeometry,
+                                                     LogLevel requiredLevel)
 :
-Task(name, configuration, nullptr),
+Task(name, configuration, nullptr,requiredLevel),
 collisionGeometry(_collisionGeometry)
 {
-  if (reportDebug()) cout << "CollisionGeometryAnalyzer::CollisionGeometryAnalyzer(...) No ops" << endl;
+  // no ops
 }
 
 CollisionGeometryAnalyzer::~CollisionGeometryAnalyzer()
 {
-  if (reportDebug()) cout << "CollisionGeometryAnalyzer::~CollisionGeometryAnalyzer(...) No ops" << endl;
+  // no ops
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -36,14 +37,21 @@ CollisionGeometryAnalyzer::~CollisionGeometryAnalyzer()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void CollisionGeometryAnalyzer::initialize()
 {
-  if (reportDebug()) cout << "CollisionGeometryAnalyzer::initialize() Started" << endl;
-
+  if (reportStart("ParticleAnalyzer",getTaskName(),"initialize()"))
+    ;
   CollisionGeometryConfiguration * config = (CollisionGeometryConfiguration *) getTaskConfiguration();
+
+  if (reportInfo("CollisionGeometryAnalyzer",getTaskName(),"initialize()"))
+      {
+      cout << endl;
+      config->printConfiguration(cout);
+      }
   collisionGeometryHistograms = new CollisionGeometryHistograms(config->histoBaseName,
                                                                 config,
-                                                                MessageLogger::Info);
-
-  if (reportDebug()) cout << "CollisionGeometryAnalyzer::initialize() Completed" << endl;
+                                                                getReportLevel());
+  collisionGeometryHistograms->createHistograms();
+  if (reportEnd("ParticleAnalyzer",getTaskName(),"initialize()"))
+    ;
 }
 
 
@@ -53,25 +61,25 @@ void CollisionGeometryAnalyzer::initialize()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void CollisionGeometryAnalyzer::execute()
 {
-  if (reportDebug()) cout << "CollisionGeometryAnalyzer::execute() Started" << endl;
-
-
+  //if (reportStart("ParticleAnalyzer",getTaskName(),"execute()")) ;
   collisionGeometryHistograms->fill(collisionGeometry,1.0);
-  if (reportDebug()) cout << "CollisionGeometryAnalyzer::execute() Completed" << endl;
+  //if (reportEnd("ParticleAnalyzer",getTaskName(),"execute()")) ;
 }
 
 void CollisionGeometryAnalyzer::saveHistograms(TFile * outputFile)
 {
-  if (reportDebug()) cout << "CollisionGeometryAnalyzer::saveHistograms(...) Saving Event histograms to file." << endl;
+  if (reportStart("ParticleAnalyzer",getTaskName(),"execute()"))
+    ;
   if (!outputFile)
     {
-    if (reportError()) cout << "CollisionGeometryAnalyzer::saveHistograms(...) outputFile is a null  pointer." << endl;
+    if (reportError("ParticleAnalyzer",getTaskName(),"execute()")) cout << "outputFile is a null  pointer." << endl;
     postTaskError();
     return;
     }
   outputFile->cd();
   collisionGeometryHistograms->saveHistograms(outputFile);
-  if (reportDebug()) cout << "CollisionGeometryAnalyzer::saveHistograms(...) Completed." << endl;
+  if (reportEnd("ParticleAnalyzer",getTaskName(),"execute()"))
+    ;
 }
 
 

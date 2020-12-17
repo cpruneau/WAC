@@ -12,32 +12,42 @@
 #include "TParticle.h"
 #include "TClonesArray.h"
 #include "TPythia8.h"
+#include "TFile.h"
+#include "TTree.h"
 #include "Task.hpp"
 #include "EventFilter.hpp"
 #include "ParticleFilter.hpp"
+#include "PythiaConfiguration.hpp"
 
 class PythiaEventGenerator : public Task
 {
 public:
 
+
   PythiaEventGenerator(const TString & name,
-                  TaskConfiguration * configuration,
-                  Event * event,
-                  EventFilter * ef,
-                  ParticleFilter * pf);
+                       TaskConfiguration * configuration,
+                       Event * event,
+                       EventFilter * ef,
+                       ParticleFilter * pf,
+                       LogLevel selectedLevel);
   virtual ~PythiaEventGenerator();
   virtual void initialize();
   virtual void finalize();
-  virtual void reset();
   void execute();
-
-  int nMax; //  = 10000;
-  TClonesArray* particles; // = new TClonesArray("TParticle", nMax);
 
   TPythia8* pythia8; // = new TPythia8();
 
+  // For WAC analyses
+  int nMax; //  = 10000;
+  TClonesArray* particles; // = new TClonesArray("TParticle", nMax);
   EventFilter * eventFilter;
   ParticleFilter * particleFilter;
+
+  // For TTree file output
+  // Set up the ROOT TFile and TTree.
+  TFile *outputFile;
+  Pythia8::Event *outputEvent;
+  TTree *outputTree;
 
   ClassDef(PythiaEventGenerator,0)
 };

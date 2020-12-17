@@ -43,7 +43,12 @@ nParticles(0),
 centrality(0),
 multiplicity(0),
 impactParameter(0),
-other(0)
+other(0),
+nFilters(0),
+nFiltered(nullptr),
+eFiltered(nullptr),
+qFiltered(nullptr),
+bFiltered(nullptr)
 {
 }
 
@@ -52,6 +57,10 @@ other(0)
  //////////////////////////
  Event::~Event()
  {
+ if (nFiltered) delete[] nFiltered;
+ if (eFiltered) delete[] eFiltered;
+ if (qFiltered) delete[] qFiltered;
+ if (bFiltered) delete[] bFiltered;
  }
 
  ////////////////////////////////////////////////////
@@ -71,6 +80,13 @@ void Event::clear()
  impactParameter = 0;
  other = 0;
  Particle::getFactory()->reset();
+ for (int iFilter=0;iFilter<nFilters;iFilter++)
+   {
+   nFiltered[iFilter] = 0.0;
+   eFiltered[iFilter] = 0.0;
+   qFiltered[iFilter] = 0.0;
+   bFiltered[iFilter] = 0.0;
+   }
  }
 
  ////////////////////////////////////////////////////
@@ -90,6 +106,13 @@ void Event::clear()
  impactParameter = 0;
  other = 0;
  Particle::getFactory()->reset();
+ for (int iFilter=0;iFilter<nFilters;iFilter++)
+   {
+   nFiltered[iFilter] = 0.0;
+   eFiltered[iFilter] = 0.0;
+   qFiltered[iFilter] = 0.0;
+   bFiltered[iFilter] = 0.0;
+   }
  }
 
 
