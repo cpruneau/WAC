@@ -9,6 +9,7 @@
 #include "HistogramCollection.hpp"
 #include "TLorentzVector.h"
 #include "TKey.h"
+#include "TROOT.h"
 
 ClassImp(HistogramCollection);
 

@@ -20,13 +20,16 @@
 ####################################################################################################
 echo "========================================================================================"
 echo "Creating (if needed) build, InputFiles, and OutputFiles directories"
-if [[ ! (-d build) ]] then
+if [[ ! (-d build) ]] 
+then
   mkdir build;
 fi
-if [[ ! (-d InputFiles) ]] then
+if [[ ! (-d InputFiles) ]] 
+then
   mkdir InputFiles;
 fi
-if [[ ! (-d OutputFiles) ]] then
+if [[ ! (-d OutputFiles) ]] 
+then
   mkdir OutputFiles
 fi
 

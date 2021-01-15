@@ -19,7 +19,7 @@ int main()
 {
   EventLoop * eventLoop = new EventLoop("RunPythiaGenerator");
   eventLoop->setNEventRequested(10000000);
-  eventLoop->setNEventReported(10000);
+  eventLoop->setNEventReported(1000000);
   //eventLoop->setReportLevel(MessageLogger::Debug);
   Event * event = nullptr; //Event::getEvent();
   // ==========================

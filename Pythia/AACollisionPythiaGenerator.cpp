@@ -70,7 +70,7 @@ void AACollisionPythiaGenerator::initialize()
     nnPythia->Initialize(neutronId, neutronId, pc->energy);
     }
   Factory<Particle> * particleFactory = Particle::getFactory();
-  particleFactory -> initialize(Particle::factorySize * 2000);
+  particleFactory -> initialize(Particle::factorySize * 5000);
   if (reportEnd("AACollisionPythiaGenerator",getTaskName(),"initialize()"))
     ;
 }
@@ -128,7 +128,7 @@ void AACollisionPythiaGenerator::execute()
     if (ist <= 0) continue;
     int pdg = part.GetPdgCode();
     mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
-    if (removePhotons && mass<0.0001) continue;
+    if (removePhotons && mass<0.002) continue;
     charge = TDatabasePDG::Instance()->GetParticle(pdg)->Charge();
     p_x  = cosPhi*part.Px() - sinPhi*part.Py();
     p_y  = sinPhi*part.Px() + cosPhi*part.Py();

@@ -12,12 +12,12 @@ class PTHistos : public Histograms
 public:
 
   PTHistos(const TString & collectionName,
-    TransverseMomentumConfiguration * analysisConfiguration,
+    TaskConfiguration * analysisConfiguration,
     LogLevel  debugLevel,
     int ord);
   PTHistos(TFile * inputFile,
     const TString & collectionName,
-    TransverseMomentumConfiguration * analysisConfiguration,
+    TaskConfiguration * analysisConfiguration,
     LogLevel  debugLevel,
     int ord);
   virtual ~PTHistos();

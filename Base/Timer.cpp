@@ -51,7 +51,7 @@ void Timer::stop()
 
 void Timer::print(ostream & os)
 {
-  os << "Time elapsed: " << days << " days, "<< hours << " hours, " << minutes << " minutes, " << seconds << " seconds.";
+  os << "Time elapsed: " << days << " days, "<< hours << " hours, " << minutes << " minutes, " << seconds << " seconds." <<endl;
 }
 
 

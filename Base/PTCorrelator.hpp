@@ -6,7 +6,9 @@
 #include "Task.hpp"
 #include "Event.hpp"
 #include "EventFilter.hpp"
+#include "ParticleFilter.hpp"
 #include "PTHistos.hpp"
+#include "TransverseMomentumConfiguration.hpp"
 
 class PTCorrelator : public Task
 {
@@ -17,10 +19,11 @@ public:
   // CTOR
   //////////////////////////////////////////////////////////////
   PTCorrelator(const TString &  name,
-            TransverseMomentumConfiguration * configuration,
+            TaskConfiguration * configuration,
             Event * event,
             EventFilter * eventFilter,
-            ParticleFilter ** particleFilter1);
+            ParticleFilter ** particleFilter1,
+            LogLevel selectedLevel);
   virtual ~PTCorrelator();
   virtual void execute();
   virtual void createHistograms();
@@ -31,6 +34,8 @@ public:
   virtual void fillTransverseMomentumValues();
   virtual void fillYieldValues();
   virtual void calculateTransverseMomentumMoments();
+  virtual void reset();
+  virtual void calculateDerivedHistograms();
 
   //////////////////////////////////////////////////////////////
   // Data Members

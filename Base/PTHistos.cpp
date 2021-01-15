@@ -1,26 +1,28 @@
 #include "PTHistos.hpp"
-#include "TransverseMomentumConfiguration.hpp"
 #include "TH1.h"
 
 ClassImp(PTHistos);
 
 PTHistos::PTHistos(const TString & name,
-	TransverseMomentumConfiguration  configuration,
+	TaskConfiguration * configuration,
 	LogLevel  debugLevel,
 	int ord)
 :
-Histograms(name,configuration,(TMath::Factorial(2 * ord) / TMath::Factorial(ord )),debugLevel),
+Histograms(name,configuration,(1000000),debugLevel), //note the 1000000 number just needs to be larger than the number of histograms
 maxOrder(ord),
 histoIndex(0),
 size(0),
 numFunc(3)
 {
-	initialize();
+	TransverseMomentumConfiguration * hc = (TransverseMomentumConfiguration *) getConfiguration();
+	size = (TMath::Factorial( maxOrder + hc->numTypes)) / (TMath::Factorial(maxOrder ) * TMath::Factorial(hc->numTypes )) - 1;
+	//initialize(size);
+	createHistograms();
 }
 
 PTHistos::PTHistos(TFile * inputFile,
 	const TString & name,
-	TransverseMomentumConfiguration  configuration,
+	TaskConfiguration * configuration,
 	LogLevel  debugLevel,
 	int ord)
 :
@@ -116,7 +118,7 @@ void PTHistos::createHistograms()
 	TransverseMomentumConfiguration & ac = (TransverseMomentumConfiguration&)( *getConfiguration());
 	TString bn = getHistoBaseName();
 	TH1::SetDefaultBufferSize(ac.totEvents);
-	totEvents =ac.totEvents;
+	totEvents =ac.totEvents; // Note: totEvents will hold the max # of events that will be done. ac.totEvents will initially hold that # then later hold the number of events processed up to that point for each partial save
 
 	// ================================================================================
 	// Naming convention
@@ -128,7 +130,7 @@ void PTHistos::createHistograms()
 	// c are the yield-normalized cumulants
  	// c* are the cumulants normalizd by average transverse momenta
 
-	size = (TMath::Factorial(2 * maxOrder)) / (TMath::Factorial(maxOrder ) * TMath::Factorial(maxOrder )) - 1;
+	size = (TMath::Factorial( maxOrder + ac.numTypes)) / (TMath::Factorial(maxOrder ) * TMath::Factorial(ac.numTypes )) - 1;
 
 	hS = new TProfile ** [numFunc];
 	hS_vsMult = new TProfile ** [numFunc];
@@ -159,6 +161,8 @@ void PTHistos::createHistograms()
 		titles2[i] = new TString [size];
 	}
 
+	
+
 	h_counts = new TProfile*  [size];
 	h_counts_vsMult = new TProfile * [size];
 	h_counts_vsCent = new TProfile * [size];
@@ -170,11 +174,11 @@ void PTHistos::createHistograms()
 	if (ac.ptCorrelatorVsMult) h_events_vsMult = createHistogram(bn+TString("Nevents_vsMult"),ac.nBins_mult, ac.min_mult, ac.max_mult,  "mult","n_{Events}");
 	if (ac.ptCorrelatorVsCent) h_events_vsCent = createHistogram(bn+TString("Nevents_vsCent"),ac.nBins_cent,ac.min_cent, ac.max_cent,  "cent","n_{Events}");
 
-	pT = new TProfile * [maxOrder];
-	pT_vsMult = new TProfile * [maxOrder];
-	pT_vsCent = new TProfile * [maxOrder];
+	pT = new TProfile * [ac.numTypes ];
+	pT_vsMult = new TProfile * [ac.numTypes ];
+	pT_vsCent = new TProfile * [ac.numTypes ];
 
-	for(int i = 0; i < maxOrder; i++)
+	for(int i = 0; i < ac.numTypes ; i++)
 	{
 		pT[i]  = createProfile(bn+TString("AverageTransverseMomentum_") + (i + 1) ,1,ac.min_mult, ac.max_mult,  "mult",TString("AverageTransverseMomentum_") + i);
 		if (ac.ptCorrelatorVsMult) pT_vsMult[i] = createProfile(bn+TString("AverageTransverseMomentum_") + (i + 1) + TString("_vsMult"),ac.nBins_mult, ac.min_mult, ac.max_mult,  "mult",TString("AverageTransverseMomentum_") + i);
@@ -240,6 +244,7 @@ void PTHistos::createHistograms()
 		}
 	}
 	histoIndex = 0;
+
 	if (reportDebug())  cout << "PTHistos::createHistograms(...) ended"<< endl;
 	//h_c123vsMultTest = createProfile("c123Test", ac.nBins_mult,ac.min_mult,ac.max_mult,"mult", "c123Test" );
 }
@@ -254,11 +259,11 @@ void PTHistos::loadHistograms(TFile * inputFile)
 		if (reportFatal()) cout << "-Fatal- Attempting to load NuDynHistos from an invalid file pointer" << endl;
 		return;
 	}
-	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration ) *getConfiguration();
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration& ) (*getConfiguration());
 
 	TString  bn = getHistoBaseName();
 
-	size = (TMath::Factorial(2 * maxOrder)) / (TMath::Factorial(maxOrder ) * TMath::Factorial(maxOrder )) - 1;
+	size = (TMath::Factorial( maxOrder + ac.numTypes )) / (TMath::Factorial(maxOrder ) * TMath::Factorial(ac.numTypes  )) - 1;
 
 	hS = new TProfile ** [numFunc];
 	hS_vsMult = new TProfile ** [numFunc];
@@ -324,16 +329,16 @@ void PTHistos::saveHistograms(TFile * outputFile, bool saveAll)
 	if (reportDebug()) cout << "HistogramCollection::saveHistograms(TFile * outputFile) started."  << endl;
 	outputFile->cd();
 
-	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration ) *getConfiguration();
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration& ) (*getConfiguration());
 
 	int numTypes = 1;
 	if (ac.ptCorrelatorVsMult) numTypes++;
 	if (ac.ptCorrelatorVsCent) numTypes++;
 
-	int extra = numTypes * (maxOrder + 1);
+	int extra = numTypes * (ac.numTypes + 1);
 
 	//saves event and transverse momentum histos
-	//there are "extra" of these
+	//there are "extra" of these at the start of the collection
 	for (int k=0; k<extra; k++)
 	{
 		if (isSaved(options[k]) || saveAll)  getObjectAt(k)->Write();
@@ -381,23 +386,25 @@ void PTHistos::saveHistograms(TFile * outputFile, bool saveAll)
 void PTHistos::fillEventHistos(double mult, double cent, double weight)
 {
 	if (reportDebug())  cout << "PTHistos::fillEventHistos(...) started"<< endl;
-	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration ) *getConfiguration();
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration& ) (*getConfiguration());
 	h_events->Fill(mult,weight);
-	if (ac1.ptCorrelatorVsMult) h_events_vsMult->Fill(mult,weight);
-	if (ac1.ptCorrelatorVsCent) h_events_vsCent->Fill(cent,weight);
+	if (ac.ptCorrelatorVsMult) h_events_vsMult->Fill(mult,weight);
+	if (ac.ptCorrelatorVsCent) h_events_vsCent->Fill(cent,weight);
 	if (reportDebug()) cout << "HistogramCollection::fillEventHistos(...)completed."  << endl;
 }
 
 void PTHistos::fillTransverseMomentumHistos(double transverseMomentum, int filter, double mult, double cent, double weight)
 {
 	if (reportDebug())  cout << "PTHistos::fillTransverseMomentumHistos(...) started"<< endl;
-	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration ) *getConfiguration();
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration& ) (*getConfiguration());
 	pT[filter]->Fill(mult, transverseMomentum,weight);
-	if (ac1.ptCorrelatorVsMult) pT_vsMult[filter]->Fill(mult, transverseMomentum,weight);
-	if (ac1.ptCorrelatorVsCent) pT_vsCent[filter]->Fill(cent, transverseMomentum,weight);
+	if (ac.ptCorrelatorVsMult) pT_vsMult[filter]->Fill(mult, transverseMomentum,weight);
+	if (ac.ptCorrelatorVsCent) pT_vsCent[filter]->Fill(cent, transverseMomentum,weight);
 	if (reportDebug()) cout << "HistogramCollection::fillTransverseMomentumHistos(...) completed."  << endl;
 
 }
+
+
 
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -408,12 +415,12 @@ void PTHistos::fillTransverseMomentumHistos(double transverseMomentum, int filte
 void PTHistos::createHistogramRec(TString * baseName, TString * baseTitle, int depth, int partIndex)
 {
 	if (reportDebug())  cout << "PTHistos::createHistogramsRec(...) started"<< endl;
-	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration ) *getConfiguration();
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration& ) (*getConfiguration());
 	TString *histoName = new TString[2 * numFunc +1];
 	TString *histoTitle= new TString[2 * numFunc +1];
 
 
-	for(int i = partIndex; i < maxOrder; i++)
+	for(int i = partIndex; i < ac.numTypes; i++)
 	{
 		
 		for(int iFunc = 0; iFunc < numFunc ; iFunc++)
@@ -465,7 +472,7 @@ void PTHistos::loadHistogramRec(TString * baseName, int depth, int partIndex, TF
 {
 
 	if (reportDebug())  cout << "PTHistos::loadHistogramRec(...) Starting." << endl;
-	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration ) *getConfiguration();
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration& ) (*getConfiguration());
 	TString *histoName = new TString[2 * numFunc +1];
 
 
@@ -514,13 +521,11 @@ void PTHistos::loadHistogramRec(TString * baseName, int depth, int partIndex, TF
 void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments,double ** counts, double * mults, double * cents, double * numParticles)
 {
 	if (reportDebug())  cout << "PTHistos::fillDerivedHistos(...) Starting." << endl;
-	auto start = chrono::high_resolution_clock::now(); 
 	TransverseMomentumConfiguration & ac = (TransverseMomentumConfiguration&)*getConfiguration();
-
 	yields = counts;
-	SValues = new double * [totEvents]();
+	SValues = new double * [ac.totEvents]();
 	//fill yields
-	for(int iEvent = 0; iEvent < totEvents;iEvent++)
+	for(int iEvent = 0; iEvent < ac.totEvents;iEvent++)
 	{
 		for(int iHisto = 0; iHisto <size; iHisto++)
 		{
@@ -531,16 +536,16 @@ void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments,double ** 
 	}
 	//fill SValues
 	//fill SValues normalized by counts and average pT's
-	for(int iEvent = 0; iEvent < totEvents;iEvent++)
+	for(int iEvent = 0; iEvent < ac.totEvents;iEvent++)
 	{
 		for(int iHisto = 0; iHisto <size; iHisto++)
 		{
 			if(yields[iEvent][iHisto] != 0)
 			{
-				SValues[iEvent] = new double [size];
+				SValues[iEvent] = new double [size]();
 				int bin = pT[0]->FindBin(mults[iEvent]);
 				calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent, numParticles[iEvent],pT );//calculate the deviation using this bin of the average transverse momentum
-				hS[0][iHisto]->Fill(mults[iEvent], SValues[iEvent][iHisto], 1.0);//weight is always 1.0
+				hS[0][iHisto]->Fill(mults[iEvent],  SValues[iEvent][iHisto], 1.0);//weight is always 1.0
 				if (ac.ptCorrelatorVsMult)	
 				{
 					bin = pT_vsMult[0]->FindBin(mults[iEvent]);
@@ -647,9 +652,6 @@ void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments,double ** 
 	}
 	delete[] newhCValues;
 
-	auto stop = chrono::high_resolution_clock::now(); 
-	auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
-	if (reportInfo()) cout << "Time taken to calculate derived histos: " << duration.count() << " microseconds"<< endl;
 	if (reportDebug())  cout << "PTHistos::fillDerivedHistos(...) Completed." << endl;
 
 
@@ -663,9 +665,9 @@ void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments,double ** 
 void PTHistos::fillNormalizedPTValues( int depth, int partIndex, TProfile * product, TProfile **OldSHistos, TProfile** pTHistos, TProfile **newSHistos)
 {
 	if (reportDebug())  cout << "PTHistos::fillNormalizedPTValues(...) Starting." << endl;
-	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration ) *getConfiguration();
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration& ) *getConfiguration();
 
-	for(int i = partIndex; i < maxOrder; i++)
+	for(int i = partIndex; i < ac.numTypes; i++)
 	{	
 		TProfile * newProduct; TH1D *h1; TH1D *h2; 
 		TString s = OldSHistos[i]->GetTitle();
@@ -726,7 +728,7 @@ void PTHistos::calculateCumulants(TProfile ** SHistos, TProfile **CHistos, int n
 		}
 	}
 
-	int maxSize = TMath::Factorial( maxOrder);
+	int maxSize = TMath::Factorial( ac.numTypes );
 	double * used = new double[maxSize];
 	for(int iHisto = 0; iHisto < size; iHisto++)
 	{
@@ -779,7 +781,7 @@ void PTHistos::calculateCumulants(TProfile ** SHistos, TProfile **CHistos, int n
 void PTHistos::calcRecSum(TProfile **CHistos,  int* iHisto, int* Subset, int len,  int * set, int lenSet, TProfile * productC, double* used, int& curInd, int productS, TProfile *  sum, int depth)
 {
 	if (reportDebug())  cout << "PTHistos::calcRecSum(...) Starting." << endl;
-	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration ) *getConfiguration();
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration& ) (*getConfiguration());
 	int lenSub = 0;
 	int lenCompSub = 0;
 	if(len != 1)
@@ -890,35 +892,37 @@ void PTHistos::calcRecSum(TProfile **CHistos,  int* iHisto, int* Subset, int len
 void PTHistos::calculatePTDeviationMoments(double *** transverseMomentumMoments, int bin, int iEvent, int nParticles, TProfile ** pTHisto)
 {
 	if (reportDebug())  cout << "PTHistos::calculatePTDeviationMoments(...) Starting." << endl;
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration& ) (*getConfiguration());
 
-	double *n1 = new double [maxOrder]();
-	double *n2 = new double [maxOrder]();
-	double *n3 = new double [maxOrder]();
-	double *n4 = new double [maxOrder]();
+	double *n1 = new double [ac.numTypes ]();
+	double *n2 = new double [ac.numTypes ]();
+	double *n3 = new double [ac.numTypes ]();
+	double *n4 = new double [ac.numTypes ]();
 	int counter = 0;
 	double * tempSValues = new double [size]();
-	for(int iFilter = 0; iFilter < maxOrder; iFilter++)
+	for(int iFilter = 0; iFilter < ac.numTypes ; iFilter++)
 	{
 		//Use the pT moments, stored from each event to calculate the pT deviation moments
 		//These equations come simply from binomial theorem
 		nParticles = yields[iEvent][reorder2[iFilter]];
 		n1[iFilter]= transverseMomentumMoments[iEvent][iFilter][0] - nParticles * pTHisto[iFilter]->GetBinContent(bin);
-		n2[iFilter]= transverseMomentumMoments[iEvent][iFilter][1] - 2 * transverseMomentumMoments[iEvent][iFilter][0] * pTHisto[iFilter]->GetBinContent(bin) + nParticles * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin);
-		n3[iFilter]= transverseMomentumMoments[iEvent][iFilter][2] - 3 * transverseMomentumMoments[iEvent][iFilter][1] * pTHisto[iFilter]->GetBinContent(bin) 
+		if(maxOrder > 1) n2[iFilter]= transverseMomentumMoments[iEvent][iFilter][1] - 2 * transverseMomentumMoments[iEvent][iFilter][0] * pTHisto[iFilter]->GetBinContent(bin) + nParticles * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin);
+		if(maxOrder > 2) n3[iFilter]= transverseMomentumMoments[iEvent][iFilter][2] - 3 * transverseMomentumMoments[iEvent][iFilter][1] * pTHisto[iFilter]->GetBinContent(bin) 
 		+ 3 * transverseMomentumMoments[iEvent][iFilter][0] * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin) - nParticles * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin);
-		n4[iFilter]= transverseMomentumMoments[iEvent][iFilter][3] - 4 * transverseMomentumMoments[iEvent][iFilter][2] * pTHisto[iFilter]->GetBinContent(bin) + 6 * transverseMomentumMoments[iEvent][iFilter][1] * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin)
+		if(maxOrder > 3) n4[iFilter]= transverseMomentumMoments[iEvent][iFilter][3] - 4 * transverseMomentumMoments[iEvent][iFilter][2] * pTHisto[iFilter]->GetBinContent(bin) + 6 * transverseMomentumMoments[iEvent][iFilter][1] * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin)
 		- 4 * transverseMomentumMoments[iEvent][iFilter][0] * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin) + nParticles * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin);
 	}
 
-	for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
+	for(int iFilter1 = 0; iFilter1 < ac.numTypes ; iFilter1++)
 	{
 		tempSValues[counter] = n1[iFilter1];
 		counter++;
 	}
 
-	for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
+	if(maxOrder > 1)
+	for(int iFilter1 = 0; iFilter1 < ac.numTypes ; iFilter1++)
 	{
-		for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
+		for(int iFilter2 = iFilter1; iFilter2 < ac.numTypes ; iFilter2++)
 		{
 			double same12 = iFilter2 == iFilter1? n2[iFilter1] : 0;
 			tempSValues[counter] = n1[iFilter1] * n1[iFilter2] - same12; //subtract out overcounting the same particle Note: These formulas are well known as Newton sums, to convert moments((x+y+z), (x^3 + y^3 + z^3)) to cyclic sums((x + y + z), (xy + xz + yz))
@@ -926,11 +930,12 @@ void PTHistos::calculatePTDeviationMoments(double *** transverseMomentumMoments,
 		}
 	}
 
-	for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
+	if(maxOrder > 2)
+	for(int iFilter1 = 0; iFilter1 < ac.numTypes ; iFilter1++)
 	{
-		for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
+		for(int iFilter2 = iFilter1; iFilter2 < ac.numTypes ; iFilter2++)
 		{
-			for(int iFilter3 = iFilter2; iFilter3 < maxOrder; iFilter3++)
+			for(int iFilter3 = iFilter2; iFilter3 < ac.numTypes ; iFilter3++)
 			{
 				if(iFilter1 == iFilter2)
 				{
@@ -947,13 +952,14 @@ void PTHistos::calculatePTDeviationMoments(double *** transverseMomentumMoments,
 		}
 	}
 
-	for(int iFilter1 = 0; iFilter1 < maxOrder; iFilter1++)
+	if(maxOrder > 3)
+	for(int iFilter1 = 0; iFilter1 < ac.numTypes ; iFilter1++)
 	{
-		for(int iFilter2 = iFilter1; iFilter2 < maxOrder; iFilter2++)
+		for(int iFilter2 = iFilter1; iFilter2 < ac.numTypes ; iFilter2++)
 		{
-			for(int iFilter3 = iFilter2; iFilter3 < maxOrder; iFilter3++)
+			for(int iFilter3 = iFilter2; iFilter3 < ac.numTypes ; iFilter3++)
 			{
-				for(int iFilter4 = iFilter3; iFilter4 < maxOrder; iFilter4++)
+				for(int iFilter4 = iFilter3; iFilter4 < ac.numTypes ; iFilter4++)
 				{
 					if(iFilter1 == iFilter2)
 					{
@@ -987,9 +993,9 @@ void PTHistos::calculatePTDeviationMoments(double *** transverseMomentumMoments,
 		}
 	}
 	delete [] n1;
-	delete [] n2;
-	delete [] n3;
-	delete [] n4;
+	if(maxOrder > 1) delete [] n2;
+	if(maxOrder > 2) delete [] n3;
+	if(maxOrder > 3) delete [] n4;
 	
 
 	for(int iHisto = 0; iHisto < size; iHisto++)
@@ -1007,37 +1013,39 @@ void PTHistos::calculatePTDeviationMoments(double *** transverseMomentumMoments,
 
 
 ///////////////////////////////////////
-// convert a base maxOrder integer (represented by num) into the index of the corresponding moment in the array
+// convert a base ac->numTypes integer (represented by num) into the index of the corresponding moment in the array
 // ex: for 4th order correlations, the function {1,2,3} is index 19 in the array (1, 2, 3, 4, 11, 12 ... 44, 111, ... 123)
 // checked for correctness
 ///////////////////////////////////////
 int PTHistos::convert(int * num, int len)
 {
-	int convert = (TMath::Factorial( maxOrder + len - 1)) / (TMath::Factorial(maxOrder ) * TMath::Factorial(len - 1 )) - 1;
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration& ) (*getConfiguration());
+	int convert = (TMath::Factorial( ac.numTypes + len - 1)) / (TMath::Factorial(ac.numTypes ) * TMath::Factorial(len - 1 )) - 1;
 	for(int i = 0; i < len; i++)
 	{
 		for(int j = (i == 0)? 0: num[i - 1] - 1; j < num[i] - 1; j++)
 		{
-			convert += (TMath::Factorial( maxOrder + len - j - i - 2)) / (TMath::Factorial(maxOrder - j - 1 ) * TMath::Factorial(len - i - 1 ));
+			convert += (TMath::Factorial( ac.numTypes + len - j - i - 2)) / (TMath::Factorial(ac.numTypes - j - 1 ) * TMath::Factorial(len - i - 1 ));
 		}
 	}
 	return convert;
 }
 
 //////////////////////////////////////
-// convert the index of the moment (represented by num) into a base maxOrder integer
+// convert the index of the moment (represented by num) into a base ac->numTypes integer
 // ex: for 4th order correlations, the function {1,2,3} is index 19 in the array (1, 2, 3, 4, 11, 12 ... 44, 111, ... 123)
 //////////////////////////////////////
 int * PTHistos::convert(int num, int & len)
 {
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration& ) (*getConfiguration());
 	if (reportDebug())  cout << "PTHistos::convert(...) started." << endl;
 	for(len = 2; len <=maxOrder + 1; len++)
 	{
-		int temp = (TMath::Factorial( maxOrder + len - 1)) / (TMath::Factorial(maxOrder ) * TMath::Factorial(len - 1 )) - 1 ;
+		int temp = (TMath::Factorial( ac.numTypes + len - 1)) / (TMath::Factorial(ac.numTypes ) * TMath::Factorial(len - 1 )) - 1 ;
 		if(num < temp)
 		{
 			len--;
-			num -= (TMath::Factorial( maxOrder + len - 1)) / (TMath::Factorial(maxOrder ) * TMath::Factorial(len - 1 )) - 1 ;
+			num -= (TMath::Factorial( ac.numTypes + len - 1)) / (TMath::Factorial(ac.numTypes ) * TMath::Factorial(len - 1 )) - 1 ;
 			break;
 		}
 	}
@@ -1047,9 +1055,9 @@ int * PTHistos::convert(int num, int & len)
 	for(int i = 0; i <len; i++)
 	{
 		int temp = 0;
-		for(convert[i] = (i == 0)? 1: convert[i - 1] ; convert[i] <= maxOrder; convert[i]++)
+		for(convert[i] = (i == 0)? 1: convert[i - 1] ; convert[i] <= ac.numTypes; convert[i]++)
 		{
-			int temp2 = (TMath::Factorial( maxOrder + len - (convert[i] - 1) - i - 2)) / (TMath::Factorial(maxOrder - (convert[i] - 1) - 1 ) * TMath::Factorial(len - i - 1 ));
+			int temp2 = (TMath::Factorial( ac.numTypes + len - (convert[i] - 1) - i - 2)) / (TMath::Factorial(ac.numTypes - (convert[i] - 1) - 1 ) * TMath::Factorial(len - i - 1 ));
 			temp += temp2;
 			if(num < temp)
 			{

@@ -92,7 +92,7 @@
 
 #pragma link C++ class PTCorrelator+;
 #pragma link C++ class PTHistos+;
-
+#pragma link C++ class TransverseMomentumConfiguration+;
 
 #pragma link C++ class SubSampleStatCalculator+;
 

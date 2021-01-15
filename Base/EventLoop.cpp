@@ -71,7 +71,7 @@ void EventLoop::run(long nEvent, long nReport)
       if (!isTaskOk()) continue;
       }
     }
-  if (isTaskOk()) finalize();
+  if (isTaskOk() && !((subsampleAnalysis||partialSave) && nEventProcessed%nEventPartialSave==0)) finalize(); //if (subsampleAnalysis||partialSave) && nEventProcessed%nEventPartialSave==0  is true then this already happens above in savePartialResults()
   timer.stop();
   if (reportInfo("EventLoop",getTaskName(),"run(...)"))
     {

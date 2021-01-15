@@ -169,7 +169,6 @@ void PythiaEventGenerator::execute()
     if (reportDebug()) cout << "PythiaEventGenerator::execute() No of accepted Particles : "<< particleAccepted<<endl;
     if (reportDebug()) cout << "PythiaEventGenerator::execute() No of counted Particles : "<< particleCounted <<endl;
     }
-   if (reportDebug()) cout << "PythiaEventGenerator::execute() event completed!" << endl;
 }
 
 void PythiaEventGenerator::finalize()
