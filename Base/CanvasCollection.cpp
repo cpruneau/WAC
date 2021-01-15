@@ -77,7 +77,7 @@ TCanvas * CanvasCollection::createCanvas(const TString & canvasName, const Canva
   canvas->SetFillStyle(1001);
   canvas->SetBorderSize(0);
   canvas->SetBorderMode(0);
-  add(canvas);
+  append(canvas);
 
   return canvas;
 }
@@ -103,7 +103,7 @@ TCanvas * CanvasCollection::createCanvasXX(int nx, int ny, const TString & canva
   canvas->SetFillStyle(1001);
   canvas->SetBorderSize(0);
   canvas->SetBorderMode(0);
-  add(canvas);
+  append(canvas);
   return canvas;
 }
 

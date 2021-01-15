@@ -8,10 +8,10 @@
 
 #ifndef BWModelConfiguration_hpp
 #define BWModelConfiguration_hpp
-#include "GeneratorConfiguration.hpp"
+#include "TaskConfiguration.hpp"
 #include <TF1.h>
 
-class BWModelConfiguration : public GeneratorConfiguration
+class BWModelConfiguration : public TaskConfiguration
 {
 public:
 

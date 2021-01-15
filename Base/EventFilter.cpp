@@ -46,6 +46,8 @@ bool EventFilter::accept(Event & event)
       case Multiplicity:    condition = event.multiplicity; break;
       case ImpactParameter: condition = event.impactParameter; break;
       case Other:           condition = event.other; break;
+      case TPC:             condition = event.nFiltered[0]; break;
+      case V0M:             condition = event.nFiltered[1]; break;
     }
 
   return (condition >= minimum) && (condition < maximum);
@@ -63,6 +65,8 @@ TString EventFilter::getName()
     case Multiplicity:    name = Form("MGeq%gLt%g",minimum,maximum); break;
     case ImpactParameter: name = Form("bGeq%gLt%g",minimum,maximum); break;
     case Other:           name = Form("XGeq%gLt%g",minimum,maximum); break;
+    case TPC:             name = Form("TPCnGeq%gLt%g",minimum,maximum); ; break;
+    case V0M:             name = Form("V0MnGeq%gLt%g",minimum,maximum); ; break;
   }
   return name;
 }
@@ -79,6 +83,9 @@ TString EventFilter::getTitle()
     case Multiplicity:    name = Form("%g < M < %g",minimum,maximum); break;
     case ImpactParameter: name = Form("%g < b < %g",minimum,maximum); break;
     case Other:           name = Form("%g < X < %g",minimum,maximum); break;
+    case TPC:             name = Form("%g < TPC n < %g",minimum,maximum); ; break;
+    case V0M:             name = Form("%g < V0M n < %g",minimum,maximum); ; break;
+
   }
   return name;
 }

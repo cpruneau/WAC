@@ -1,11 +1,11 @@
 #include "PTHistos.hpp"
-#include "HeavyIonConfiguration.hpp"
+#include "TransverseMomentumConfiguration.hpp"
 #include "TH1.h"
 
 ClassImp(PTHistos);
 
 PTHistos::PTHistos(const TString & name,
-	AnalysisConfiguration * configuration,
+	TransverseMomentumConfiguration  configuration,
 	LogLevel  debugLevel,
 	int ord)
 :
@@ -20,7 +20,7 @@ numFunc(3)
 
 PTHistos::PTHistos(TFile * inputFile,
 	const TString & name,
-	AnalysisConfiguration * configuration,
+	TransverseMomentumConfiguration  configuration,
 	LogLevel  debugLevel,
 	int ord)
 :
@@ -41,7 +41,7 @@ PTHistos::~PTHistos()
 {
 	//deleteHistograms();
 	if (reportDebug())  cout << "PTHistos::DTOR(...) Started" << endl;
-	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)( *getConfiguration());
+	TransverseMomentumConfiguration & ac = (TransverseMomentumConfiguration&)( *getConfiguration());
 	/*for (int i = 0; i < maxOrder; ++i)
 	{
 		delete pT[i];
@@ -113,7 +113,7 @@ PTHistos::~PTHistos()
 void PTHistos::createHistograms()
 {
 	if (reportDebug())  cout << "PTHistos::createHistograms(...) started"<< endl;
-	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)( *getConfiguration());
+	TransverseMomentumConfiguration & ac = (TransverseMomentumConfiguration&)( *getConfiguration());
 	TString bn = getHistoBaseName();
 	TH1::SetDefaultBufferSize(ac.totEvents);
 	totEvents =ac.totEvents;
@@ -254,7 +254,7 @@ void PTHistos::loadHistograms(TFile * inputFile)
 		if (reportFatal()) cout << "-Fatal- Attempting to load NuDynHistos from an invalid file pointer" << endl;
 		return;
 	}
-	AnalysisConfiguration & ac = *getConfiguration();
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration ) *getConfiguration();
 
 	TString  bn = getHistoBaseName();
 
@@ -324,7 +324,7 @@ void PTHistos::saveHistograms(TFile * outputFile, bool saveAll)
 	if (reportDebug()) cout << "HistogramCollection::saveHistograms(TFile * outputFile) started."  << endl;
 	outputFile->cd();
 
-	AnalysisConfiguration & ac = *getConfiguration();
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration ) *getConfiguration();
 
 	int numTypes = 1;
 	if (ac.ptCorrelatorVsMult) numTypes++;
@@ -381,7 +381,7 @@ void PTHistos::saveHistograms(TFile * outputFile, bool saveAll)
 void PTHistos::fillEventHistos(double mult, double cent, double weight)
 {
 	if (reportDebug())  cout << "PTHistos::fillEventHistos(...) started"<< endl;
-	AnalysisConfiguration & ac1 = *getConfiguration();
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration ) *getConfiguration();
 	h_events->Fill(mult,weight);
 	if (ac1.ptCorrelatorVsMult) h_events_vsMult->Fill(mult,weight);
 	if (ac1.ptCorrelatorVsCent) h_events_vsCent->Fill(cent,weight);
@@ -391,7 +391,7 @@ void PTHistos::fillEventHistos(double mult, double cent, double weight)
 void PTHistos::fillTransverseMomentumHistos(double transverseMomentum, int filter, double mult, double cent, double weight)
 {
 	if (reportDebug())  cout << "PTHistos::fillTransverseMomentumHistos(...) started"<< endl;
-	AnalysisConfiguration & ac1 = *getConfiguration();
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration ) *getConfiguration();
 	pT[filter]->Fill(mult, transverseMomentum,weight);
 	if (ac1.ptCorrelatorVsMult) pT_vsMult[filter]->Fill(mult, transverseMomentum,weight);
 	if (ac1.ptCorrelatorVsCent) pT_vsCent[filter]->Fill(cent, transverseMomentum,weight);
@@ -408,7 +408,7 @@ void PTHistos::fillTransverseMomentumHistos(double transverseMomentum, int filte
 void PTHistos::createHistogramRec(TString * baseName, TString * baseTitle, int depth, int partIndex)
 {
 	if (reportDebug())  cout << "PTHistos::createHistogramsRec(...) started"<< endl;
-	AnalysisConfiguration & ac = *getConfiguration();
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration ) *getConfiguration();
 	TString *histoName = new TString[2 * numFunc +1];
 	TString *histoTitle= new TString[2 * numFunc +1];
 
@@ -465,7 +465,7 @@ void PTHistos::loadHistogramRec(TString * baseName, int depth, int partIndex, TF
 {
 
 	if (reportDebug())  cout << "PTHistos::loadHistogramRec(...) Starting." << endl;
-	AnalysisConfiguration & ac = *getConfiguration();
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration ) *getConfiguration();
 	TString *histoName = new TString[2 * numFunc +1];
 
 
@@ -515,7 +515,7 @@ void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments,double ** 
 {
 	if (reportDebug())  cout << "PTHistos::fillDerivedHistos(...) Starting." << endl;
 	auto start = chrono::high_resolution_clock::now(); 
-	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)*getConfiguration();
+	TransverseMomentumConfiguration & ac = (TransverseMomentumConfiguration&)*getConfiguration();
 
 	yields = counts;
 	SValues = new double * [totEvents]();
@@ -663,7 +663,7 @@ void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments,double ** 
 void PTHistos::fillNormalizedPTValues( int depth, int partIndex, TProfile * product, TProfile **OldSHistos, TProfile** pTHistos, TProfile **newSHistos)
 {
 	if (reportDebug())  cout << "PTHistos::fillNormalizedPTValues(...) Starting." << endl;
-	AnalysisConfiguration & ac = *getConfiguration();
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration ) *getConfiguration();
 
 	for(int i = partIndex; i < maxOrder; i++)
 	{	
@@ -709,7 +709,7 @@ void PTHistos::calculateCumulants(TProfile ** SHistos, TProfile **CHistos, int n
 {	
 	if (reportDebug())  cout << "PTHistos::calculateCumulants(...) Starting." << endl;
 
-	HeavyIonConfiguration & ac = (HeavyIonConfiguration&)( *getConfiguration());
+	TransverseMomentumConfiguration & ac = (TransverseMomentumConfiguration&)( *getConfiguration());
 
 	TProfile ** newSHistos = new TProfile *[size];
 	int counter = 0;
@@ -779,7 +779,7 @@ void PTHistos::calculateCumulants(TProfile ** SHistos, TProfile **CHistos, int n
 void PTHistos::calcRecSum(TProfile **CHistos,  int* iHisto, int* Subset, int len,  int * set, int lenSet, TProfile * productC, double* used, int& curInd, int productS, TProfile *  sum, int depth)
 {
 	if (reportDebug())  cout << "PTHistos::calcRecSum(...) Starting." << endl;
-	AnalysisConfiguration & ac = *getConfiguration();
+	TransverseMomentumConfiguration & ac =(TransverseMomentumConfiguration ) *getConfiguration();
 	int lenSub = 0;
 	int lenCompSub = 0;
 	if(len != 1)

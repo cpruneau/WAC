@@ -31,13 +31,24 @@ saveHistograms(true),
 resetHistograms(false),
 clearHistograms(false),
 forceHistogramsRewrite(true),
+subsampleAnalysis(true),
 inputPath("./"),
 outputPath("./"),
+
+dataInputUsed(false),
 dataInputPath(""),
 dataInputFileName(""),
 dataInputTreeName("tree"),
 dataInputFileMinIndex(0),
 dataInputFileMaxIndex(1),
+
+dataOutputUsed(false),
+dataOutputPath(""),
+dataOutputFileName(""),
+dataOutputTreeName("tree"),
+
+dataConversionToWac(true),
+
 dataSourceName(""),
 collisionSystemName(""),
 collisionEnergyName(""),
@@ -74,11 +85,21 @@ clearHistograms(false),
 forceHistogramsRewrite(true),
 inputPath("./"),
 outputPath("./"),
+
+dataInputUsed(false),
 dataInputPath(""),
 dataInputFileName(""),
 dataInputTreeName("tree"),
 dataInputFileMinIndex(0),
 dataInputFileMaxIndex(1),
+
+dataOutputUsed(false),
+dataOutputPath(""),
+dataOutputFileName(""),
+dataOutputTreeName("tree"),
+
+dataConversionToWac(true),
+
 dataSourceName(""),
 collisionSystemName(""),
 collisionEnergyName(""),
@@ -115,11 +136,21 @@ clearHistograms( source.clearHistograms ),
 forceHistogramsRewrite( source.forceHistogramsRewrite ),
 inputPath( source.inputPath ),
 outputPath( source.outputPath ),
+
+dataInputUsed( source.dataInputUsed ),
 dataInputPath( source.dataInputPath ),
 dataInputFileName( source.dataInputFileName ),
 dataInputTreeName( source.dataInputTreeName),
 dataInputFileMinIndex( source.dataInputFileMinIndex ),
 dataInputFileMaxIndex( source.dataInputFileMaxIndex ),
+
+dataOutputUsed(source.dataOutputUsed),
+dataOutputPath(source.dataOutputPath),
+dataOutputFileName(source.dataOutputFileName),
+dataOutputTreeName(source.dataOutputTreeName),
+
+dataConversionToWac(source.dataConversionToWac),
+
 dataSourceName( source.dataSourceName ),
 collisionSystemName( source.collisionSystemName ),
 collisionEnergyName( source.collisionEnergyName ),
@@ -195,13 +226,20 @@ TString TaskConfiguration::getName() const
 {
   return name;
 }
+
 TString TaskConfiguration::getType() const
 {
   return type;
 }
+
 TString TaskConfiguration::getVersion() const
 {
   return version;
+}
+
+TString TaskConfiguration::getHistoBaseName() const
+{
+  return name;
 }
 
 void TaskConfiguration::printTaskConfiguration(ostream & os)
@@ -253,7 +291,7 @@ TString TaskConfiguration::composeFileName(int option)
       name += collisionEnergyName; // e.g., 14 TeV
       name += "_";
       name += triggerName;         // e.g., Min Bias
-            break;
+      break;
       case 1:
       name = dataSourceName;      // e.g., Pythia, AMPT, ALICE, etc
       name += "_";

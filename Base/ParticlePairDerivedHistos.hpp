@@ -20,11 +20,7 @@ class ParticlePairDerivedHistos : public  Histograms
 public:
 
   ParticlePairDerivedHistos(const TString & name,
-                            AnalysisConfiguration * configuration,
-                            LogLevel  debugLevel);
-  ParticlePairDerivedHistos(TFile * inputFile,
-                            const TString & name,
-                            AnalysisConfiguration * configuration,
+                            ParticlePairAnalyzerConfiguration * configuration,
                             LogLevel  debugLevel);
   virtual ~ParticlePairDerivedHistos();
   void loadHistograms(TFile * inputFile);

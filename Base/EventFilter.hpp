@@ -16,8 +16,7 @@ class EventFilter
 {
 public:
 
-  enum EventSelection   { MinBias, Centrality, Multiplicity, ImpactParameter, Other };
-
+  enum EventSelection   { MinBias, Centrality, Multiplicity, ImpactParameter, Other, TPC, V0M };
 
    EventFilter(EventSelection eventSelectionRequested,
                double minimum,

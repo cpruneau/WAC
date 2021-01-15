@@ -18,7 +18,8 @@ public:
 
   BWModelEventGenerator(const TString & name,
                         BWModelConfiguration * configuration,
-                        Event * event);
+                        Event * event,
+                        LogLevel selectedLevel);
   virtual ~BWModelEventGenerator();
   virtual void initialize();
   virtual void reset();

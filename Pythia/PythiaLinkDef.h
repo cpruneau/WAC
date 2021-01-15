@@ -11,4 +11,7 @@
 #pragma link C++ class AACollisionReader+;
 #pragma link C++ class HeavyIonConfiguration+;
 
+#pragma link C++ class AACollisionPythiaGenerator+;
+#pragma link C++ class AACollisionPythiaGenerator+;
+
 #endif

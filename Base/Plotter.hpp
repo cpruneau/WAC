@@ -44,6 +44,14 @@ public:
                   double xMinLeg, double yMinLeg, double xMaxLeg, double yMaxLeg,
                   double legendSize);
 
+  TCanvas *  plot(TString   canvasName, CanvasConfiguration * cc, GraphConfiguration * gc,
+                  TString   xTitle,  double xMin, double xMax,
+                  TString   yTitle,  double yMin, double yMax,
+                  TString   zTitle,  double zMin, double zMax,
+                  TH1 * h,  const TString & plotOption);
+
+
+
   TCanvas *  plot(int nGraphs, TString  canvasName, CanvasConfiguration * cc, GraphConfiguration ** gc,
                    TString   xTitle,  double xMin, double xMax,
                    TString   yTitle,  double yMin, double yMax,

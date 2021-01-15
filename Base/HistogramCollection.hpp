@@ -55,6 +55,8 @@ public:
 
   HistogramCollection & operator=(const HistogramCollection & source);
 
+  HistogramCollection * clone() const;
+
   int getNHistograms()
   {
   return getCollectionSize();
@@ -102,17 +104,15 @@ public:
   ////////////////////////////////////////////////////////////////////////////
   // Add the given histogram to the list
   ////////////////////////////////////////////////////////////////////////////
-  void add(TH1 * h,
-           bool doScale,
-           bool doSave,
-           bool doPlot,
-           bool doPrint);
+  void append(TH1 * h, bool doScale, bool doSave, bool doPlot, bool doPrint);
+  void append(TH1 * h, int options);
 
   TH1 * getHisto(int i)
   {
     return getObjectAt(i);
   }
 
+  virtual void reset();
 
   void setDefaultOptions(bool color=0);
   TH1 * createHistogram(const TString &  name,
@@ -201,11 +201,16 @@ public:
   void setHistoProperties(TH2 * h, const GraphConfiguration & graphConfiguration);
   void setHistoProperties(TH1 * h, const GraphConfiguration & graphConfiguration, const TString & xTitle, const TString & yTitle);
   void setHistoProperties(TH2 * h, const GraphConfiguration & graphConfiguration, const TString & xTitle, const TString & yTitle, const TString & zTitle);
-  void addHistos(HistogramCollection * c1, double a1);
-  void addHistos(HistogramCollection * c1, HistogramCollection * c2, double a1, double a2);
-  void addHistos(HistogramCollection * c1, HistogramCollection * c2, HistogramCollection * c3, double a1, double a2, double a3);
-  void addHistos(HistogramCollection * c1, HistogramCollection * c2, HistogramCollection * c3, HistogramCollection * c4,
+
+  void add(const HistogramCollection & c1, double a1);
+  void add(const HistogramCollection & c1, const HistogramCollection & c2, double a1, double a2);
+  void add(const HistogramCollection & c1, const HistogramCollection & c2, const HistogramCollection & c3, double a1, double a2, double a3);
+  void add(const HistogramCollection & c1, const HistogramCollection & c2, const HistogramCollection & c3, const HistogramCollection & c4,
                  double a1, double a2, double a3, double a4);
+  void divide(const HistogramCollection & c1);
+  void divide(const HistogramCollection & c1, const HistogramCollection & c2);
+
+
   double calculateN1N1(const TH1 * h_1, const TH1 * h_2, TH1 * h_12, double a1, double a2);
   double calculateN1N1_H1H1H2(const TH1 * h_1, const TH1 * h_2, TH2 * h_12, double a1, double a2);
   double calculateN1N1_H2H2H2(const TH2 *h_1, const TH2 * h_2, TH2 * h_12, double a1, double a2);
@@ -213,9 +218,12 @@ public:
   double calculateN1N1N1(const TH1 * h_1, const TH1 * h_2, const TH1 * h_3, TH3 * h_123);
   void calculateN2N1(const TH2 * s2, const TH1* s1, TH2 * target, int single);
   void calculateN2N1x(const TH2 * s2, const TH1* s1, TH3 * target, int single);
-  bool sameDimensions1D(const TH1* h1, const TH1* h2);
-  bool sameDimensions2D(const TH2* h1, const TH2* h2);
-  bool sameDimensions3D(const TH3* h1, const TH3* h2);
+  int  getDimension(const TH1* h);
+  bool sameDimensions(const TH1* h1, const TH1* h2);
+  bool sameDimensions(const TH1* h1, const TH1* h2, const TH1* h3);
+  bool sameDimensions(const TH1* h1, const TH1* h2, const TH1* h3, const TH1* h4);
+  bool sameDimensions(const TH1* h1, const TH1* h2, const TH1* h3, const TH1* h4, const TH1* h5);
+
   void calculateDptDpt(const TH2 * spp, const TH2 * spn, const TH2 * snp, const TH2 * snn,
                        const TH2 * avgp1, const TH2 * avgp2,  TH2 * s2dptdpt,  TH2 * dptdpt,
                        bool ijNormalization, int nEta, int nPhi);
@@ -242,13 +250,16 @@ public:
 
   void setHistogram(TH1 * h, double v, double ev);
   void setHistogram(TH2 * h, double v, double ev);
+
+  int  loadCollection(TFile * inputFile);
+
   TH1 * loadH1(TFile * inputFile,const TString & histoName);
   TH2 * loadH2(TFile * inputFile,const TString & histoName);
   TH3 * loadH3(TFile * inputFile,const TString & histoName);
   TProfile * loadProfile(TFile * inputFile,const TString & histoName);
-  TH1 * cloneH1(const TH1 * h1, const TString & histoName);
-  TH2 * cloneH2(const TH2 * h2, const TString & histoName);
-  TH3 * cloneH3(const TH3 * h3, const TString & histoName);
+  void loadHistosInList(TFile * inputFile, HistogramCollection * collection);
+  TH1 * clone(const TH1 * h1, const TString & histoName);
+
   void findMaximum(TH1 * h, int xFirstBin, int xLastBin, int & xMaxValueBin, double & xMaxValue);
   void findMinimum(TH1 * h, int xFirstBin, int xLastBin, int & xMinValueBin, double  & xMinValue);
   void scaleByBinWidth1D(TH1 * h, double scale);
@@ -308,6 +319,8 @@ public:
                      double &F4_1234,double &eF4_1234, double &  R4_1234,double & eR4_1234);
   void calculateNudyn(double r2_11,double er2_11,double r2_12,double er2_12,double r2_22,double er2_22,double & nudyn,double & enudyn);
 
+  void squareDifferenceCollection(const HistogramCollection & collection, double sumWeights, double weight, int n);
+  void squareDifferenceHistos(TH1 * hAvg, TH1 * h, double sumWeights, double weight, int n);
   TString getName() const
   {
   return collectionName;

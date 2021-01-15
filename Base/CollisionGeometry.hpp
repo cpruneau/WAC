@@ -12,6 +12,7 @@
 #include "Nucleon.hpp"
 #include "Nucleus.hpp"
 #include "NucleusGenerator.hpp"
+#include "GeometryMoments.hpp"
 
 // ***************************************************************************
 // CollisionGeometry
@@ -27,6 +28,8 @@ class CollisionGeometry : public TObject
 {
 public:
 
+  enum NucleonNucleonType   { ProtonProton, ProtonNeutron, NeutronProton, NeutronNeutron};
+
   Nucleus * nucleusA;
   Nucleus * nucleusB;
   int nBinaryMax;
@@ -41,7 +44,10 @@ public:
   int nParticipant;  // number of participants
   int nPP;           // number of proton-proton collisions
   int nPN;           // number of proton-neutron collisions
+  int nNP;           // number of neutron-proton collisions
   int nNN;           // number of neutron-neutron collisions
+  GeometryMoments binaryMoments;
+  GeometryMoments participantMoments;
 
   CollisionGeometry(int nProtonsA, int nNeutronsA, int nProtonsB, int nNeutronsB);
 
@@ -59,7 +65,9 @@ public:
   virtual void addNNCollision(Nucleon* nucleonA,Nucleon* nucleonB, double xAvg, double yAvg, double zAvg, double tAvg);
   virtual void countParticipants();
 
-  static CollisionGeometry * getCollisionGeometry();
+  virtual NucleonNucleonType getNNTpye(int index);
+
+  //static CollisionGeometry * getCollisionGeometry();
 
   ClassDef(CollisionGeometry,0)
   

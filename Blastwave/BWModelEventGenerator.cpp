@@ -11,10 +11,10 @@ ClassImp(BWModelEventGenerator);
 
 BWModelEventGenerator::BWModelEventGenerator(const TString & name,
                                              BWModelConfiguration * configuration,
-                                             Event * event)
+                                             Event * event,
+                                             LogLevel selectedLevel)
 :
-Task  (name, configuration, event),
-generatorConfiguration(configuration),
+Task  (name, configuration, event, selectedLevel),
 useAllKinds(true),
 useFlow(false),
 pionPercentage(0.0),
@@ -29,7 +29,8 @@ azimuthalAngleKaons(nullptr),
 ptSpectraProtons(nullptr),
 azimuthalAngleProtons(nullptr)
 {
-  if (reportDebug())  cout << "BWModelEventGenerator::CTOR(...) No ops" << endl;
+  if (reportNoOps("BWModelEventGenerator",getTaskName(),"CTOR"))
+    ;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -37,6 +38,8 @@ azimuthalAngleProtons(nullptr)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 BWModelEventGenerator::~BWModelEventGenerator()
 {
+  if (reportStart("BWModelEventGenerator",getTaskName(),"DTOR"))
+    ;
   if (ptSpectraAllKinds != nullptr)       delete ptSpectraAllKinds;
   if (azimuthalAngleAllKinds != nullptr)  delete azimuthalAngleAllKinds;
   if (ptSpectraPions != nullptr)          delete ptSpectraPions;
@@ -45,6 +48,8 @@ BWModelEventGenerator::~BWModelEventGenerator()
   if (azimuthalAngleKaons != nullptr)     delete azimuthalAngleKaons;
   if (ptSpectraProtons != nullptr)        delete ptSpectraProtons;
   if (azimuthalAngleProtons != nullptr)   delete azimuthalAngleProtons;
+  if (reportEnd("BWModelEventGenerator",getTaskName(),"DTOR"))
+    ;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -52,9 +57,9 @@ BWModelEventGenerator::~BWModelEventGenerator()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void BWModelEventGenerator::initialize()
 {
-  if (reportDebug())  cout << "BWModelEventGenerator::initialize() Started" << endl;
-
-  BWModelConfiguration *config = (BWModelConfiguration *) generatorConfiguration;
+  if (reportStart("BWModelEventGenerator",getTaskName(),"initialize()"))
+    ;
+  BWModelConfiguration *config = (BWModelConfiguration *) getTaskConfiguration();
 
   //==============Particles and spectra==============//
   if (config->useAllKinds) {
@@ -168,7 +173,8 @@ void BWModelEventGenerator::initialize()
       azimuthalAngleProtons = new TF1("fAzimuthalAngleProtons","1",0.,2.*TMath::Pi());
     }
   }
-  if (reportDebug())  cout << "BWModelEventGenerator::initialize() Completed" << endl;
+  if (reportEnd("BWModelEventGenerator",getTaskName(),"initialize()"))
+    ;
 }
 
 
@@ -177,9 +183,7 @@ void BWModelEventGenerator::initialize()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void BWModelEventGenerator::reset()
 {
-  if (reportDebug())  cout << "BWModelEventGenerator::reset() Started" << endl;
   event->reset();
-  if (reportDebug())  cout << "BWModelEventGenerator::reset() Completed" << endl;
 }
 
 
@@ -188,18 +192,13 @@ void BWModelEventGenerator::reset()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void BWModelEventGenerator::execute()
 {
-  if (reportDebug())  cout << "BWModelEventGenerator::execute() Started" << endl;
-
   BWModelConfiguration *config = (BWModelConfiguration *) generatorConfiguration;
-
   Factory<Particle> * particleFactory = Particle::getFactory();
-
   /* event multiplicity */
   int multiplicity = int(gRandom->Gaus(config->totalMultiplicityMean,config->totalMultiplicitySigma));
   int netcharge    = int(gRandom->Gaus(config->netChargeMean,config->netChargeSigma));
   int ntogenplus   = int(multiplicity/2.0) + netcharge;
   int ntogenminus  = multiplicity - ntogenplus;
-
   double reactionplane = TMath::TwoPi()*gRandom->Rndm();
   if (useAllKinds)
     {
@@ -291,8 +290,10 @@ void BWModelEventGenerator::execute()
   }
   event->nParticles = nGenerated;
   event->multiplicity = nGenerated;
-  if (reportDebug())  cout << "BWModelEventGenerator::execute() " << nGenerated << " particles, " << nGeneratedPlus << " positive, " << nGeneratedMinus << " negative" << endl;
-  if (reportDebug())  cout << "BWModelEventGenerator::execute() event completed!" << endl;
+  if (reportDebug("BWModelEventGenerator",getTaskName(),"execute()"))
+    {
+    cout << "BWModelEventGenerator::execute() " << nGenerated << " particles, " << nGeneratedPlus << " positive, " << nGeneratedMinus << " negative" << endl;
+    }
 }
 
 TF1 *  BWModelEventGenerator::GetExponentialSpectra_FN(const char *name, double mass, double temp, double xmin, double xmax) {

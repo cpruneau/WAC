@@ -20,7 +20,8 @@ public:
 
   CollisionGeometryAnalyzer(const TString & name,
                             CollisionGeometryConfiguration * configuration,
-                            CollisionGeometry * collisionGeometry);
+                            CollisionGeometry * _collisionGeometry,
+                            LogLevel requiredLevel);
   virtual ~CollisionGeometryAnalyzer();
   virtual void initialize();
   virtual void saveHistograms(TFile * outputFile);

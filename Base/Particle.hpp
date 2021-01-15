@@ -26,6 +26,8 @@ public:
   Particle(const Particle& other);
   Particle & operator=(const Particle & other);
   void printProperties(ostream & output);
+
+  void setSourceIndex(int sourceIndex);
   void setPxPyPzE(double p_x, double p_y, double p_z, double p_e);
   void setPidPxPyPzE(long pid, long charge, double p_x, double p_y, double p_z, double p_e);
   void setPidPtPhiYEta(long _id,long _ch,double _pT,double _phi,double _y,double _eta);
@@ -33,13 +35,18 @@ public:
   void boost(double ax, double ay, double az);
   void boostRapidity(double boost);
 
+  int getSourceIndex() const
+  {
+  return sourceIndex;
+  }
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Data Members
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
-  long pid;
-  long charge;
-  double px, py, pz, e, pt, y, eta, phi;
-  int ixEtaPhi, ixYPhi;
+  int   sourceIndex;
+  int   pid;
+  float charge,baryon;
+  float px, py, pz, e, pt, y, eta, phi;
+  int   ixEtaPhi, ixYPhi;
 
   static int factorySize;
   static Factory<Particle> * factory;

@@ -1,11 +1,11 @@
 #ifndef WAC_HeavyIonConfiguration
 #define WAC_HeavyIonConfiguration
-#include "AnalysisConfiguration.hpp"
+#include "NuDynConfiguration.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration of a given analysis
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-class HeavyIonConfiguration : public AnalysisConfiguration
+class HeavyIonConfiguration : public NuDynConfiguration
 {
 public:
   

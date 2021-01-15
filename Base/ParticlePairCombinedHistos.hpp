@@ -8,7 +8,6 @@
 
 #ifndef WAC_ParticlePairCombinedHistos
 #define WAC_ParticlePairCombinedHistos
-#include "Histograms.hpp"
 #include "ParticlePairDerivedHistos.hpp"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -22,16 +21,12 @@ public:
   // CTOR
   //////////////////////////////////////////////////////////////////////////////////////////////////////
   ParticlePairCombinedHistos(const TString & name,
-                             AnalysisConfiguration * configuration,
-                             LogLevel  debugLevel);
-  ParticlePairCombinedHistos(TFile * inputFile,
-                             const TString & name,
-                             AnalysisConfiguration * configuration,
+                             ParticlePairAnalyzerConfiguration * configuration,
                              LogLevel  debugLevel);
   virtual ~ParticlePairCombinedHistos();
-  void loadHistograms(TFile * inputFile);
-  void createHistograms();
-  void calculate(ParticlePairDerivedHistos * pp, ParticlePairDerivedHistos * mm, ParticlePairDerivedHistos * pm, double app, double amm, double apm);
+  virtual void loadHistograms(TFile * inputFile);
+  virtual void createHistograms();
+  virtual void calculate(ParticlePairDerivedHistos * pp, ParticlePairDerivedHistos * mm, ParticlePairDerivedHistos * pm, double app, double amm, double apm);
   //void calculateRR_Q3D(ClusterHistos * ch);
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

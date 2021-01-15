@@ -4,6 +4,7 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
+#pragma link C++ class Timer+;
 #pragma link C++ class CanvasCollection+;
 #pragma link C++ class CanvasConfiguration+;
 #pragma link C++ class EnhancedGraph+;
@@ -22,6 +23,9 @@
 #pragma link C++ class StatStudyHistograms+;
 #pragma link C++ class StatStudyPlotter+;
 #pragma link C++ class StatStudyModel+;
+
+#pragma link C++ class TotalXsection+;
+
 //#pragma link C++ class IMPairHistos+;
 //#pragma link C++ class IMParticleHistos+;
 //#pragma link C++ class MasterAnalysis+;
@@ -43,7 +47,7 @@
 #pragma link C++ class MessageLogger+;
 
 
-#pragma link C++ class AnalysisConfiguration+;
+//// #pragma link C++ class AnalysisConfiguration+;
 #pragma link C++ class Event+;
 #pragma link C++ class EventFilter+;
 #pragma link C++ class EventHistos+;
@@ -56,9 +60,12 @@
 //#pragma link C++ class MultHisto+;
 #pragma link C++ class Particle+;
 #pragma link C++ class ParticleFilter+;
+#pragma link C++ class ParticleFilterAliceV0+;
 #pragma link C++ class ParticleHistos+;
+#pragma link C++ class ParticleAnalyzerConfiguration+;
 #pragma link C++ class ParticleAnalyzer+;
 #pragma link C++ class ParticlePlotter+;
+#pragma link C++ class ParticlePairAnalyzerConfiguration+;
 #pragma link C++ class ParticlePairCombinedHistos+;
 #pragma link C++ class ParticlePairDerivedHistos+;
 #pragma link C++ class ParticlePairFilter+;
@@ -72,13 +79,22 @@
 #pragma link C++ class ParticleTripletHistosMPADerived+;
 #pragma link C++ class ParticleQuadHistosMPA+;
 #pragma link C++ class ParticleQuadHistosMPADerived+;
+
+#pragma link C++ class RadialBoostConfiguration+;
+#pragma link C++ class RadialBoostHistos+;
+#pragma link C++ class RadialBoostTask+;
+
 #pragma link C++ class NuDynTask+;
 #pragma link C++ class NuDynHistos+;
 #pragma link C++ class NuDynDerivedHistos+;
 #pragma link C++ class NuDynPlotter+;
+#pragma link C++ class NuDynConfiguration+;
 
 #pragma link C++ class PTCorrelator+;
 #pragma link C++ class PTHistos+;
+
+
+#pragma link C++ class SubSampleStatCalculator+;
 
 #pragma link C++ class TrackAndPairEffects+;
 #pragma link C++ class TrackAndPairConfiguration+;
@@ -91,9 +107,22 @@
 #pragma link C++ class  CollisionGeometryAnalyzer+;
 #pragma link C++ class  CollisionGeometryGenerator+;
 #pragma link C++ class  CollisionGeometryHistograms+;
+#pragma link C++ class  GeometryMoments+;
+
 #pragma link C++ class  Nucleon+;
 #pragma link C++ class  Nucleus+;
 #pragma link C++ class  NucleusGenerator+;
+
+#pragma link C++ class  GlobalAnalyzer+;
+#pragma link C++ class  GlobalHistos+;
+#pragma link C++ class  GlobalAnalyzerConfiguration+;
+
+#pragma link C++ class  ParticleFilterAliceV0+;
+
+
+//#pragma link C++ class  RadialBoostConfiguration+;
+//#pragma link C++ class  RadialBoostHistos+;
+//#pragma link C++ class  RadialBoostTask+;
 
 
 #endif

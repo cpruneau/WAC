@@ -17,20 +17,20 @@ class CollisionGeometryGenerator : public Task
 {
 public:
 
-  CollisionGeometryGenerator(const TString & name,
-                             CollisionGeometryConfiguration * configuration,
-                             CollisionGeometry * collisionGeometry,
-                             NucleusGenerator * nucleusGeneratorA,
-                             NucleusGenerator * nucleusGeneratorB);
-  virtual ~CollisionGeometryGenerator() {}
+  CollisionGeometryGenerator(const TString & _name,
+                             CollisionGeometryConfiguration * _collisionGeometryConfiguration,
+                             LogLevel requiredLevel=Info);
+  virtual ~CollisionGeometryGenerator();
   virtual void reset();
   virtual void execute();
 
-  CollisionGeometry * collisionGeometry;
-  NucleusGenerator * nucleusGeneratorA;
-  NucleusGenerator * nucleusGeneratorB;
+  CollisionGeometry * getCollisionGeometry();
 
 protected:
+
+  CollisionGeometry * collisionGeometry;
+  NucleusGenerator  * nucleusGeneratorA;
+  NucleusGenerator  * nucleusGeneratorB;
 
   double minB, minBSq, maxB, maxBSq;
   double nnCrossSection;

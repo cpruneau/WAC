@@ -35,22 +35,35 @@ public:
     reportLevel = requiredLevel;
   }
 
-  LogLevel getReportLevel()
+  void setLogLevel(LogLevel requiredLevel)
+  {
+    reportLevel = requiredLevel;
+  }
+
+  LogLevel getLogLevel() const
   {
     return reportLevel;
   }
 
-  bool reportDebug(ostream & output=cout);
-  bool reportInfo(ostream & output=cout);
-  bool reportWarning(ostream & output=cout);
-  bool reportError(ostream & output=cout);
-  bool reportFatal(ostream & output=cout);
+  LogLevel getReportLevel() const
+  {
+    return reportLevel;
+  }
 
-  bool reportDebug(TString  className, TString  fctName, TString  taskName, ostream & output=cout);
-  bool reportInfo(TString  className, TString  fctName, TString  taskName, ostream & output=cout);
-  bool reportWarning(TString  className, TString  fctName, TString  taskName, ostream & output=cout);
-  bool reportError(TString  className, TString  fctName, TString  taskName, ostream & output=cout);
-  bool reportFatal(TString  className, TString  fctName, TString  taskName, ostream & output=cout);
+  bool reportDebug(ostream & output=cout) const;
+  bool reportInfo(ostream & output=cout) const;
+  bool reportWarning(ostream & output=cout) const;
+  bool reportError(ostream & output=cout) const;
+  bool reportFatal(ostream & output=cout) const;
+
+  bool reportDebug(TString  className, TString  fctName, TString  taskName, ostream & output=cout) const;
+  bool reportNoOps(TString  className, TString  fctName, TString  taskName, ostream & output=cout) const;
+  bool reportStart(TString  className, TString  fctName, TString  taskName, ostream & output=cout) const;
+  bool reportEnd(TString  className, TString  fctName, TString  taskName, ostream & output=cout) const;
+  bool reportInfo(TString  className, TString  fctName, TString  taskName, ostream & output=cout) const;
+  bool reportWarning(TString  className, TString  fctName, TString  taskName, ostream & output=cout) const;
+  bool reportError(TString  className, TString  fctName, TString  taskName, ostream & output=cout) const;
+  bool reportFatal(TString  className, TString  fctName, TString  taskName, ostream & output=cout) const;
 
 
   ClassDef(MessageLogger,0)

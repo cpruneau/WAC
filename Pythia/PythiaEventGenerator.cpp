@@ -23,11 +23,18 @@ PythiaEventGenerator::PythiaEventGenerator(const TString & name,
                                            TaskConfiguration * configuration,
                                            Event * event,
                                            EventFilter * ef,
-                                           ParticleFilter * pf)
+                                           ParticleFilter * pf,
+                                           LogLevel selectedLevel)
 :
-Task(name, configuration, event),
+Task(name, configuration, event, selectedLevel),
+pythia8(nullptr),
+nMax(10000),
+particles(nullptr),
 eventFilter(ef),
-particleFilter(pf)
+particleFilter(pf),
+outputFile(nullptr),
+outputEvent(nullptr),
+outputTree(nullptr)
 {
   if (reportDebug()) cout << "PythiaEventGenerator::PythiaEventGenerator(...) No ops" << endl;
 }
@@ -39,37 +46,40 @@ PythiaEventGenerator::~PythiaEventGenerator()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialize generator
+//pythia8->Initialize(2212 /* p */, 2212 /* p */, 14000. /* GeV */);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void PythiaEventGenerator::initialize()
 {
   if (reportDebug()) cout << "PythiaEventGenerator::initialize() Started" << endl;
 
 
-  nMax = 10000;
-  particles = new TClonesArray("TParticle", nMax);
-  pythia8 = new TPythia8();
-
-
   PythiaConfiguration * pc = (PythiaConfiguration*) getTaskConfiguration();
+  pythia8 = new TPythia8();
   for (int iOption=0; iOption<pc->nOptions; iOption++)
   {
   pythia8->ReadString( *pc->options[iOption]);
   }
   pythia8->Initialize(pc->beam,pc->target,pc->energy);
-  //pythia8->Initialize(2212 /* p */, 2212 /* p */, 14000. /* GeV */);
+
+  if (pc->dataOutputUsed)
+    {
+    TString outputFileName = pc->dataOutputPath;
+    outputFileName += "/";
+    outputFileName += pc->dataOutputFileName;
+    outputFile = TFile::Open(outputFileName,"recreate");
+    //outputEvent = &pythia8->Pythia8()->event;
+    outputTree  = new TTree(pc->dataOutputTreeName,"PythiaEventTree");
+    particles = (TClonesArray*) pythia8->GetListOfParticles();
+    outputTree->Branch("particles", &particles);
+    //outputTree->Branch("event",&outputEvent);
+    }
+  if (pc->dataConversionToWac)
+    {
+    nMax = 10000;
+    particles = new TClonesArray("TParticle", nMax);
+    }
+
   if (reportDebug()) cout << "PythiaEventGenerator::initialize() Completed" << endl;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Reset and Initialize the generator
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void PythiaEventGenerator::reset()
-{
-  if (reportDebug()) cout << "PythiaEventGenerator::reset() Started" << endl;
-  event->reset();
-  Particle::getFactory()->reset();
-  if (reportDebug()) cout << "PythiaEventGenerator::reset() Completed" << endl;
 }
 
 
@@ -80,8 +90,8 @@ void PythiaEventGenerator::reset()
 void PythiaEventGenerator::execute()
 {
   if (reportDebug()) cout << "PythiaEventGenerator::execute() Started" << endl;
+  PythiaConfiguration * pc = (PythiaConfiguration*) getTaskConfiguration();
 
-  Factory<Particle> * particleFactory = Particle::getFactory();
   int nparts;
   bool seekingEvent = true;
   while (seekingEvent)
@@ -89,7 +99,6 @@ void PythiaEventGenerator::execute()
     pythia8->GenerateEvent();
     if (reportDebug()) pythia8->EventListing();
     if (reportDebug()) cout << "PythiaEventGenerator::execute() Calling pythia8->ImportParticles()" << endl;
-
     pythia8->ImportParticles(particles,"Final");
     if (reportDebug()) cout << "PythiaEventGenerator::execute() pythia8->ImportParticles() completed" << endl;
     nparts = particles->GetEntriesFast();
@@ -103,61 +112,77 @@ void PythiaEventGenerator::execute()
     //exit(0);
     }
 
-  int thePid;
-  double charge, mass, p_x, p_y, p_z, p_e;
-  Particle * particle;
-  int particleAccepted = 0;
-  int particleCounted = 0;
-
-  //------------------- Randomizing the particle phi --------------Starts
-  double eventAngle= TMath::TwoPi() * gRandom->Rndm();
-  double cosPhi = cos(eventAngle);
-  double sinPhi = sin(eventAngle);
-
-  // load particles from TClone storage and copy into event.
-  Particle aParticle;
-  //if (reportDebug()) cout << "PythiaEventGenerator::execute() starting copy loop into event..." << endl;
-
-  for (int iParticle = 0; iParticle < nparts; iParticle++)
+  if (pc->dataOutputUsed)
     {
-    TParticle & part = * (TParticle*) particles->At(iParticle);
-    int ist = part.GetStatusCode();
-    //if (reportDebug()) cout << "PythiaEventGenerator::execute() ist: " << ist << endl;
-    if (ist <= 0) continue;
-    int pdg = part.GetPdgCode();
-    mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
-    if (mass<0.002) continue;  // no photons, electrons...
-    charge = TDatabasePDG::Instance()->GetParticle(pdg)->Charge();
-    p_x  = cosPhi*part.Px() - sinPhi*part.Py();
-    p_y  = sinPhi*part.Px() + cosPhi*part.Py();
-    p_z  = part.Pz();
-    p_e  = part.Energy();
-    aParticle.setPidPxPyPzE(pdg, charge, p_x,p_y,p_z,p_e);
-    //aParticle.printProperties(cout);
-    //if (reportDebug()) cout << "PythiaEventGenerator::execute() calling filter " << endl;
-    particleCounted++;
-    if (!particleFilter->accept(aParticle)) continue;
-    particle = particleFactory->getNextObject();
-    *particle = aParticle;
-    particleAccepted++;
-    //    if (true)
-    //      {
-    //      cout << "PythiaEventGenerator::execute() particle: " << iParticle << " / " << particleAccepted << endl;
-    //      particle->printProperties(cout);
-    //      }
+    outputTree->Fill();
     }
+  if (pc->dataConversionToWac)
+    {
+    Factory<Particle> * particleFactory = Particle::getFactory();
+    particleFactory->reset();
+    int thePid;
+    double charge, mass, p_x, p_y, p_z, p_e;
+    Particle * particle;
+    int particleAccepted = 0;
+    int particleCounted = 0;
 
-  event->nParticles   = particleCounted;
-  event->multiplicity = particleAccepted;
-  if (reportDebug()) cout << "PythiaEventGenerator::execute() No of accepted Particles : "<< particleAccepted<<endl;
-  if (reportDebug()) cout << "PythiaEventGenerator::execute() No of counted Particles : "<< particleCounted <<endl;
-  if (reportDebug()) cout << "PythiaEventGenerator::execute() event completed!" << endl;
+    //------------------- Randomizing the particle phi --------------Starts
+    double eventAngle= TMath::TwoPi() * gRandom->Rndm();
+    double cosPhi = cos(eventAngle);
+    double sinPhi = sin(eventAngle);
+
+    // load particles from TClone storage and copy into event.
+    Particle aParticle;
+    //if (reportDebug()) cout << "PythiaEventGenerator::execute() starting copy loop into event..." << endl;
+
+    for (int iParticle = 0; iParticle < nparts; iParticle++)
+      {
+      TParticle & part = * (TParticle*) particles->At(iParticle);
+      int ist = part.GetStatusCode();
+      //if (reportDebug()) cout << "PythiaEventGenerator::execute() ist: " << ist << endl;
+      if (ist <= 0) continue;
+      int pdg = part.GetPdgCode();
+      mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
+      if (mass<0.002) continue;  // no photons, electrons...
+      charge = TDatabasePDG::Instance()->GetParticle(pdg)->Charge();
+      p_x  = cosPhi*part.Px() - sinPhi*part.Py();
+      p_y  = sinPhi*part.Px() + cosPhi*part.Py();
+      p_z  = part.Pz();
+      p_e  = part.Energy();
+      aParticle.setPidPxPyPzE(pdg, charge, p_x,p_y,p_z,p_e);
+      //aParticle.printProperties(cout);
+      //if (reportDebug()) cout << "PythiaEventGenerator::execute() calling filter " << endl;
+      particleCounted++;
+      if (!particleFilter->accept(aParticle)) continue;
+      particle = particleFactory->getNextObject();
+      *particle = aParticle;
+      particleAccepted++;
+      //    if (true)
+      //      {
+      //      cout << "PythiaEventGenerator::execute() particle: " << iParticle << " / " << particleAccepted << endl;
+      //      particle->printProperties(cout);
+      //      }
+      }
+
+    event->nParticles   = particleCounted;
+    event->multiplicity = particleAccepted;
+    if (reportDebug()) cout << "PythiaEventGenerator::execute() No of accepted Particles : "<< particleAccepted<<endl;
+    if (reportDebug()) cout << "PythiaEventGenerator::execute() No of counted Particles : "<< particleCounted <<endl;
+    }
+   if (reportDebug()) cout << "PythiaEventGenerator::execute() event completed!" << endl;
 }
 
 void PythiaEventGenerator::finalize()
 {
   if (reportDebug()) cout << "PythiaEventGenerator::finalize() started" << endl;
   if (reportInfo()) pythia8->PrintStatistics();
+  PythiaConfiguration * pc = (PythiaConfiguration*) getTaskConfiguration();
+  if (pc->dataOutputUsed)
+    {
+    outputTree->Print();
+    outputTree->Write();
+    delete outputFile;
+    }
   if (reportDebug()) cout << "PythiaEventGenerator::finalize() completed" << endl;
 }
 

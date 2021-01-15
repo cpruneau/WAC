@@ -57,7 +57,9 @@ public:
   TRandom           * taskRandomGenerator;
   Event             * event;
 
-  long eventsProcessed;
+  long nEventProcessed;
+  long nEventAccepted;
+  int  subSampleIndex;
 
   ////////////////////////////////////////////
   // Member functions
@@ -65,14 +67,16 @@ public:
 
   Task(const TString & name,
        TaskConfiguration * configuration,
-       Event * event);
+       Event * event,
+       LogLevel selectedLevel);
   virtual ~Task();
   virtual void initialize();
   virtual void execute();
   virtual void finalize();
   virtual void reset();
   virtual void clear();
-
+  virtual void savePartialResults();
+  
   virtual void createHistograms();
   virtual void loadHistograms();
   virtual void loadHistograms(TFile * inputFile);
@@ -85,18 +89,60 @@ public:
   virtual void saveHistograms();
   virtual void saveHistograms(TFile * outputFile);
   virtual void addHistogramsToExtList(TList *list, bool all=false);
+
+  virtual double readParameter(TFile * inputFile, const TString & parameterName);
+  TFile * openRootFile(const TString & inputPath, const TString & fileName, const TString & ioOption);
+
   Event * getEvent();
 
   TaskConfiguration * getTaskConfiguration();
   void setTaskConfiguration(TaskConfiguration * config);
-  virtual void printConfiguration(ostream & output);
-  TString getName() const;
-  void setName(const TString & name);
+  virtual void printTaskConfiguration(ostream & output);
+  inline TString getTaskName() const
+  {
+    return taskName;
+  }
+
+  inline void setTaskName(const TString & name)
+  {
+    taskName = name;
+  }
 
   TRandom * getRandomGenerator()
   {
   return taskRandomGenerator;
   }
+
+  inline long incrementEventProcessed()
+  {
+  return ++nEventProcessed;
+  }
+
+  inline long incrementEventAccepted()
+  {
+  return ++nEventAccepted;
+  }
+
+  inline long getNEventProcessed() const
+  {
+  return nEventProcessed;
+  }
+
+  inline long getNEventAccepted() const
+  {
+  return nEventAccepted;
+  }
+
+  inline long getSubSampleIndex() const
+  {
+  return subSampleIndex;
+  }
+
+  void saveNEventProcessed(TFile * outputFile);
+  void saveNEventAccepted(TFile * outputFile);
+  long loadNEventProcessed(TFile * inputFile);
+  long loadNEventAccepted(TFile * inputFile);
+
 
   void setRandomGenerator(TRandom * randomGenerator);
 
@@ -108,16 +154,54 @@ private:
   static TaskStatus taskStatus;
 
 public:
-  
-  static TaskStatus getTaskStatus();
-  static void setTaskStatus(TaskStatus taskStatus);
-  static void postTaskOk();
-  static void postTaskEof(); // end of file
-  static void postTaskEod(); // end of data
-  static void postTaskWarning();
-  static void postTaskError();
-  static void postTaskFatal();
-  static bool isTaskOk();
+
+  inline static TaskStatus getTaskStatus()
+  {
+    return taskStatus;
+  }
+
+  inline static void setTaskStatus(TaskStatus newStatus)
+  {
+    taskStatus = newStatus;
+  }
+
+  inline static void postTaskOk()
+  {
+    taskStatus = TaskOk;
+  }
+
+  inline static void postTaskEof()
+  {
+    taskStatus = TaskEof;
+  }
+
+
+  inline static void postTaskEod()
+  {
+    taskStatus = TaskEod;
+  }
+
+  inline static void postTaskWarning()
+  {
+    taskStatus = TaskWarning;
+  }
+
+  inline static void postTaskError()
+  {
+    taskStatus = TaskError;
+  }
+
+  inline static void postTaskFatal()
+  {
+    taskStatus = TaskFatal;
+  }
+
+
+  inline static bool isTaskOk()
+  {
+    return (taskStatus == TaskOk);
+  }
+
   static TString getTaskStatusName();
 
   ClassDef(Task,0)

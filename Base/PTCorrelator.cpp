@@ -6,7 +6,7 @@
 
 #include <chrono>
 #include "PTCorrelator.hpp"
-#include "AnalysisConfiguration.hpp"
+#include "TransverseMomentumConfiguration.hpp"
 #include "HeavyIonConfiguration.hpp"
 
 
@@ -31,7 +31,7 @@ correlatorIndex(0),
 maxEvents(0)
 {
 	if (reportDebug())  cout << "PTCorrelator::CTOR(...) Started." << endl;
-	AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
+	TransverseMomentumConfiguration * ac = (TransverseMomentumConfiguration *) getTaskConfiguration();
 	HeavyIonConfiguration * hc = (HeavyIonConfiguration *) ac;
 
 
@@ -130,7 +130,7 @@ void PTCorrelator::loadHistograms(TFile * inputFile)
 	TParameter<Long64_t> *par = (TParameter<Long64_t> *) inputFile->Get("NoOfEvents");
 	eventsProcessed = par->GetVal();
 	delete par;
-	AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
+	TransverseMomentumConfiguration * ac = (TransverseMomentumConfiguration *) getTaskConfiguration();
 	//LogLevel debugLevel = getReportLevel();
 
 	TString histoName;
@@ -188,7 +188,7 @@ void PTCorrelator::execute()
 	HeavyIonConfiguration * ac = (HeavyIonConfiguration *) getTaskConfiguration();
 	if (!ac)
 	{
-		if (reportError()) cout << "PTCorrelator::execute(...) analysisConfiguration null pointer" << endl;
+		if (reportError()) cout << "PTCorrelator::execute(...) TransverseMomentumConfiguration null pointer" << endl;
 		postTaskError();
 		return;
 	}

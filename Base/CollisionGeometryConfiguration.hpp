@@ -10,6 +10,7 @@
 #ifndef WAC_CollisionGeometryConfiguration
 #define WAC_CollisionGeometryConfiguration
 #include "TaskConfiguration.hpp"
+#include "NucleusGenerator.hpp"
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -22,25 +23,51 @@ public:
   CollisionGeometryConfiguration(const TString & name,
                                  const TString & type,
                                  const TString & version);
-  virtual ~CollisionGeometryConfiguration(){}
+  CollisionGeometryConfiguration(const CollisionGeometryConfiguration & source);
+  virtual ~CollisionGeometryConfiguration();
+  CollisionGeometryConfiguration & operator=(const CollisionGeometryConfiguration & source);
+
+  virtual void setBXsectPartition(int nBins, double * bValues);
+  virtual void setDefaultBXsectPartition();
+  virtual void setPbPb2740GeVBXsectPartition();
+
+  virtual void setDefaultConfiguration();
+  virtual void setPbPb2740GeVConfiguration();
+
   virtual void printConfiguration(ostream & os);
+
 
   ////////////////////////////////////////////////////
   // Data Members
   ////////////////////////////////////////////////////
-  int nProtonsA, nNeutronsA, nProtonsB, nNeutronsB;
-
   TString histoBaseName;
 
+  // Nucleus A Generation
+  int nProtonsA, nNeutronsA;
+  NucleusGenerator::GeneratorType aGeneratorType;
+  double aParA, aParB, aParC;
+  int    aNR;
+  double aMinR, aMaxR;
 
-  // used for generation
+  // Nucleus B Generation
+  int nProtonsB, nNeutronsB;
+  NucleusGenerator::GeneratorType bGeneratorType;
+  double bParA, bParB, bParC;
+  int    bNR;
+  double bMinR, bMaxR;
+
+  // used for collision generation
   double minB, maxB;
   double nnCrossSection;
+
 
   // used for histograms
   int nBins_b;          double min_b;          double max_b;
   int nBins_nPart;      double min_nPart;      double max_nPart;
   int nBins_nBinary;    double min_nBinary;    double max_nBinary;
+
+  int nBins_bxSect;
+  double * bValues;
 
 ClassDef(CollisionGeometryConfiguration,0)
 };

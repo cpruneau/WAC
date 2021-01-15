@@ -18,9 +18,13 @@ class GeneralizedGaussianConfiguration : public TaskConfiguration
 {
 public:
 
- GeneralizedGaussianConfiguration(const TString & name,
-                                  const TString & version);
-  virtual ~GeneralizedGaussianConfiguration();
+  GeneralizedGaussianConfiguration(const TString & name,
+                                   const TString & version);
+  GeneralizedGaussianConfiguration(const GeneralizedGaussianConfiguration & source);
+  GeneralizedGaussianConfiguration & operator=(const GeneralizedGaussianConfiguration & source);
+
+  virtual ~GeneralizedGaussianConfiguration(){}
+
   virtual void printConfiguration(ostream & os);
 
   // ////////////////////////////////////////////

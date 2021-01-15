@@ -106,12 +106,19 @@ protected:
 
   // Returns the number of object currently
   // in use.
+  long getNObject() const
+  {
+    return nObject;
+  }
+
+  // Returns the number of object currently
+  // in use.
   long getCollectionSize() const
   {
     return nObject;
   }
 
-T * add(T * object)
+  T * append(T * object)
   {
   if (nObject >= nObjectCapacity)
     {
@@ -132,6 +139,26 @@ T * add(T * object)
   return objects[index];
   }
 
+  bool sameSizeAs(const Collection<T> & other)
+  {
+  return nObject == other.nObject;
+  }
+
+  virtual void clear()
+  {
+  // if instance the objects, delete them, but not the container.
+  if (bOwnObjects)
+    {
+    deleteObjects();
+    }
+  nObject = 0;
+  }
+
+  virtual void reset()
+  {
+  // no ops
+  }
+
 protected:
 
   void initialize(int initialCapacity)
@@ -146,8 +173,7 @@ protected:
     }
   }
 
-
-void copy(long n, T ** source)
+  void copy(long n, T ** source)
   {
   for (int iObject=0; iObject<n; iObject++)
     {

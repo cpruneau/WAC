@@ -19,33 +19,23 @@
 ClassImp(ParticlePairHistos);
 
 ParticlePairHistos::ParticlePairHistos(const TString & name,
-                                       AnalysisConfiguration * configuration,
+                                       ParticlePairAnalyzerConfiguration * configuration,
                                        LogLevel  debugLevel)
 :
 Histograms(name,configuration,150,debugLevel)
 {
-  initialize();
-}
-
-ParticlePairHistos::ParticlePairHistos(TFile * inputFile,
-                                       const TString & name,
-                                       AnalysisConfiguration * configuration,
-                                       LogLevel  debugLevel)
-:
-Histograms(name,configuration,150,debugLevel)
-{
-  loadHistograms(inputFile);
+  // no ops
 }
 
 ParticlePairHistos::~ParticlePairHistos()
 {
-  /* */
+  // no ops
 }
 
-void ParticlePairHistos::initialize()
+void ParticlePairHistos::createHistograms()
 {
   if (reportDebug()) cout << "ParticlePairHistos::initialize() Started." << endl;
-  AnalysisConfiguration & ac = *(AnalysisConfiguration*) getConfiguration();
+  ParticlePairAnalyzerConfiguration & ac = *(ParticlePairAnalyzerConfiguration*) getConfiguration();
   TString bn = getHistoBaseName();
   ac.range_pt       = ac.max_pt  - ac.min_pt;
   ac.range_phi      = ac.max_phi - ac.min_phi;
@@ -87,7 +77,7 @@ void ParticlePairHistos::initialize()
   h_ptn_phiPhi        = createHistogram(bn+TString("ptn_phiPhi"),       ac.nBins_phi,    ac.min_phi, ac.max_phi, ac.nBins_phi, ac.min_phi, ac.max_phi, "#varphi_{1}", "#varphi_{2}", "p_{T} x n",1,1,0,0);
   h_ptpt_phiPhi       = createHistogram(bn+TString("ptpt_phiPhi"),      ac.nBins_phi,    ac.min_phi, ac.max_phi, ac.nBins_phi, ac.min_phi, ac.max_phi, "#varphi_{1}", "#varphi_{2}", "p_{T}xp_{T}",1,1,0,0);
 
-  if (ac.fillQ3D)
+  if (false && ac.fillQ3D)
     {
     h_n2_Q3D   = createHistogram(bn+TString("n2_Q3D"),ac.nBins_DeltaPlong, ac.min_DeltaPlong, ac.max_DeltaPlong,
                                  ac.nBins_DeltaPside, ac.min_DeltaPside, ac.max_DeltaPside,ac.nBins_DeltaPout,  ac.min_DeltaPout,  ac.max_DeltaPout,
@@ -128,6 +118,8 @@ void ParticlePairHistos::initialize()
 
 void ParticlePairHistos::fill(Particle & particle1, Particle & particle2, double weight)
 {
+  //if (reportStart("ParticlePairHistos",getName(), "fill(Particle & particle1, Particle & particle2, double weight)"))
+  //  ;
   double pt1   = particle1.pt;
 //  double eta1  = particle1.eta;
 //  double phi1  = particle1.phi; if (phi1<0) phi1 += TMath::TwoPi();
@@ -136,11 +128,12 @@ void ParticlePairHistos::fill(Particle & particle1, Particle & particle2, double
 //  double eta2  = particle2.eta;
 //  double phi2  = particle2.phi; if (phi2<0) phi2 += TMath::TwoPi();
 
-  AnalysisConfiguration & ac = * (AnalysisConfiguration*) getConfiguration();
+  ParticlePairAnalyzerConfiguration & ac = * (ParticlePairAnalyzerConfiguration*) getConfiguration();
   h_n2_ptPt    ->Fill(pt1,  pt2,  weight);
   // delayed fill h_n2_etaEta  ->Fill(eta1, eta2, weight);
   // delayed fill h_n2_phiPhi  ->Fill(phi1, phi2, weight);
 
+  //if (reportDebug("ParticlePairHistos",getName(), "fill(Particle & particle1, Particle & particle2, double weight)")) cout << " -1- " << endl;
 
   // delayed fill h_ptn_etaEta ->Fill(eta1, eta2, weight*pt1);
   // delayed fill h_npt_etaEta ->Fill(eta1, eta2, weight*pt2);
@@ -155,6 +148,8 @@ void ParticlePairHistos::fill(Particle & particle1, Particle & particle2, double
   bool wrongix = iPhiEta1 < 0 || iPhiEta2 < 0;
 
   if (!wrongix) {
+
+
 #ifdef OPTIMIZEADDBINCONTENT
     int binno = (iPhiEta2+1)*(h_n2_phiEtaPhiEta->GetNbinsX()+2)+(iPhiEta1+1);
     double nentries = h_n2_phiEtaPhiEta->GetEntries() + 1;
@@ -187,17 +182,13 @@ void ParticlePairHistos::fill(Particle & particle1, Particle & particle2, double
     {
 //    double y1    = particle1.y;
 //    double y2    = particle2.y;
-
     // delayed fill h_n2_yY  ->Fill(y1, y2, weight);
     // delayed fill h_ptn_yY ->Fill(y1, y2, weight*pt1);
     // delayed fill h_npt_yY ->Fill(y1, y2, weight*pt2);
     // delayed fill h_ptpt_yY->Fill(y1, y2, weight*pt1*pt2);
-
-
     int iPhiY1 = particle1.ixYPhi;
     int iPhiY2 = particle2.ixYPhi;
     wrongix = iPhiY1 < 0 || iPhiY2 < 0;
-
     if (!wrongix) {
 #ifdef OPTIMIZEADDBINCONTENT
       int binno = (iPhiY2+1)*(h_n2_phiYPhiY->GetNbinsX()+2)+(iPhiY1+1);
@@ -228,56 +219,56 @@ void ParticlePairHistos::fill(Particle & particle1, Particle & particle2, double
     //        }
     }
 
-  if (ac.fillQ3D)
-    {
-    double Qlong, Qside, Qout, Qinv;
-    //double Qlong1, Qside1, Qout1;
-
-    double px1   = particle1.px;
-    double py1   = particle1.py;
-    double pz1   = particle1.pz;
-    double e1    = particle1.e;
-
-    double px2   = particle2.px;
-    double py2   = particle2.py;
-    double pz2   = particle2.pz;
-    double e2    = particle2.e;
-
-    double pt,s,Mlong,roots;
-    double ptot[4],q[4];
-    //const int g[4]={1,-1,-1,-1};
-    //int alpha;
-    Qinv=0.0;
-    s=0.0;
-    ptot[0] = e1  + e2;
-    ptot[1] = px1 + px2;
-    ptot[2] = py1 + py2;
-    ptot[3] = pz1 + pz2;
-    q[0] = e1  - e2;
-    q[1] = px1 - px2;
-    q[2] = py1 - py2;
-    q[3] = pz1 - pz2;
-    s = ptot[0]*ptot[0] - ptot[1]*ptot[1] - ptot[2]*ptot[2] - ptot[3]*ptot[3];
-    Qinv = -(q[0]*q[0] - q[1]*q[1] - q[2]*q[2] - q[3]*q[3]);
-    pt=sqrt(ptot[1]*ptot[1]+ptot[2]*ptot[2]);
-    Mlong=sqrt(s+pt*pt);
-    roots=sqrt(s);
-
-    if (pt>0)
-      {
-      Qside = (ptot[1]*q[2]-ptot[2]*q[1])/pt;
-      Qlong = (ptot[0]*q[3]-ptot[3]*q[0])/Mlong;
-      Qout  = (roots/Mlong)*(ptot[1]*q[1]+ptot[2]*q[2])/pt;
-      }
-    else
-      {
-      Qlong = q[3];
-      Qside = q[2];
-      Qout  = q[1];
-      }
-
-    h_n2_Q3D->Fill(Qlong, Qside, Qout,weight);
-    }
+//  if (false && ac.fillQ3D)
+//    {
+//    double Qlong, Qside, Qout, Qinv;
+//    //double Qlong1, Qside1, Qout1;
+//
+//    double px1   = particle1.px;
+//    double py1   = particle1.py;
+//    double pz1   = particle1.pz;
+//    double e1    = particle1.e;
+//
+//    double px2   = particle2.px;
+//    double py2   = particle2.py;
+//    double pz2   = particle2.pz;
+//    double e2    = particle2.e;
+//
+//    double pt,s,Mlong,roots;
+//    double ptot[4],q[4];
+//    //const int g[4]={1,-1,-1,-1};
+//    //int alpha;
+//    Qinv=0.0;
+//    s=0.0;
+//    ptot[0] = e1  + e2;
+//    ptot[1] = px1 + px2;
+//    ptot[2] = py1 + py2;
+//    ptot[3] = pz1 + pz2;
+//    q[0] = e1  - e2;
+//    q[1] = px1 - px2;
+//    q[2] = py1 - py2;
+//    q[3] = pz1 - pz2;
+//    s = ptot[0]*ptot[0] - ptot[1]*ptot[1] - ptot[2]*ptot[2] - ptot[3]*ptot[3];
+//    Qinv = -(q[0]*q[0] - q[1]*q[1] - q[2]*q[2] - q[3]*q[3]);
+//    pt=sqrt(ptot[1]*ptot[1]+ptot[2]*ptot[2]);
+//    Mlong=sqrt(s+pt*pt);
+//    roots=sqrt(s);
+//
+//    if (pt>0)
+//      {
+//      Qside = (ptot[1]*q[2]-ptot[2]*q[1])/pt;
+//      Qlong = (ptot[0]*q[3]-ptot[3]*q[0])/Mlong;
+//      Qout  = (roots/Mlong)*(ptot[1]*q[1]+ptot[2]*q[2])/pt;
+//      }
+//    else
+//      {
+//      Qlong = q[3];
+//      Qside = q[2];
+//      Qout  = q[1];
+//      }
+//
+//    h_n2_Q3D->Fill(Qlong, Qside, Qout,weight);
+//    }
 
 }
 
@@ -285,7 +276,7 @@ void ParticlePairHistos::fill(Particle & particle1, Particle & particle2, double
 // higher dimensional ones
 void ParticlePairHistos::completeFill()
 {
-  AnalysisConfiguration & ac = * (AnalysisConfiguration*) getConfiguration();
+  ParticlePairAnalyzerConfiguration & ac = * (ParticlePairAnalyzerConfiguration*) getConfiguration();
 
   int nbinseta = h_n2_etaEta->GetNbinsX();
   int nbinsphi = h_n2_phiPhi->GetNbinsX();
@@ -327,7 +318,7 @@ void ParticlePairHistos::completeFill()
 //    if (phi1<0) phi1 += TMath::TwoPi();  // sets the range to [0,2pi[
 //    if (phi2<0) phi2 += TMath::TwoPi();
 //
-//    AnalysisConfiguration & ac = *analysisConfiguration;
+//    ParticlePairAnalyzerConfiguration & ac = *analysisConfiguration;
 //    h_n2_ptPt    ->Fill(pt1,  pt2,  weight);
 //    h_n2_etaEta  ->Fill(eta1, eta2, weight);
 //    h_n2_phiPhi  ->Fill(phi1, phi2, weight);
@@ -452,7 +443,7 @@ void ParticlePairHistos::loadHistograms(TFile * inputFile)
     cout << "-Fatal- Attempting to load ParticleHistos from an invalid file pointer" << endl;
     return;
     }
-  AnalysisConfiguration & ac = *(AnalysisConfiguration*) getConfiguration();
+  ParticlePairAnalyzerConfiguration & ac = *(ParticlePairAnalyzerConfiguration*) getConfiguration();
    TString bn = getHistoBaseName();
   h_n2_ptPt           = loadH2(inputFile, bn+TString("n2_ptPt"));
   h_n2_etaEta         = loadH2(inputFile, bn+TString("n2_etaEta"));

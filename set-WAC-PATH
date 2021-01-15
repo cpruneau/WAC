@@ -1,7 +1,38 @@
+####################################################################################################
+#
+# Use this file to setup envirionment variable to run WAC applications
+#
+# The build is controlled by cmake and make. Both are needed for this to work.
+#
+# The following directory structure is assumed/build
+#
+#  'pwd'         : Current directory
+#  'pwd'/Base    : Base classes
+#  'pwd'/Pythia  : Pythia related classes
+#  'pwd'/BW      : Blastwave model related classes
+#  ...
+#  'pwd'/InputFiles   : Where APPs will look for input (histogram) files using root::getenv("WAC_INPUT_PATH");
+#  'pwd'/OutputFiles  : Where APPs will create ouput files using root::getenv("WAC_OUTPUT_PATH");
+#  'pwd'/build        : Where cmake & make will compile&build APPs
+#  'pwd'/bin          : Where cmake & make will install binaries
+#  'pwd'/lib          : Where cmake & make will install libraries
+#
+####################################################################################################
+echo "========================================================================================"
+echo "Creating (if needed) build, InputFiles, and OutputFiles directories"
+if [[ ! (-d build) ]] then
+  mkdir build;
+fi
+if [[ ! (-d InputFiles) ]] then
+  mkdir InputFiles;
+fi
+if [[ ! (-d OutputFiles) ]] then
+  mkdir OutputFiles
+fi
 
-####################################################################################################
-echo "Setting up WAC"
-####################################################################################################
+echo "========================================================================================"
+echo "Setting up WAC environment variables"
+echo "========================================================================================"
 export WAC_ROOT=`pwd`
 export WAC_SOURCE="$WAC_ROOT"
 export WAC_BIN="$WAC_ROOT/bin"
@@ -9,9 +40,13 @@ export WAC_LIB="$WAC_ROOT/lib"
 export PATH="$WAC_BIN:$PATH"
 export DYLD_LIBRARY_PATH="$WAC_LIB:$DYLD_LIBRARY_PATH"
 export LD_LIBRARY_PATH="$WAC_LIB:$LD_LIBRARY_PATH"
-mkdir OutputFiles
-export OUTPUT_PATH="$WAC_ROOT/OutputFiles"
-mkdir build
+export WAC_INPUT_PATH="$WAC_ROOT/InputFiles/"
+export WAC_OUTPUT_PATH="$WAC_ROOT/OutputFiles/"
+export WAC_INPUT_DATA_PATH="$WAC_ROOT/InputDataFiles/"
+export WAC_OUTPUT_DATA_PATH="$WAC_ROOT/OutputDataFiles/"
 cd build
 cmake ../
 make install
+cd ../
+echo "All done"
+echo "========================================================================================"

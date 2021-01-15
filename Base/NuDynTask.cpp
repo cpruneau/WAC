@@ -13,110 +13,92 @@
 
  Class defining Two Particle Correlation Analyzer Task
  */
-
 #include "NuDynTask.hpp"
-#include "AnalysisConfiguration.hpp"
-
 
 ClassImp(NuDynTask);
 
-
-//////////////////////////////////////////////////////////////
-// CTOR
-//////////////////////////////////////////////////////////////
-NuDynTask::NuDynTask(const TString &  name,
-                     TaskConfiguration * configuration,
-                     Event * event,
-                     EventFilter * ef,
-                     ParticleFilter * pf1,
-                     ParticleFilter * pf2,
-                     ParticleFilter * pf3,
-                     ParticleFilter * pf4)
+NuDynTask::NuDynTask(const TString &  _name,
+                     NuDynConfiguration * _taskConfiguration,
+                     Event          * _event,
+                     EventFilter    * _eventFilter,
+                     ParticleFilter * particleFilter1,
+                     ParticleFilter * particleFilter2,
+                     ParticleFilter * particleFilter3,
+                     ParticleFilter * particleFilter4,
+                     LogLevel selectedLevel)
 :
-Task(name,configuration,event),
-nuDynHistos(NULL),
-nuDynDerivedHistos(NULL),
-eventFilter(ef),
-particleFilter1(pf1),
-particleFilter2(pf2),
-particleFilter3(pf3),
-particleFilter4(pf4),
-partName1("U"),
-partName2("U"),
-partName3("U"),
-partName4("U")
+Task(_name,_taskConfiguration,_event,selectedLevel),
+nuDynHistos       (nullptr),
+nuDynDerivedHistos(nullptr),
+eventFilter       (_eventFilter),
+nParticleFilters  (4),
+particleFilters   (new ParticleFilter*[4]),
+partNames         (nullptr)
 {
-  if (reportDebug())  cout << "NuDynTask::CTOR(...) Started." << endl;
-
+  if (reportStart("NuDynTask",getTaskName(),"CTOR"))
+    ;
   if (!eventFilter)
     {
-    if (reportError()) cout << "NuDynTask::CTOR(...) eventFilter is null pointer." << endl;
+    if (reportError("NuDynTask",getTaskName(),"CTOR")) cout << "Given eventFilter is a null pointer." << endl;
     postTaskError();
     return;
     }
-
-  if (!particleFilter1)
+  particleFilters[0] = particleFilter1;
+  particleFilters[1] = particleFilter2;
+  particleFilters[2] = particleFilter3;
+  particleFilters[3] = particleFilter4;
+  for (int iParticleFilter=0; iParticleFilter<nParticleFilters; iParticleFilter++)
+  {
+  if (!particleFilters[iParticleFilter])
     {
-    if (reportError()) cout << "NuDynTask::CTOR(...) particleFilter1 is null pointer." << endl;
+    if (reportError("NuDynTask",getTaskName(),"CTOR")) cout << "Given particleFilter : " <<  iParticleFilter << " is null pointer." << endl;
     postTaskError();
     return;
     }
-  if (!particleFilter2)
-    {
-    if (reportError()) cout << "NuDynTask::CTOR(...) particleFilter2 is null pointer." << endl;
-    postTaskError();
-    return;
-    }
-  if (!particleFilter3)
-     {
-     if (reportError()) cout << "NuDynTask::CTOR(...) particleFilter3 is null pointer." << endl;
-     postTaskError();
-     return;
-     }
-  if (!particleFilter4)
-     {
-     if (reportError()) cout << "NuDynTask::CTOR(...) particleFilter4 is null pointer." << endl;
-     postTaskError();
-     return;
-     }
-
-  partName1 = particleFilter1->getName();
-  partName2 = particleFilter2->getName();
-  partName3 = particleFilter3->getName();
-  partName4 = particleFilter4->getName();
+  partNames[iParticleFilter] = new TString( particleFilters[iParticleFilter]->getName() );
+  }
   createIdentical();
+  if (reportEnd("NuDynTask",getTaskName(),"CTOR"))
+    ;
 }
+
 
 //////////////////////////////////////////////////////////////
 // DTOR
 //////////////////////////////////////////////////////////////
 NuDynTask::~NuDynTask()
 {
-  if (reportDebug())  cout << "NuDynTask::DTOR(...) Started" << endl;
+  if (reportStart("NuDynTask",getTaskName(),"DTOR"))
+    ;
   if (nuDynHistos != NULL) delete nuDynHistos;
   if (nuDynDerivedHistos != NULL) delete nuDynDerivedHistos;
-  if (reportDebug())  cout << "NuDynTask::DTOR(...) Completed" << endl;
+  if (partNames != NULL) delete partNames;
+  if (reportEnd("NuDynTask",getTaskName(),"DTOR"))
+    ;
 }
 
 
 void NuDynTask::createHistograms()
 {
-  if (reportDebug())  cout << "NuDynTask::initialize(...) started"<< endl;
-  AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
+  if (reportStart("NuDynTask",getTaskName(),"createHistograms()"))
+    ;
+  NuDynConfiguration * ac = (NuDynConfiguration *) getTaskConfiguration();
   LogLevel debugLevel = getReportLevel();
-  TString prefixName = getName(); prefixName += "_";
+  TString prefixName = getTaskName(); prefixName += "_";
   TString histoName = prefixName;
-  histoName = partName1;
-  histoName += partName2;
-  histoName += partName3;
-  histoName += partName4;
-
+  for (int iParticleFilter=0; iParticleFilter<nParticleFilters; iParticleFilter++)
+  {
+  histoName +=  * partNames[iParticleFilter];
+  }
   nuDynHistos = new NuDynHistos(histoName,identical,ac,debugLevel);
+  nuDynHistos->createHistograms();
   if (ac->calculateDerivedHistograms)
     {
     nuDynDerivedHistos = new NuDynDerivedHistos(histoName,ac,debugLevel);
+    nuDynDerivedHistos->createHistograms();
     }
-  if (reportDebug())  cout << "NuDynTask::createHistograms(...) completed"<< endl;
+  if (reportEnd("NuDynTask",getTaskName(),"createHistograms()"))
+    ;
 }
 
 //////////////////////////////////////////////////////////////
@@ -124,25 +106,26 @@ void NuDynTask::createHistograms()
 //////////////////////////////////////////////////////////////
 void NuDynTask::loadHistograms(TFile * inputFile)
 {
-  if (reportDebug())  cout << "NuDynTask::loadHistograms(...) Starting." << endl;
-  /* first load the number of events as from the  cumulated parameter */
-  TParameter<Long64_t> *par = (TParameter<Long64_t> *) inputFile->Get("NoOfEvents");
-  eventsProcessed = par->GetVal();
-  delete par;
-  AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
+  if (reportStart("NuDynTask",getTaskName(),"loadHistograms(TFile * inputFile)"))
+    ;
+  NuDynConfiguration * ac = (NuDynConfiguration *) getTaskConfiguration();
   LogLevel debugLevel = getReportLevel();
-  TString prefixName = getName(); prefixName += "_";
+  TString prefixName = getTaskName(); prefixName += "_";
   TString histoName = prefixName;
-  histoName = partName1;
-  histoName += partName2;
-  histoName += partName3;
-  histoName += partName4;
-  nuDynHistos = new NuDynHistos(inputFile,histoName,ac,debugLevel);
+  for (int iParticleFilter=0; iParticleFilter<nParticleFilters; iParticleFilter++)
+  {
+  histoName +=  * partNames[iParticleFilter];
+  }
+
+  nuDynHistos = new NuDynHistos(histoName,identical,ac,debugLevel);
+  nuDynHistos->loadHistograms(inputFile);
   if (ac->calculateDerivedHistograms)
     {
-    nuDynDerivedHistos = new NuDynDerivedHistos(inputFile,histoName,ac,debugLevel);
+    nuDynDerivedHistos = new NuDynDerivedHistos(histoName,ac,debugLevel);
+    nuDynDerivedHistos->loadHistograms(inputFile);
     }
-  if (reportDebug())  cout << "NuDynTask::loadHistograms(...) Completed." << endl;
+  if (reportEnd("NuDynTask",getTaskName(),"loadHistograms(TFile * inputFile)"))
+    ;
 }
 
 //////////////////////////////////////////////////////////////
@@ -150,89 +133,58 @@ void NuDynTask::loadHistograms(TFile * inputFile)
 //////////////////////////////////////////////////////////////
 void NuDynTask::saveHistograms(TFile * outputFile)
 {
-  if (reportDebug()) cout << "NuDynTask::saveHistograms(...) Saving Event histograms to file." << endl;
+  if (reportStart("NuDynTask",getTaskName(),"saveHistograms(TFile * inputFile)"))
+    ;
   if (!outputFile)
     {
-    if (reportError()) cout << "NuDynTask::saveHistograms(...) outputFile is a null  pointer." << endl;
+    if (reportError("NuDynTask",getTaskName(),"saveHistograms(TFile * inputFile)")) cout << "Given inputFile is a null  pointer." << endl;
     postTaskError();
     return;
     }
   outputFile->cd();
-
-  /* first save the number of events as a cumulated parameter */
-  TParameter<Long64_t>("NoOfEvents",eventsProcessed,'+').Write();
-  AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
   nuDynHistos->saveHistograms(outputFile);
+  NuDynConfiguration * ac = (NuDynConfiguration *) getTaskConfiguration();
   if (ac->calculateDerivedHistograms)
     {
     nuDynDerivedHistos->saveHistograms(outputFile);
     }
-  if (reportDebug()) cout << "NuDynTask::saveHistograms(...) Completed." << endl;
+  if (reportEnd("NuDynTask",getTaskName(),"saveHistograms(TFile * inputFile)"))
+    ;
 }
 
 void NuDynTask::execute()
 {
-  //if (reportDebug())  cout << "NuDynTask::execute(...) Starting" << endl;
-  if (event != NULL)
-    {
-    if (reportDebug()) cout << "NuDynTask::execute(...) analyzing " << event->nParticles << " particles" << endl;
-    }
-  else
-    {
-    if (reportError()) cout << "NuDynTask::execute(...) event pointer is NULL. Abort." << endl;
-    postTaskError();
-    return;
-    }
-
-  //if (reportDebug()) cout <<"NuDynTask::analyze(...) check if event is acceptable" << endl;
+  incrementEventProcessed();
   if (!eventFilter->accept(*event)) return;
-  //if (reportDebug()) cout <<"NuDynTask::analyze(...) acceptable event" << endl;
-
-  AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
-  if (!ac)
-    {
-    if (reportError()) cout << "NuDynTask::execute(...) analysisConfiguration null pointer" << endl;
-    postTaskError();
-    return;
-    }
-
-  bool accept1;
-  bool accept2;
-  bool accept3;
-  bool accept4;
-  double n[4];
-  n[0] = 0;
-  n[1] = 0;
-  n[2] = 0;
-  n[3] = 0;
+  incrementEventAccepted(); // count events used to fill histograms and for scaling at the end...
+  NuDynConfiguration & ac = *(NuDynConfiguration *) getTaskConfiguration();
+  double nAccepted[4];
+  for (int iParticleFilter=0; iParticleFilter<nParticleFilters; iParticleFilter++) nAccepted[iParticleFilter] = 0;
 
   for (int iParticle=0; iParticle<event->nParticles; iParticle++)
     {
     Particle & particle = * event->getParticleAt(iParticle);
-    //if (reportDebug())  particle.printProperties(cout);
-    accept1 = particleFilter1->accept(particle);
-    accept2 = particleFilter2->accept(particle);
-    accept3 = particleFilter3->accept(particle);
-    accept4 = particleFilter4->accept(particle);
-    //    if (reportDebug())  cout << "  accept1:" << accept1<< endl;
-    //    if (reportDebug())  cout << "  accept2:" << accept2<< endl;
-    if (accept1)  n[0]++;
-    if (accept2)  n[1]++;
-    if (accept3)  n[2]++;
-    if (accept4)  n[3]++;
+    for (int iParticleFilter=0; iParticleFilter<nParticleFilters; iParticleFilter++)
+      {
+      if (particleFilters[iParticleFilter]->accept(particle)) nAccepted[iParticleFilter]++;
+      }
     }
-  //cout << " mult:" << event->multiplicity << "   cent:" << event->centrality << " n1:" << n1 << " n2:" << n2 << endl;
-  nuDynHistos->fill(event->multiplicity,event->centrality,n,1.0);
-  eventsProcessed++;
-  if (reportDebug()) cout << "NuDyn::execute() Completed" << endl;
+  switch ( ac.multiplicityType )
+    {
+      case NuDynConfiguration::Centrality:           nuDynHistos->fill(event->centrality,nAccepted,1.0); break;
+      case NuDynConfiguration::TotalMultiplicity:    nuDynHistos->fill(event->multiplicity,nAccepted,1.0); break;
+      case NuDynConfiguration::AcceptedMultiplicity: nuDynHistos->fill(event->multiplicity,nAccepted,1.0); break;
+    }
 }
 
 
 void NuDynTask::calculateDerivedHistograms()
 {
-  if (reportDebug()) cout << "NuDynTask::calculateDerivedHistograms() Starting" << endl;
+  if (reportStart("NuDynTask",getTaskName(),"calculateDerivedHistograms()"))
+    ;
   nuDynDerivedHistos->calculateDerivedHistograms(nuDynHistos);
-  if (reportDebug())  cout << "NuDynTask::calculateDerivedHistograms() Completed" << endl;
+  if (reportEnd("NuDynTask",getTaskName(),"calculateDerivedHistograms()"))
+    ;
 }
 
 //////////////////////////////////////////////////////////////
@@ -241,28 +193,36 @@ void NuDynTask::calculateDerivedHistograms()
 //////////////////////////////////////////////////////////////
 void NuDynTask::scaleHistograms(double factor)
 {
-  if (reportDebug())  cout << "NuDynTask::scaleHistograms(..) Scale all primary histograms by " << factor << endl;
+  if (reportInfo("NuDynTask",getTaskName(),"scaleHistograms(double factor)"))   cout << "Scale all primary histograms by " << factor << endl;
   nuDynHistos->scale(factor);
-  if (reportDebug())  cout << "NuDynTask::scale(..) Completed"  << endl;
+  if (reportEnd("NuDynTask",getTaskName(),"scaleHistograms(double factor)"))
+    ;
 }
+
+void NuDynTask::resetHistograms()
+{
+  nuDynHistos->reset();
+  nuDynDerivedHistos->reset();
+}
+
 
 
 void NuDynTask::createIdentical()
 {
-  identical[0] = 1; //(particleFilter1==particleFilter1) ? 1 : 0;
-  identical[1] = (particleFilter1==particleFilter2) ? 1 : 0;
-  identical[2] = (particleFilter1==particleFilter3) ? 1 : 0;
-  identical[3] = (particleFilter1==particleFilter4) ? 1 : 0;
-  identical[4] = (particleFilter2==particleFilter1) ? 1 : 0;
-  identical[5] = 1; //(particleFilter2==particleFilter2) ? 1 : 0;
-  identical[6] = (particleFilter2==particleFilter3) ? 1 : 0;
-  identical[7] = (particleFilter2==particleFilter4) ? 1 : 0;
-  identical[8] = (particleFilter3==particleFilter1) ? 1 : 0;
-  identical[9] = (particleFilter3==particleFilter2) ? 1 : 0;
-  identical[10] = 1; //(particleFilter3==particleFilter3) ? 1 : 0;
-  identical[11] = (particleFilter3==particleFilter4) ? 1 : 0;
-  identical[12] = (particleFilter4==particleFilter1) ? 1 : 0;
-  identical[13] = (particleFilter4==particleFilter2) ? 1 : 0;
-  identical[14] = (particleFilter4==particleFilter3) ? 1 : 0;
-  identical[15] = 1; //(particleFilter4==particleFilter4) ? 1 : 0;
+  identical[0] = 1; //(particleFilters[0]==particleFilters[0]) ? 1 : 0;
+  identical[1] = (particleFilters[0]==particleFilters[1]) ? 1 : 0;
+  identical[2] = (particleFilters[0]==particleFilters[2]) ? 1 : 0;
+  identical[3] = (particleFilters[0]==particleFilters[3]) ? 1 : 0;
+  identical[4] = (particleFilters[1]==particleFilters[0]) ? 1 : 0;
+  identical[5] = 1; //(particleFilters[1]==particleFilters[1]) ? 1 : 0;
+  identical[6] = (particleFilters[1]==particleFilters[2]) ? 1 : 0;
+  identical[7] = (particleFilters[1]==particleFilters[3]) ? 1 : 0;
+  identical[8] = (particleFilters[2]==particleFilters[0]) ? 1 : 0;
+  identical[9] = (particleFilters[2]==particleFilters[1]) ? 1 : 0;
+  identical[10] = 1; //(particleFilters[2]==particleFilters[2]) ? 1 : 0;
+  identical[11] = (particleFilters[2]==particleFilters[3]) ? 1 : 0;
+  identical[12] = (particleFilters[3]==particleFilters[0]) ? 1 : 0;
+  identical[13] = (particleFilters[3]==particleFilters[1]) ? 1 : 0;
+  identical[14] = (particleFilters[3]==particleFilters[2]) ? 1 : 0;
+  identical[15] = 1; //(particleFilters[3]==particleFilters[3]) ? 1 : 0;
 }

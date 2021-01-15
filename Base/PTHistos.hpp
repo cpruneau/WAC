@@ -1,7 +1,7 @@
 #ifndef WAC_PTHistos
 #define WAC_PTHistos
 #include "Histograms.hpp"
-#include "Event.hpp"
+#include "TransverseMomentumConfiguration.hpp"
 #include "TMath.h"
 #include <cstdlib>
 #include <cmath>
@@ -12,12 +12,12 @@ class PTHistos : public Histograms
 public:
 
   PTHistos(const TString & collectionName,
-    AnalysisConfiguration * analysisConfiguration,
+    TransverseMomentumConfiguration * analysisConfiguration,
     LogLevel  debugLevel,
     int ord);
   PTHistos(TFile * inputFile,
     const TString & collectionName,
-    AnalysisConfiguration * analysisConfiguration,
+    TransverseMomentumConfiguration * analysisConfiguration,
     LogLevel  debugLevel,
     int ord);
   virtual ~PTHistos();

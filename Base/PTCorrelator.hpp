@@ -17,7 +17,7 @@ public:
   // CTOR
   //////////////////////////////////////////////////////////////
   PTCorrelator(const TString &  name,
-            TaskConfiguration * configuration,
+            TransverseMomentumConfiguration * configuration,
             Event * event,
             EventFilter * eventFilter,
             ParticleFilter ** particleFilter1);

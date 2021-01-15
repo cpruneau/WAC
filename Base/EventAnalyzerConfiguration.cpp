@@ -11,15 +11,15 @@
  \class Property
  \ingroup WAC
 
- Utility class used to defineAnalysisConfiguration
+ Utility class used to defineEventAnalyzerConfiguration
  */
 
-#include "AnalysisConfiguration.hpp"
+#include "EventAnalyzerConfiguration.hpp"
 
-ClassImp(AnalysisConfiguration);
+ClassImp(EventAnalyzerConfiguration);
 
 
-AnalysisConfiguration::AnalysisConfiguration(const TString & name,
+EventAnalyzerConfiguration::EventAnalyzerConfiguration(const TString & name,
                                              const TString & type,
                                              const TString & version)
 :
@@ -66,7 +66,7 @@ nBins_cent(20),  min_cent(0.0), max_cent(100.0)
   max_Dphi_shft = 3.0*TMath::Pi()/4.0;
 }
 
-AnalysisConfiguration::AnalysisConfiguration(const AnalysisConfiguration & source)
+EventAnalyzerConfiguration::EventAnalyzerConfiguration(const EventAnalyzerConfiguration & source)
 :
 TaskConfiguration( source ),
 histoBaseName( source.histoBaseName ),
@@ -103,7 +103,7 @@ nBins_cent( source.nBins_cent ),  min_cent( source.min_cent ), max_cent( source.
 {
 }
 
-AnalysisConfiguration & AnalysisConfiguration::operator=(const AnalysisConfiguration & source)
+EventAnalyzerConfiguration & EventAnalyzerConfiguration::operator=(const EventAnalyzerConfiguration & source)
 {
   if (this!=&source)
     {
@@ -190,7 +190,7 @@ AnalysisConfiguration & AnalysisConfiguration::operator=(const AnalysisConfigura
 ////////////////////////////////////////////////////
 // Print this configuration to the given stream
 ////////////////////////////////////////////////////
-void AnalysisConfiguration::printConfiguration(ostream & os)
+void EventAnalyzerConfiguration::printConfiguration(ostream & os)
 {
   printTaskConfiguration(os);
   os
@@ -218,7 +218,7 @@ void AnalysisConfiguration::printConfiguration(ostream & os)
   << "        -- bin correction: " << binCorrMM        << endl;
 }
 
-int AnalysisConfiguration::getIxEtaPhi(double eta, double phi) {
+int EventAnalyzerConfiguration::getIxEtaPhi(double eta, double phi) {
 
   if(!(eta<min_eta || eta>max_eta)) {
     int iEta = int( double(nBins_eta)*(eta-min_eta)/range_eta );
@@ -233,7 +233,7 @@ int AnalysisConfiguration::getIxEtaPhi(double eta, double phi) {
   return -1;
 }
 
-int AnalysisConfiguration::getIxYPhi(double y, double phi) {
+int EventAnalyzerConfiguration::getIxYPhi(double y, double phi) {
 
   if(!(y<min_y || y>max_y))
     {

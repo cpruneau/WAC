@@ -6,9 +6,8 @@
 #include <fstream>
 #include <TStyle.h>
 #include <TROOT.h>
+#include "Timer.hpp"
 #include "Event.hpp"
-#include "AnalysisConfiguration.hpp"
-#include "TwoPartCorrelationAnalyzer.hpp"
 #include "EventLoop.hpp"
 #include "EventFilter.hpp"
 #include "ParticleFilter.hpp"
@@ -18,17 +17,15 @@
 
 int main()
 {
-  time_t begin,end; // time_t is a datatype to store time values.
-  time (&begin); // note time before execution
-  cout << "<INFO> PYTHIA Model Analysis - Starting" << endl;
+  MessageLogger::LogLevel messageLevel = MessageLogger::Info;
 
-//  long nEventsRequested = 100;
-  long nEventsRequested = 1000000;
-  int  nEventsReport    = 100000;
-
-  // ==========================
-  // Event Section
-  // ==========================
+  EventLoop * eventLoop = new EventLoop("RunPythiaSimulationNuDyn");
+  eventLoop->setNEventRequested(1000000);
+  eventLoop->setNEventReported(100000);
+  eventLoop->setReportLevel(messageLevel);
+  eventLoop->setNEventPartialSave(100000);
+  eventLoop->setPartialSave(true);
+  eventLoop->setSubsampleAnalysis(true);
   Event * event = Event::getEvent();
 
   // ==========================
@@ -55,12 +52,11 @@ int main()
                                                            0.2,100.0,
                                                            -1.0,1.0,
                                                            -5.0,5.0);
-  Task * generator = new PythiaEventGenerator("PYTHIA",pc, event,eventFilterGen,particleFilterGen);
-
+  eventLoop->addTask( new PythiaEventGenerator("PYTHIA",pc, event,eventFilterGen,particleFilterGen, messageLevel) );
   // ==========================
   // Analysis Section
   // ==========================
-  AnalysisConfiguration * ac = new AnalysisConfiguration("PYTHIA","PYTHIA","1.0");
+  NuDynConfiguration * ac = new NuDynConfiguration("PYTHIA","PYTHIA","1.0");
   ac->loadHistograms         = false;
   ac->createHistograms       = true;
   ac->scaleHistograms        = true;
@@ -69,9 +65,8 @@ int main()
   ac->resetHistograms        = false;
   ac->clearHistograms        = false;
   ac->forceHistogramsRewrite = true;
-  ac->inputPath              = "/Users/claudeapruneau/Documents/GitHub/run/PythiaStudies/";
-  ac->outputPath             = "/Users/claudeapruneau/Documents/GitHub/run/PythiaStudies/";
-
+  ac->inputPath              = getenv("WAC_INPUT_PATH");
+  ac->outputPath             = getenv("WAC_OUTPUT_PATH");
   ac->dataSourceName          = "PYTHIA8.0";
   ac->collisionSystemName     = "pp";
   ac->collisionEnergyName     = "14TeV";
@@ -89,66 +84,37 @@ int main()
   ac->particleFilterTitle     = "Varia";
   ac->setRootOutputFileName(2);
 
-  ac->nBins_pt    = 40;
-  ac->min_pt      = 0.2;
-  ac->max_pt      = 2.0;
-  ac->nBins_eta   = 20;
-  ac->min_eta     = -2;
-  ac->max_eta     = 2;
-  ac->nBins_y     = 20;
-  ac->min_y       = -2;
-  ac->max_y       = 2;
-  ac->nBins_phi   = 36;
-  ac->min_phi     = 0.0;
-  ac->max_phi     = 2.0*3.1415927;
-
-  ac->nuDynVsMult  = true;
-  ac->nuDynVsCent  = false;
+  ac->multiplicityType = NuDynConfiguration::TotalMultiplicity;
   ac->nBins_mult   = 100;
   ac->min_mult     = 0.0;
   ac->max_mult     = 200.0;
-  ac->nBins_cent   = 20;
-  ac->min_cent     = 0.0;
-  ac->max_cent     = 100.0;
+
+  double minPt  = 0.2;
+  double maxPt  = 2.0;
+  double minEta = -2.0;
+  double maxEta =  2.0;
+  double minY   = -2.0;
+  double maxY   =  2.0;
 
   EventFilter     * eventFilter        = new EventFilter(EventFilter::MinBias,0.0,0.0);
-  ParticleFilter  * particleFilter_HP  = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Positive,ac->min_pt+0.001,ac->max_pt,ac->min_eta,ac->max_eta, ac->min_y,ac->max_y);
-  ParticleFilter  * particleFilter_HM  = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Negative,ac->min_pt+0.001,ac->max_pt,ac->min_eta,ac->max_eta, ac->min_y,ac->max_y);
-  ParticleFilter  * particleFilter_PiP = new ParticleFilter(ParticleFilter::Pion,   ParticleFilter::Positive,ac->min_pt+0.001,ac->max_pt,ac->min_eta,ac->max_eta, ac->min_y,ac->max_y);
-  ParticleFilter  * particleFilter_PiM = new ParticleFilter(ParticleFilter::Pion,   ParticleFilter::Negative,ac->min_pt+0.001,ac->max_pt,ac->min_eta,ac->max_eta, ac->min_y,ac->max_y);
-  ParticleFilter  * particleFilter_KP  = new ParticleFilter(ParticleFilter::Kaon,   ParticleFilter::Positive,ac->min_pt+0.001,ac->max_pt,ac->min_eta,ac->max_eta, ac->min_y,ac->max_y);
-  ParticleFilter  * particleFilter_KM  = new ParticleFilter(ParticleFilter::Kaon,   ParticleFilter::Negative,ac->min_pt+0.001,ac->max_pt,ac->min_eta,ac->max_eta, ac->min_y,ac->max_y);
-  ParticleFilter  * particleFilter_PP  = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Positive,ac->min_pt+0.001,ac->max_pt,ac->min_eta,ac->max_eta, ac->min_y,ac->max_y);
-  ParticleFilter  * particleFilter_PM  = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Negative,ac->min_pt+0.001,ac->max_pt,ac->min_eta,ac->max_eta, ac->min_y,ac->max_y);
+  ParticleFilter  * particleFilter_HP  = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Positive, minPt, maxPt, minEta, maxEta, minY, maxY );
+  ParticleFilter  * particleFilter_HM  = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Negative, minPt, maxPt, minEta, maxEta, minY, maxY );
+  ParticleFilter  * particleFilter_PiP = new ParticleFilter(ParticleFilter::Pion,   ParticleFilter::Positive, minPt, maxPt, minEta, maxEta, minY, maxY );
+  ParticleFilter  * particleFilter_PiM = new ParticleFilter(ParticleFilter::Pion,   ParticleFilter::Negative, minPt, maxPt, minEta, maxEta, minY, maxY );
+  ParticleFilter  * particleFilter_KP  = new ParticleFilter(ParticleFilter::Kaon,   ParticleFilter::Positive, minPt, maxPt, minEta, maxEta, minY, maxY );
+  ParticleFilter  * particleFilter_KM  = new ParticleFilter(ParticleFilter::Kaon,   ParticleFilter::Negative, minPt, maxPt, minEta, maxEta, minY, maxY );
+  ParticleFilter  * particleFilter_PP  = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Positive, minPt, maxPt, minEta, maxEta, minY, maxY );
+  ParticleFilter  * particleFilter_PM  = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Negative, minPt, maxPt, minEta, maxEta, minY, maxY );
 
-  int nAnalysisTasks = 25;
-  int iTask = 0;
-  Task ** analysisTasks = new Task*[nAnalysisTasks];
-  analysisTasks[iTask++] = new NuDynTask("_HPHPHPHP", ac, event, eventFilter,particleFilter_HP,particleFilter_HP,particleFilter_HP,particleFilter_HP);
-  analysisTasks[iTask++] = new NuDynTask("_HPHPHPHM", ac, event, eventFilter,particleFilter_HP,particleFilter_HP,particleFilter_HP,particleFilter_HM);
-  analysisTasks[iTask++] = new NuDynTask("_HPHPHMHM", ac, event, eventFilter,particleFilter_HP,particleFilter_HP,particleFilter_HM,particleFilter_HM);
-  analysisTasks[iTask++] = new NuDynTask("_HPHMHMHM", ac, event, eventFilter,particleFilter_HP,particleFilter_HM,particleFilter_HM,particleFilter_HM);
-  analysisTasks[iTask++] = new NuDynTask("_HMHMHMHM", ac, event, eventFilter,particleFilter_HM,particleFilter_HM,particleFilter_HM,particleFilter_HM);
-  analysisTasks[iTask++] = new NuDynTask("_KPKPKPKP", ac, event, eventFilter,particleFilter_KP,particleFilter_KP,particleFilter_KP,particleFilter_KP);
-  analysisTasks[iTask++] = new NuDynTask("_KPKPKPKM", ac, event, eventFilter,particleFilter_KP,particleFilter_KP,particleFilter_KP,particleFilter_KM);
-  analysisTasks[iTask++] = new NuDynTask("_KPKPKMKM", ac, event, eventFilter,particleFilter_KP,particleFilter_KP,particleFilter_KM,particleFilter_KM);
-  analysisTasks[iTask++] = new NuDynTask("_KPKMKMKM", ac, event, eventFilter,particleFilter_KP,particleFilter_KM,particleFilter_KM,particleFilter_KM);
-  analysisTasks[iTask++] = new NuDynTask("_KMKMKMKM", ac, event, eventFilter,particleFilter_KM,particleFilter_KM,particleFilter_KM,particleFilter_KM);
-  nAnalysisTasks = iTask;
-
-  // ==========================
-  // Event Loop
-  // ==========================
-  EventLoop * eventLoop = new EventLoop();
-  eventLoop->addTask( generator );
-  for (int iAnalysisTask=0;iAnalysisTask<nAnalysisTasks;iAnalysisTask++)
-  {
-    eventLoop->addTask( analysisTasks[iAnalysisTask] );
-  }
-  eventLoop->run(nEventsRequested,nEventsReport);
-
-  cout << "<INFO> PYTHIA Analysis - Completed" << endl;
-  time (&end); // note time after execution
-  double difference = difftime (end,begin);
-  cout << "<INFO> in " <<  difference << " seconds";
+  eventLoop->addTask(  new NuDynTask("_HPHPHPHP", ac, event, eventFilter,particleFilter_HP,particleFilter_HP,particleFilter_HP,particleFilter_HP, messageLevel) );
+  eventLoop->addTask(  new NuDynTask("_HPHPHPHM", ac, event, eventFilter,particleFilter_HP,particleFilter_HP,particleFilter_HP,particleFilter_HM, messageLevel) );
+  eventLoop->addTask(  new NuDynTask("_HPHPHMHM", ac, event, eventFilter,particleFilter_HP,particleFilter_HP,particleFilter_HM,particleFilter_HM, messageLevel) );
+  eventLoop->addTask(  new NuDynTask("_HPHMHMHM", ac, event, eventFilter,particleFilter_HP,particleFilter_HM,particleFilter_HM,particleFilter_HM, messageLevel) );
+  eventLoop->addTask(  new NuDynTask("_HMHMHMHM", ac, event, eventFilter,particleFilter_HM,particleFilter_HM,particleFilter_HM,particleFilter_HM, messageLevel) );
+  eventLoop->addTask(  new NuDynTask("_KPKPKPKP", ac, event, eventFilter,particleFilter_KP,particleFilter_KP,particleFilter_KP,particleFilter_KP, messageLevel) );
+  eventLoop->addTask(  new NuDynTask("_KPKPKPKM", ac, event, eventFilter,particleFilter_KP,particleFilter_KP,particleFilter_KP,particleFilter_KM, messageLevel) );
+  eventLoop->addTask(  new NuDynTask("_KPKPKMKM", ac, event, eventFilter,particleFilter_KP,particleFilter_KP,particleFilter_KM,particleFilter_KM, messageLevel) );
+  eventLoop->addTask(  new NuDynTask("_KPKMKMKM", ac, event, eventFilter,particleFilter_KP,particleFilter_KM,particleFilter_KM,particleFilter_KM, messageLevel) );
+  eventLoop->addTask(  new NuDynTask("_KMKMKMKM", ac, event, eventFilter,particleFilter_KM,particleFilter_KM,particleFilter_KM,particleFilter_KM, messageLevel) );
+  eventLoop->run();
 }

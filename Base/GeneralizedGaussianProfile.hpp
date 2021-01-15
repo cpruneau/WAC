@@ -22,9 +22,10 @@ class GeneralizedGaussianProfile : public Task
 {
 public:
   
-  GeneralizedGaussianProfile(const TString   name,
+  GeneralizedGaussianProfile(const TString & name,
                              TaskConfiguration * configuration,
-                             Event * event);
+                             Event * selectedEvent,
+                             LogLevel selectedLevel=Info);
   virtual ~GeneralizedGaussianProfile();
   virtual void initialize();
   virtual void execute();

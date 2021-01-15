@@ -10,24 +10,14 @@ ClassImp(ParticlePairCombinedHistos)
 
 
 ParticlePairCombinedHistos::ParticlePairCombinedHistos(const TString & name,
-                                                       AnalysisConfiguration * configuration,
+                                                       ParticlePairAnalyzerConfiguration * configuration,
                                                        LogLevel  debugLevel)
   :
   Histograms(name,configuration,100,debugLevel)
   {
-    initialize();
+   // no ops
   }
 
-
-  ParticlePairCombinedHistos::ParticlePairCombinedHistos(TFile * inputFile,
-                             const TString & collectionName,
-                             AnalysisConfiguration * analysisConfiguration,
-                             LogLevel  debugLevel)
-  :
-  Histograms(collectionName,analysisConfiguration,100,debugLevel)
-  {
-     loadHistograms(inputFile);
-  }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////
   // DTOR
@@ -43,7 +33,7 @@ ParticlePairCombinedHistos::~ParticlePairCombinedHistos()
   void ParticlePairCombinedHistos::loadHistograms(TFile * inputFile)
   {
     if (reportDebug()) cout << "ParticlePairCombinedHistos::loadHistograms(...) strted" << endl;
-    AnalysisConfiguration & ac = *getConfiguration();
+   ParticlePairAnalyzerConfiguration & ac = * (ParticlePairAnalyzerConfiguration*) getConfiguration();
     TString bn = getHistoBaseName();
     h_R2_etaEta        = loadH2(inputFile,bn+TString("R2_etaEta"));
     h_R2_phiPhi        = loadH2(inputFile,bn+TString("R2_phiPhi"));
@@ -80,7 +70,7 @@ ParticlePairCombinedHistos::~ParticlePairCombinedHistos()
     if (reportDebug()) cout << "ParticlePairCombinedHistos::initialize() started" << endl;
     TString name;
 
-    AnalysisConfiguration & ac = *getConfiguration();
+    ParticlePairAnalyzerConfiguration & ac = *(ParticlePairAnalyzerConfiguration*) getConfiguration();
     TString bn = getHistoBaseName();
     ac.nBins_phiEta     = ac.nBins_eta*ac.nBins_phi;
     ac.nBins_Dphi_shft  = ac.nBins_phi/4;
@@ -141,21 +131,21 @@ ParticlePairCombinedHistos::~ParticlePairCombinedHistos()
       h_BF_DyDphi_shft     = createHistogram(bn+TString("BF_DyDphi_shft"),       ac.nBins_Dy,  ac.min_Dy,  ac.max_Dy,  ac.nBins_Dphi,  ac.min_Dphi_shft, ac.max_Dphi_shft, "#Delta y",   "#Delta#varphi", "BF_{2}", true,true,true,true);
     }
 
-  if (ac.fillQ3D)
-    {
-      h_R2_Q3D = createHistogram(bn+TString("R2_Q3D"),
-                                 ac.nBins_DeltaPlong, ac.min_DeltaPlong, ac.max_DeltaPlong,
-                                 ac.nBins_DeltaPside, ac.min_DeltaPside, ac.max_DeltaPside,
-                                 ac.nBins_DeltaPout,  ac.min_DeltaPout,  ac.max_DeltaPout,
-                                 "Q_{long} (GeV/c)", "Q_{side}  (GeV/c)", "Q_{out}  (GeV/c)","R_{2}", true,true,false,false);
-
-      h_RR2_Q3D = createHistogram(bn+TString("RR2_Q3D"),
-                                  ac.nBins_DeltaPlong, ac.min_DeltaPlong, ac.max_DeltaPlong,
-                                  ac.nBins_DeltaPside, ac.min_DeltaPside, ac.max_DeltaPside,
-                                  ac.nBins_DeltaPout,  ac.min_DeltaPout,  ac.max_DeltaPout,
-                                  "Q_{long} (GeV/c)", "Q_{side}  (GeV/c)", "Q_{out}  (GeV/c)","RR_{2}", true,true,false,false);
-
-    }
+//  if (ac.fillQ3D)
+//    {
+//      h_R2_Q3D = createHistogram(bn+TString("R2_Q3D"),
+//                                 ac.nBins_DeltaPlong, ac.min_DeltaPlong, ac.max_DeltaPlong,
+//                                 ac.nBins_DeltaPside, ac.min_DeltaPside, ac.max_DeltaPside,
+//                                 ac.nBins_DeltaPout,  ac.min_DeltaPout,  ac.max_DeltaPout,
+//                                 "Q_{long} (GeV/c)", "Q_{side}  (GeV/c)", "Q_{out}  (GeV/c)","R_{2}", true,true,false,false);
+//
+//      h_RR2_Q3D = createHistogram(bn+TString("RR2_Q3D"),
+//                                  ac.nBins_DeltaPlong, ac.min_DeltaPlong, ac.max_DeltaPlong,
+//                                  ac.nBins_DeltaPside, ac.min_DeltaPside, ac.max_DeltaPside,
+//                                  ac.nBins_DeltaPout,  ac.min_DeltaPout,  ac.max_DeltaPout,
+//                                  "Q_{long} (GeV/c)", "Q_{side}  (GeV/c)", "Q_{out}  (GeV/c)","RR_{2}", true,true,false,false);
+//
+//    }
 
 
     if (reportDebug()) cout << "ParticlePairCombinedHistos::initialize() completed" << endl;
@@ -166,55 +156,62 @@ ParticlePairCombinedHistos::~ParticlePairCombinedHistos()
   //////////////////////////////////////////////////////////////////////////////////////////////////////
   void ParticlePairCombinedHistos::calculate(ParticlePairDerivedHistos * pp, ParticlePairDerivedHistos * mm, ParticlePairDerivedHistos * pm, double app, double amm, double apm)
   {
-    if (reportDebug()) cout << "ParticlePairCombinedHistos::calculate() started" << endl;
-    AnalysisConfiguration & ac = *getConfiguration();
+  if (reportStart("ParticlePairCombinedHistos",getName(),"calculate(...)"))
+    ;
+  ParticlePairAnalyzerConfiguration  & ac = *(ParticlePairAnalyzerConfiguration*) getConfiguration();
 
-    h_R2_etaEta->Add(pp->h_R2_etaEta, mm->h_R2_etaEta, app, amm);
-    h_R2_etaEta->Add(pm->h_R2_etaEta, apm);
+  if (!sameDimensions(pp->h_R2_etaEta, mm->h_R2_etaEta,pm->h_R2_etaEta, h_R2_etaEta)) return;
+  h_R2_etaEta->Add(pp->h_R2_etaEta, mm->h_R2_etaEta, app, amm);
+  h_R2_etaEta->Add(pm->h_R2_etaEta, apm);
 
-    h_R2_phiPhi->Add(pp->h_R2_phiPhi, mm->h_R2_phiPhi, app, amm);
-    h_R2_phiPhi->Add(pm->h_R2_phiPhi, apm);
+  if (!sameDimensions(pp->h_R2_phiPhi, mm->h_R2_phiPhi,pm->h_R2_phiPhi, h_R2_phiPhi)) return;
+  h_R2_phiPhi->Add(pp->h_R2_phiPhi, mm->h_R2_phiPhi, app, amm);
+  h_R2_phiPhi->Add(pm->h_R2_phiPhi, apm);
 
-    h_R2_ptPt->Add(pp->h_R2_ptPt, mm->h_R2_ptPt, app, amm);
-    h_R2_ptPt->Add(pm->h_R2_ptPt, apm);
+  h_R2_ptPt->Add(pp->h_R2_ptPt, mm->h_R2_ptPt, app, amm);
+  h_R2_ptPt->Add(pm->h_R2_ptPt, apm);
 
-    h_DptDpt_etaEta->Add(pp->h_DptDpt_etaEta, mm->h_DptDpt_etaEta, app, amm);
-    h_DptDpt_etaEta->Add(pm->h_DptDpt_etaEta, apm);
+  if (!sameDimensions(pp->h_DptDpt_etaEta, mm->h_DptDpt_etaEta,pm->h_DptDpt_etaEta, h_DptDpt_etaEta)) return;
+  h_DptDpt_etaEta->Add(pp->h_DptDpt_etaEta, mm->h_DptDpt_etaEta, app, amm);
+  h_DptDpt_etaEta->Add(pm->h_DptDpt_etaEta, apm);
 
-    h_DptDpt_phiPhi->Add(pp->h_DptDpt_phiPhi, mm->h_DptDpt_phiPhi, app, amm);
-    h_DptDpt_phiPhi->Add(pm->h_DptDpt_phiPhi, apm);
+  h_DptDpt_phiPhi->Add(pp->h_DptDpt_phiPhi, mm->h_DptDpt_phiPhi, app, amm);
+  h_DptDpt_phiPhi->Add(pm->h_DptDpt_phiPhi, apm);
 
-    h_G2_etaEta->Add(pp->h_G2_etaEta, mm->h_G2_etaEta, app, amm);
-    h_G2_etaEta->Add(pm->h_G2_etaEta, apm);
+  h_G2_etaEta->Add(pp->h_G2_etaEta, mm->h_G2_etaEta, app, amm);
+  h_G2_etaEta->Add(pm->h_G2_etaEta, apm);
 
-    h_G2_phiPhi->Add(pp->h_G2_phiPhi, mm->h_G2_phiPhi, app, amm);
-    h_G2_phiPhi->Add(pm->h_G2_phiPhi, apm);
+  h_G2_phiPhi->Add(pp->h_G2_phiPhi, mm->h_G2_phiPhi, app, amm);
+  h_G2_phiPhi->Add(pm->h_G2_phiPhi, apm);
 
-    h_R2_DetaDphi_shft->Add(pp->h_R2_DetaDphi_shft, mm->h_R2_DetaDphi_shft, app, amm);
-    h_R2_DetaDphi_shft->Add(pm->h_R2_DetaDphi_shft, apm);
+  if (!sameDimensions(pp->h_R2_DetaDphi_shft, mm->h_R2_DetaDphi_shft,pm->h_R2_DetaDphi_shft, h_R2_DetaDphi_shft)) return;
+  h_R2_DetaDphi_shft->Add(pp->h_R2_DetaDphi_shft, mm->h_R2_DetaDphi_shft, app, amm);
+  h_R2_DetaDphi_shft->Add(pm->h_R2_DetaDphi_shft, apm);
 
-    h_DptDpt_DetaDphi_shft->Add(pp->h_DptDpt_DetaDphi_shft, mm->h_DptDpt_DetaDphi_shft, app, amm);
-    h_DptDpt_DetaDphi_shft->Add(pm->h_DptDpt_DetaDphi_shft, apm);
+  h_DptDpt_DetaDphi_shft->Add(pp->h_DptDpt_DetaDphi_shft, mm->h_DptDpt_DetaDphi_shft, app, amm);
+  h_DptDpt_DetaDphi_shft->Add(pm->h_DptDpt_DetaDphi_shft, apm);
 
-    h_P2_DetaDphi_shft->Add(pp->h_P2_DetaDphi_shft, mm->h_P2_DetaDphi_shft, app, amm);
-    h_P2_DetaDphi_shft->Add(pm->h_P2_DetaDphi_shft, apm);
+  h_P2_DetaDphi_shft->Add(pp->h_P2_DetaDphi_shft, mm->h_P2_DetaDphi_shft, app, amm);
+  h_P2_DetaDphi_shft->Add(pm->h_P2_DetaDphi_shft, apm);
 
-    h_G2_DetaDphi_shft->Add(pp->h_G2_DetaDphi_shft, mm->h_G2_DetaDphi_shft, app, amm);
-    h_G2_DetaDphi_shft->Add(pm->h_G2_DetaDphi_shft, apm);
+  h_G2_DetaDphi_shft->Add(pp->h_G2_DetaDphi_shft, mm->h_G2_DetaDphi_shft, app, amm);
+  h_G2_DetaDphi_shft->Add(pm->h_G2_DetaDphi_shft, apm);
 
-    h_BF_DetaDphi_shft->Add(pp->h_bf12_DetaDphi_shft, mm->h_bf12_DetaDphi_shft, app, amm);
-    h_BF_DetaDphi_shft->Add(pm->h_bf12_DetaDphi_shft, apm/2.0);
-    h_BF_DetaDphi_shft->Add(pm->h_bf21_DetaDphi_shft, apm/2.0);
 
-    h_BF_etaEta->Add(pp->h_bf12_etaEta, mm->h_bf12_etaEta, app, amm);
-    h_BF_etaEta->Add(pm->h_bf12_etaEta, apm/2.0);
-    h_BF_etaEta->Add(pm->h_bf21_etaEta, apm/2.0);
+  if (!sameDimensions(pp->h_bf12_DetaDphi_shft, mm->h_bf12_DetaDphi_shft,pm->h_bf12_DetaDphi_shft, pm->h_bf21_DetaDphi_shft, h_BF_DetaDphi_shft)) return;
+  h_BF_DetaDphi_shft->Add(pp->h_bf12_DetaDphi_shft, mm->h_bf12_DetaDphi_shft, app, amm);
+  h_BF_DetaDphi_shft->Add(pm->h_bf12_DetaDphi_shft, apm/2.0);
+  h_BF_DetaDphi_shft->Add(pm->h_bf21_DetaDphi_shft, apm/2.0);
 
-    h_BF_phiPhi->Add(pp->h_bf12_phiPhi, mm->h_bf12_phiPhi, app, amm);
-    h_BF_phiPhi->Add(pm->h_bf12_phiPhi, apm/2.0);
-    h_BF_phiPhi->Add(pm->h_bf21_phiPhi, apm/2.0);
+  h_BF_etaEta->Add(pp->h_bf12_etaEta, mm->h_bf12_etaEta, app, amm);
+  h_BF_etaEta->Add(pm->h_bf12_etaEta, apm/2.0);
+  h_BF_etaEta->Add(pm->h_bf21_etaEta, apm/2.0);
 
-    if (ac.fillY)
+  h_BF_phiPhi->Add(pp->h_bf12_phiPhi, mm->h_bf12_phiPhi, app, amm);
+  h_BF_phiPhi->Add(pm->h_bf12_phiPhi, apm/2.0);
+  h_BF_phiPhi->Add(pm->h_bf21_phiPhi, apm/2.0);
+
+    if (false && ac.fillY)
     {
       h_R2_yY->Add(pp->h_R2_yY, mm->h_R2_yY, app, amm);
       h_R2_yY->Add(pm->h_R2_yY, apm);
@@ -246,34 +243,15 @@ ParticlePairCombinedHistos::~ParticlePairCombinedHistos()
       h_BF_DyDphi_shft->Add(pm->h_bf21_DyDphi_shft, apm/2.0);
     }
 
-    if (ac.fillQ3D)
-    {
-      h_R2_Q3D->Add(pp->h_R2_Q3D, mm->h_R2_Q3D, app, amm);
-      h_R2_Q3D->Add(pm->h_R2_Q3D, apm);
-      h_R2_Q3D_xy = (TH2 *) h_R2_Q3D->Project3D("xy");     add(h_R2_Q3D_xy, false,true,true,true);
-      h_R2_Q3D_xz = (TH2 *) h_R2_Q3D->Project3D("xz");     add(h_R2_Q3D_xz, false,true,true,true);
-      h_R2_Q3D_yz = (TH2 *) h_R2_Q3D->Project3D("yz");     add(h_R2_Q3D_yz, false,true,true,true);
-    }
-
-    if (reportDebug()) cout << "ParticlePairCombinedHistos::calculate() completed" << endl;
-  }
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////////
-  // calculate combinations of histograms with given coefficients
-  //////////////////////////////////////////////////////////////////////////////////////////////////////
-//  void ParticlePairCombinedHistos::calculateRR_Q3D(ClusterHistos * ch)
-//  {
-//    if (reportDebug()) "ParticlePairCombinedHistos::calculate() started" << endl;
-//    AnalysisConfiguration & ac = *analysisConfiguration;
-//
 //    if (ac.fillQ3D)
 //    {
-//      h_RR2_Q3D->Divide(h_R2_Q3D, ch->h_cluster_Q3D,1.0,1.0);
-//
-//      h_RR2_Q3D_xy = (TH2 *) h_RR2_Q3D->Project3D("xy");     add(h_RR2_Q3D_xy, false,true,true,true);
-//      h_RR2_Q3D_xz = (TH2 *) h_RR2_Q3D->Project3D("xz");     add(h_RR2_Q3D_xz, false,true,true,true);
-//      h_RR2_Q3D_yz = (TH2 *) h_RR2_Q3D->Project3D("yz");     add(h_RR2_Q3D_yz, false,true,true,true);
+//      h_R2_Q3D->Add(pp->h_R2_Q3D, mm->h_R2_Q3D, app, amm);
+//      h_R2_Q3D->Add(pm->h_R2_Q3D, apm);
+//      h_R2_Q3D_xy = (TH2 *) h_R2_Q3D->Project3D("xy");     append(h_R2_Q3D_xy, false,true,true,true);
+//      h_R2_Q3D_xz = (TH2 *) h_R2_Q3D->Project3D("xz");     append(h_R2_Q3D_xz, false,true,true,true);
+//      h_R2_Q3D_yz = (TH2 *) h_R2_Q3D->Project3D("yz");     append(h_R2_Q3D_yz, false,true,true,true);
 //    }
-//
-//    if (reportDebug()) "ParticlePairCombinedHistos::calculate() completed" << endl;
-//  }
+  if (reportEnd("ParticlePairCombinedHistos",getName(),"calculate(...)"))
+    ;
+  }
+

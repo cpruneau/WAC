@@ -36,7 +36,9 @@ nBinary(0),
 nParticipant(0),
 nPP(0),
 nPN(0),
-nNN(0)
+nNN(0),
+binaryMoments(),
+participantMoments()
 {
   nucleusA = new Nucleus(nProtonsA,nNeutronsA);
   nucleusB = new Nucleus(nProtonsB,nNeutronsB);
@@ -126,4 +128,24 @@ Nucleus * CollisionGeometry::getNucleusA()
 Nucleus * CollisionGeometry::getNucleusB()
 {
   return nucleusB;
+}
+
+CollisionGeometry::NucleonNucleonType CollisionGeometry::getNNTpye(int index)
+{
+  Nucleon::NucleonType nucleonTypeA = nucleonsA[index]->nucleonType;
+  Nucleon::NucleonType nucleonTypeB = nucleonsB[index]->nucleonType;
+  if (nucleonTypeA == Nucleon::Proton)
+    {
+    if (nucleonTypeB == Nucleon::Proton)
+      return ProtonProton;
+    else
+      return ProtonNeutron;
+    }
+  else
+    {
+    if (nucleonTypeB == Nucleon::Proton)
+      return NeutronProton;
+    else
+      return NeutronNeutron;
+    }
 }

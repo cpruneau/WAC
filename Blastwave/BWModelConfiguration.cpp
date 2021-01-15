@@ -10,7 +10,7 @@ ClassImp(BWModelConfiguration);
 
 BWModelConfiguration::BWModelConfiguration(const TString & name, const TString & type, const TString & version)
 :
-GeneratorConfiguration(name,type, version),
+TaskConfiguration(name,type, version),
 totalMultiplicityMean(2000.0),
 totalMultiplicitySigma(20.0),
 netChargeMean(5.0),

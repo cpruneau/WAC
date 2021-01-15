@@ -15,57 +15,54 @@
  */
 
 #include "ParticleAnalyzer.hpp"
-#include "AnalysisConfiguration.hpp"
 
 ClassImp(ParticleAnalyzer);
 
-
-
 ParticleAnalyzer::ParticleAnalyzer(const TString &  name,
-                                   TaskConfiguration * configuration,
+                                   ParticleAnalyzerConfiguration * configuration,
                                    Event * event,
                                    EventFilter * _eventFilter,
                                    int _nParticleFilters,
-                                   ParticleFilter ** _particleFilters)
+                                   ParticleFilter ** _particleFilters,
+                                   LogLevel requiredLevel)
 :
-Task(name,configuration,event),
+Task(name,configuration,event,requiredLevel),
 nParticleFilters(_nParticleFilters),
 eventFilter(_eventFilter),
 particleFilters(_particleFilters),
 particleHistos(nullptr),
 partNames(nullptr)
 {
-  cout << "ParticleAnalyzer::CTOR(...) Started." << endl;
+  if (reportStart("ParticleAnalyzer",getTaskName(),"CTOR()"))
+    ;
   particleHistos = new ParticleHistos*[nParticleFilters];
   partNames      = new TString*[nParticleFilters];
   nAccepted      = new double[nParticleFilters];
+  totalEnergy    = new double[nParticleFilters];
   if (!eventFilter)
     {
-    if (reportError()) cout << "ParticleAnalyzer::CTOR(...) eventFilter is null pointer." << endl;
-    postTaskError();
+    if (reportWarning("ParticleAnalyzer",getTaskName(),"CTOR()")) cout << "eventFilter is null pointer." << endl;
+    postTaskWarning();
     return;
     }
 
   if (nParticleFilters<1)
     {
-    if (reportError()) cout << "ParticleAnalyzer::CTOR(...) nParticleFilters<1." << endl;
+    if (reportError("ParticleAnalyzer",getTaskName(),"CTOR()")) cout << "nParticleFilters<1." << endl;
     postTaskError();
     return;
     }
   if (!particleFilters)
     {
-    if (reportError()) cout << "ParticleAnalyzer::CTOR(...) particleFilters is null pointer." << endl;
+    if (reportError("ParticleAnalyzer",getTaskName(),"CTOR()")) cout << "particleFilters is null pointer." << endl;
     postTaskError();
     return;
     }
-
-
-  //for (int iFilter=0; iFilter<nParticleFilters; iFilter++ )
   for (int iFilter=0; iFilter<nParticleFilters; iFilter++ )
  {
   if (!particleFilters[iFilter])
     {
-    if (reportError()) cout << "ParticleAnalyzer::CTOR(...) particleFilter[" << iFilter << "] is a null pointer." << endl;
+    if (reportError("ParticleAnalyzer",getTaskName(),"CTOR()")) cout << "particleFilter[" << iFilter << "] is a null pointer." << endl;
     postTaskError();
     return;
     }
@@ -74,10 +71,12 @@ partNames(nullptr)
     partNames[iFilter] = new TString( particleFilters[iFilter]->getName() );
     }
   }
-  TString newName = getName();
+  TString newName = getTaskName();
   newName += "_";
   newName += eventFilter->getName();
-  setName(newName);
+  setTaskName(newName);
+  if (reportEnd("ParticleAnalyzer",getTaskName(),"CTOR()"))
+    ;
 }
 
 //////////////////////////////////////////////////////////////
@@ -85,26 +84,34 @@ partNames(nullptr)
 //////////////////////////////////////////////////////////////
 ParticleAnalyzer::~ParticleAnalyzer()
 {
-  if (reportDebug())  cout << "ParticleAnalyzer::DTOR(...) Started" << endl;
+  if (reportStart("ParticleAnalyzer",getTaskName(),"DTOR()"))
+    ;
   if (particleHistos != NULL) delete[] particleHistos;
   if (partNames      != NULL) delete[] partNames;
-  if (reportDebug())  cout << "ParticleAnalyzer::DTOR(...) Completed" << endl;
+  if (nAccepted      != NULL) delete[] nAccepted;
+  if (totalEnergy    != NULL) delete[] totalEnergy;
+
+  if (reportEnd("ParticleAnalyzer",getTaskName(),"DTOR()"))
+    ;
 }
 
 void ParticleAnalyzer::createHistograms()
 {
-  if (reportDebug())  cout << "ParticleAnalyzer::createHistograms(...) started"<< endl;
-  AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
+  if (reportStart("ParticleAnalyzer",getTaskName(),"createHistograms()"))
+    ;
+  ParticleAnalyzerConfiguration * ac = (ParticleAnalyzerConfiguration *) getTaskConfiguration();
   LogLevel debugLevel = getReportLevel();
-  TString prefixName = getName(); prefixName += "_";
+  TString prefixName = getTaskName(); prefixName += "_";
   TString histoName;
-  if (reportInfo())  cout << "ParticleAnalyzer::createHistograms(...) Creating histograms for nParticleFilters:" << nParticleFilters <<  endl;
+  if (reportInfo("ParticleAnalyzer",getTaskName(),"createHistograms()"))  cout << "Creating histograms for nParticleFilters:" << nParticleFilters <<  endl;
   for (int iFilter=0; iFilter<nParticleFilters; iFilter++ )
   {
   histoName = prefixName + *partNames[iFilter];
   particleHistos[iFilter] = new ParticleHistos(histoName,ac,debugLevel);
+  particleHistos[iFilter]->createHistograms();
   }
-  if (reportDebug())  cout << "ParticleAnalyzer::createHistograms(...) completed"<< endl;
+  if (reportEnd("ParticleAnalyzer",getTaskName(),"createHistograms()"))
+    ;
 }
 
 //////////////////////////////////////////////////////////////
@@ -112,21 +119,19 @@ void ParticleAnalyzer::createHistograms()
 //////////////////////////////////////////////////////////////
 void ParticleAnalyzer::loadHistograms(TFile * inputFile)
 {
-  if (reportDebug())  cout << "ParticleAnalyzer::loadHistograms(...) Starting." << endl;
-  /* first load the number of events as from the  cumulated parameter */
-  TParameter<Long64_t> *par = (TParameter<Long64_t> *) inputFile->Get("NoOfEvents");
-  eventsProcessed = par->GetVal();
-  delete par;
-  AnalysisConfiguration * ac = (AnalysisConfiguration *) getTaskConfiguration();
-  LogLevel debugLevel = getReportLevel();
-  TString prefixName = getName(); prefixName += "_";
+  if (reportStart("ParticleAnalyzer",getTaskName(),"loadHistograms(TFile * inputFile)"))
+    ;
+  ParticleAnalyzerConfiguration * ac = (ParticleAnalyzerConfiguration *) getTaskConfiguration();
+  TString prefixName = getTaskName(); prefixName += "_";
   TString histoName;
   for (int iFilter=0; iFilter<nParticleFilters; iFilter++ )
   {
   histoName = prefixName + *partNames[iFilter];
-  particleHistos[iFilter] = new ParticleHistos(inputFile,histoName,ac,debugLevel);
+  particleHistos[iFilter] = new ParticleHistos(histoName,ac,getReportLevel());
+  particleHistos[iFilter]->loadHistograms(inputFile);
   }
-  if (reportDebug())  cout << "ParticleAnalyzer::loadHistograms(...) Completed." << endl;
+  if (reportEnd("ParticleAnalyzer",getTaskName(),"loadHistograms(TFile * inputFile)"))
+    ;
 }
 
 //////////////////////////////////////////////////////////////
@@ -134,45 +139,42 @@ void ParticleAnalyzer::loadHistograms(TFile * inputFile)
 //////////////////////////////////////////////////////////////
 void ParticleAnalyzer::saveHistograms(TFile * outputFile)
 {
-  if (reportDebug()) cout << "ParticleAnalyzer::saveHistograms(...) Saving Event histograms to file." << endl;
+  if (reportStart("ParticleAnalyzer",getTaskName(),"saveHistograms(TFile * outputFile)"))
+    ;
   if (!outputFile)
     {
-    if (reportError()) cout << "ParticleAnalyzer::saveHistograms(...) outputFile is a null  pointer." << endl;
+    if (reportError("ParticleAnalyzer",getTaskName(),"saveHistograms(TFile * outputFile)")) cout << "outputFile is a null  pointer." << endl;
     postTaskError();
     return;
     }
   outputFile->cd();
-
-  /* first save the number of events as a cumulated parameter */
-  TParameter<Long64_t>("NoOfEvents",eventsProcessed,'+').Write();
   for (int iFilter=0; iFilter<nParticleFilters; iFilter++ )
   {
   particleHistos[iFilter]->saveHistograms(outputFile);
   }
-  if (reportDebug()) cout << "ParticleAnalyzer::saveHistograms(...) Completed." << endl;
+  if (reportEnd("ParticleAnalyzer",getTaskName(),"createHistograms()"))
+    ;
 }
 
 void ParticleAnalyzer::execute()
 {
-  //if (reportDebug())  cout << "ParticleAnalyzer::execute(...) Starting" << endl;
-  if (event != NULL)
-    {
-    if (reportDebug()) cout << "ParticleAnalyzer::execute(...) analyzing " << event->nParticles << " particles" << endl;
-    }
-  else
-    {
-    if (reportError()) cout << "ParticleAnalyzer::execute(...) event pointer is NULL. Abort." << endl;
-    postTaskError();
-    return;
-    }
+//  if (reportDebug("ParticleAnalyzer",getTaskName(),"execute()")) cout << " nEventProcessed: " << getNEventProcessed() << endl;
+//  if (reportDebug("ParticleAnalyzer",getTaskName(),"execute()")) cout << " nEventAccepted: " << getNEventAccepted() << endl;
 
-  //if (reportDebug()) cout <<"ParticleAnalyzer::analyze(...) check if event is acceptable" << endl;
+  incrementEventProcessed();
   if (!eventFilter->accept(*event)) return;
-  //if (reportDebug()) cout <<"ParticleAnalyzer::analyze(...) acceptable event" << endl;
-  eventsProcessed++; // count events used for fill histograms.
+
+//  if (reportDebug("ParticleAnalyzer",getTaskName(),"execute()")) cout << " ==========  WTF ========= " << endl;
+
+  incrementEventAccepted(); // count events used to fill histograms and for scaling at the end...
   bool accept;
-  for (int iFilter=0; iFilter<nParticleFilters; iFilter++ ) nAccepted[iFilter] = 0;
-  for (int iParticle=0; iParticle<event->nParticles; iParticle++)
+  for (int iFilter=0; iFilter<nParticleFilters; iFilter++ )
+  {
+  nAccepted[iFilter] = 0;
+  totalEnergy[iFilter] = 0.0;
+  }
+
+  for (int iParticle=0; iParticle<event->multiplicity; iParticle++)
   {
   Particle & particle = * event->getParticleAt(iParticle);
   for (int iFilter=0; iFilter<nParticleFilters; iFilter++ )
@@ -181,15 +183,15 @@ void ParticleAnalyzer::execute()
     if (accept)
       {
       nAccepted[iFilter]++;
+      totalEnergy[iFilter]  += particle.e;
       particleHistos[iFilter]->fill(particle,1.0);
       }
     }
   }
   for (int iFilter=0; iFilter<nParticleFilters; iFilter++ )
   {
-  particleHistos[iFilter]->fillMultiplicity(nAccepted[iFilter],1.0);
+  particleHistos[iFilter]->fillMultiplicity(nAccepted[iFilter],totalEnergy[iFilter],1.0);
   }
-  //if (reportDebug()) cout << "ParticleAnalyzer::execute() Completed" << endl;
 }
 
 
@@ -199,10 +201,27 @@ void ParticleAnalyzer::execute()
 // =========================================================
 void ParticleAnalyzer::scaleHistograms(double factor)
 {
-  if (reportDebug())  cout << "ParticleAnalyzer::scaleHistograms(..) Scale all primary histograms by " << factor << endl;
+  if (reportInfo("ParticleAnalyzer",getTaskName(),"scaleHistograms(double factor)"))  cout << "Scale all primary histograms by " << factor << endl;
   for (int iFilter=0; iFilter<nParticleFilters; iFilter++ )
   {
   particleHistos[iFilter]->scale(factor);
   }
-  if (reportDebug())  cout << "ParticleAnalyzer::scale(..) Completed"  << endl;
+  if (reportEnd("ParticleAnalyzer",getTaskName(),"scaleHistograms(double factor)"))
+    ;
+}
+
+
+// =========================================================
+// Reset histograms associated with this task
+// Called after partial saves in subsample analyses.
+// =========================================================
+void ParticleAnalyzer::resetHistograms()
+{
+  if (reportInfo("ParticleAnalyzer",getTaskName(),"resetHistograms()")) cout << "Will reset histograms of all particle filters" << endl;
+  for (int iFilter=0; iFilter<nParticleFilters; iFilter++ )
+  {
+  particleHistos[iFilter]->reset();
+  }
+  if (reportEnd("ParticleAnalyzer",getTaskName(),"scaleHistograms(double factor)"))
+    ;
 }

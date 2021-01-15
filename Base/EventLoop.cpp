@@ -17,43 +17,70 @@
 #include "EventLoop.hpp"
 ClassImp(EventLoop);
 
-EventLoop::EventLoop()
+EventLoop::EventLoop(const TString & name)
 :
-TaskCollection("EventLoop",nullptr,100)
+TaskCollection(name,nullptr,100),
+timer(),
+nEventRequested(1000000),
+nEventReported(10000),
+nEventPartialSave(10000),
+nEventProcessed(0),
+partialSave(0),
+subsampleAnalysis(0)
 {
-  if (reportDebug())  cout << "EventLoop::CTOR Started" << endl;
+  timer.start();
 }
 
 EventLoop::~EventLoop()
 {
-   if (reportDebug())  cout << "EventLoop::DTOR Started" << endl;
+  // no ops
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Run the event loop as setup
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void EventLoop::run(long nEvents, int nReport)
+void EventLoop::run()
 {
-  if (reportInfo("EventLoop",getName(),"run(...)")) cout << "Running for nEvents: " << nEvents << endl;
+  run(nEventRequested,nEventReported);
+}
+
+void EventLoop::run(long nEvent, long nReport)
+{
+  if (reportInfo("EventLoop",getTaskName(),"run(...)")) cout << "Running for nEvent: " << nEvent << endl;
   postTaskOk();
   initialize();
   if (!isTaskOk())
     {
-    if (reportWarning("EventLoop",getName(),"run(...)")) cout << "Initialization failed. Abort." << endl;
+    if (reportWarning("EventLoop",getTaskName(),"run(...)")) cout << "Initialization failed. Abort." << endl;
     return;
     }
-  for (long iEvent=0; iEvent<nEvents; iEvent++)
+  nEventProcessed = 0;
+  if (reportInfo("EventLoop",getTaskName(),"run(...)")) cout << "Starting..." << endl;
+  for (long iEvent=1; iEvent<=nEvent; iEvent++)
     {
-    if (isTaskOk()) reset();
-    if (isTaskOk()) execute();
-    if (isTaskOk() && iEvent%nReport==0 )
+    execute(); if (!isTaskOk()) continue;
+    nEventProcessed++;
+    if (nEventProcessed%nReport==0 )
       {
-      if (reportInfo("EventLoop",getName(),"run(...)")) cout << "Completed event # " << iEvent << endl;
+      if (reportInfo("EventLoop",getTaskName(),"run(...)")) cout << "Completed event # " << iEvent << endl;
+      }
+//    cout << "nEventProcessed" << nEventProcessed<< endl;
+//    cout << "nEventPartialSave" << nEventPartialSave<< endl;
+//    cout << nEventProcessed%nEventPartialSave<<endl;
+    if ( (subsampleAnalysis||partialSave) && nEventProcessed%nEventPartialSave==0)
+      {
+      savePartialResults();
+      if (subsampleAnalysis) reset();
+      if (!isTaskOk()) continue;
       }
     }
   if (isTaskOk()) finalize();
-
-  if (reportInfo("EventLoop",getName(),"run(...)"))  cout << "Completed nEvents: " << nEvents << endl;
-  if (reportInfo("EventLoop",getName(),"run(...)"))  cout << "Task finished with status : " << getTaskStatusName() << endl;
-  if (reportDebug("EventLoop",getName(),"run(...)")) cout << "Completed." << endl;
+  timer.stop();
+  if (reportInfo("EventLoop",getTaskName(),"run(...)"))
+    {
+    cout << endl;
+    cout << "  Completed with status : " << getTaskStatusName() << endl;
+    cout << "        Completed Events: " << nEventProcessed << endl;
+    cout << "        Requested Events: " << nEvent << endl;
+    cout << "            "; timer.print(cout);
+    cout << endl << endl;
+    }
 }
+
