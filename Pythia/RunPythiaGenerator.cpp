@@ -42,7 +42,7 @@ int main()
                                                      pythiaOptions);
   pc->dataOutputUsed = true;
   pc->dataConversionToWac = false;
-  pc->dataOutputFileName = "Pythia_pp_7000.root";
+  pc->dataOutputFileName = "Pythia_pp_7000_10million.root";
   pc->dataOutputTreeName = "PythiaTree";
   pc->dataOutputPath     = getenv("WAC_OUTPUT_DATA_PATH");
   EventFilter     * eventFilterGen    = nullptr;// new EventFilter(EventFilter::MinBias,0.0,0.0);
