@@ -89,6 +89,7 @@ void AACollisionPythiaGenerator::execute()
   int particleCounted = 0;
   TPythia8 * pythia = ppPythia;
   int nCollisions = collisionGeometry->nBinary; //get the number of binary collisions
+  if (reportDebug("AACollisionPythiaGenerator",getTaskName(),"execute()")) cout << "nCollisions:" << nCollisions << endl;
   for (int iCollision = 0; iCollision < nCollisions; iCollision++)
   {
   if (!ppOnly)

@@ -11,12 +11,15 @@
 #include "PythiaConfiguration.hpp"
 #include "ParticleAnalyzer.hpp"
 #include "AACollisionPythiaGenerator.hpp"
+#include "AACollisionReader.hpp"
 #include "CollisionGeometryGenerator.hpp"
 #include "CollisionGeometryAnalyzer.hpp"
 #include "CollisionGeometry.hpp"
 #include "PTCorrelator.hpp"
 #include "RadialBoostTask.hpp"
 #include "RadialBoostConfiguration.hpp"
+#include "Factory.hpp"
+#include "Particle.hpp"
 #include "TMath.h"
 
 
@@ -24,7 +27,7 @@ int main()
 {
   MessageLogger::LogLevel messageLevel = MessageLogger::Info;
 
-  EventLoop * eventLoop = new EventLoop("RunCollisionGeometrySimulation");
+  EventLoop * eventLoop = new EventLoop("RunAACollisionPythiaPtSimulation");
   eventLoop->setNEventRequested(1000000);
   eventLoop->setNEventReported(100000);
   eventLoop->setReportLevel(messageLevel);
@@ -47,10 +50,10 @@ int main()
   pythiaOptions[nOptions++] = new TString("Next:numberShowInfo = 1");            // print event information n times
   pythiaOptions[nOptions++] = new TString("Next:numberShowProcess = 0");         // print process record n times
   pythiaOptions[nOptions++] = new TString("Next:numberShowEvent = 0");
-  pythiaOptions[nOptions++] = new TString("SoftQCD:inelastic = on");             //Setting for Minumum bias INEL
+  //pythiaOptions[nOptions++] = new TString("SoftQCD:inelastic = on");             //Setting for Minumum bias INEL
 
-  //pythiaOptions[nOptions++] = new TString("SoftQCD:all = on");                   // Allow total sigma = elastic/SD/DD/ND
-                                                                                 //pythiaOptions[nOptions++] = new TString("HardQCD:all = on");
+  pythiaOptions[nOptions++] = new TString("SoftQCD:all = on");                   // Allow total sigma = elastic/SD/DD/ND
+  //pythiaOptions[nOptions++] = new TString("HardQCD:all = on");
 
   // hard process -- do not turh on with SoftQCD:inelastic = on
   // otherwise, there will be double counting.
@@ -60,7 +63,7 @@ int main()
 
   PythiaConfiguration * pc = new PythiaConfiguration(2212, /* p */
                                                      2212, /* p */
-                                                     14000.0, /* energy in GeV */
+                                                     2760.0, /* energy in GeV */
                                                      nOptions,
                                                      pythiaOptions,
                                                      true,     // only pp
@@ -87,7 +90,7 @@ int main()
   ac->rootOuputFileName =  "/Pythia";
   ac->nBins_mult   = 100;
   ac->min_mult     = 0.0;
-  ac->max_mult     = 400.0;
+  ac->max_mult     = 1000000.0;
   ac->nBins_cent   = 100;
   ac->min_cent     = 0.0;
   ac->max_cent     = 400.0;
@@ -99,10 +102,10 @@ int main()
 
   double minPt  = 0.2;
   double maxPt  = 2.0;
-  double minEta = -6.0;
-  double maxEta =  6.0;
-  double minY   = -6.0;
-  double maxY   =  6.0;
+  double minEta = -2.0;
+  double maxEta =  2.0;
+  double minY   = -2.0;
+  double maxY   =  2.0;
 
   ///////////////////////////////////////////////////////////////////////////////
   // Radial Boost Configuration
@@ -163,19 +166,19 @@ int main()
 
   // NucleusGenerator::WoodsSaxon, 6.62 , 0.546, 0.0, 11000,0.0,11.0);
   // NucleusGenerator::WoodsSaxon, 6.62 , 0.546, 0.0, 11000,0.0,11.0);
-  geometryConfiguration->aParA = 6.62;
-  geometryConfiguration->aParB = 0.546;
+  geometryConfiguration->aParA = 7.1;
+  geometryConfiguration->aParB = 0.535;
   geometryConfiguration->aParC = 0.0;
-  geometryConfiguration->aNR   = 11000;
+  geometryConfiguration->aNR   = 10000;
   geometryConfiguration->aMinR = 0.0;
-  geometryConfiguration->aMaxR = 11.0;
+  geometryConfiguration->aMaxR = 8.0;
 
-  geometryConfiguration->bParA = 6.62;
-  geometryConfiguration->bParB = 0.546;
+  geometryConfiguration->bParA = 7.1;
+  geometryConfiguration->bParB = 0.535;
   geometryConfiguration->bParC = 0.0;
-  geometryConfiguration->bNR   = 11000;
+  geometryConfiguration->bNR   = 10000;
   geometryConfiguration->bMinR = 0.0;
-  geometryConfiguration->bMaxR = 11.0;
+  geometryConfiguration->bMaxR = 8.0;
 
 
   geometryConfiguration->nnCrossSection = 6.9;  // in fm^2 -- Config C
@@ -201,8 +204,10 @@ int main()
   eventLoop->addTask( new AACollisionPythiaGenerator("AAPYTHIA",pc, collisionGeometry, event,eventFilter,particleFilter, messageLevel) );
   pc->dataInputFileName = "Pythia_pp_7000.root";
   pc->dataInputTreeName = "PythiaTree";
-  pc->dataInputPath     = getenv("WAC_INPUT_DATA_PATH");
-  //eventLoop->addTask( new AACollisionReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
+  pc->dataInputPath     = getenv("WAC_OUTPUT_DATA_PATH");
+  Factory<Particle> * particleFactory = Particle::getFactory();
+  particleFactory -> initialize(Particle::factorySize * 5000);
+  //eventLoop->addTask( new AACollisionReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel, collisionGeometry) );
   eventLoop->addTask( new RadialBoostTask("PYTHIA_RADIALBOOST",rc, collisionGeometry, event, messageLevel) );
   eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM", ac, event, eventFilter, particleFilters, messageLevel) );
   eventLoop->run();

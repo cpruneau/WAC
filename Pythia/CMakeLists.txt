@@ -39,6 +39,7 @@ add_executable(RunPythiaSimulationPtCorrelation RunPythiaSimulationPtCorrelation
 target_include_directories(RunPythiaSimulationPtCorrelation PUBLIC Base  WacPythia ${EXTRA_INCLUDES})
 target_link_libraries(RunPythiaSimulationPtCorrelation Base WacPythia Base EGLib PythiaLib EGPythiaLib   ${ROOT_LIBRARIES} ${EXTRA_LIBS} ${CMAKE_DL_LIBS})
 
+
 add_executable(RunAACollisionPythiaPtSimulation RunAACollisionPythiaPtSimulation.cpp)
 target_include_directories(RunAACollisionPythiaPtSimulation PUBLIC Base  WacPythia ${EXTRA_INCLUDES})
 target_link_libraries(RunAACollisionPythiaPtSimulation Base WacPythia Base EGLib PythiaLib EGPythiaLib   ${ROOT_LIBRARIES} ${EXTRA_LIBS} ${CMAKE_DL_LIBS})
@@ -50,6 +51,7 @@ install(TARGETS RunPythiaSimulationTwoParticles DESTINATION "$ENV{WAC_BIN}")
 install(TARGETS RunPythiaSimulationNudyn DESTINATION "$ENV{WAC_BIN}")
 install(TARGETS RunPythiaSimulationPtCorrelation DESTINATION "$ENV{WAC_BIN}")
 install(TARGETS RunPythiaGenerator DESTINATION "$ENV{WAC_BIN}")
+install(TARGETS RunAACollisionPythiaSimulation DESTINATION "$ENV{WAC_BIN}")
 install(TARGETS RunPythiaGlobalObservables DESTINATION "$ENV{WAC_BIN}")
 install(TARGETS RunAACollisionPythiaPtSimulation DESTINATION "$ENV{WAC_BIN}")
 
