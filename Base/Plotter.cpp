@@ -49,27 +49,41 @@ TCanvas *  Plotter::plot(TString  canvasName, CanvasConfiguration * cc, GraphCon
   h->SetMinimum(yMin);
   h->SetMaximum(yMax);
   h->GetXaxis()->SetRangeUser(xMin,xMax);
-  h->Draw(plotOption);
+  h->DrawCopy(gc->plotOption);
   createLegend(h,legendText,xMinLeg, yMinLeg, xMaxLeg, yMaxLeg,0, legendSize);
   return canvas;
 }
 
 TCanvas *  Plotter::plot(TString   canvasName, CanvasConfiguration * cc, GraphConfiguration * gc,
-                TString   xTitle,  double xMin, double xMax,
-                TString   yTitle,  double yMin, double yMax,
-                TString   zTitle,  double zMin, double zMax,
-                TH1 * h,  const TString & _plotOption)
+                         TString   xTitle,  double xMin, double xMax,
+                         TString   yTitle,  double yMin, double yMax,
+                         TString   zTitle,  double zMin, double zMax,
+                         TH2 * h)
 {
   TCanvas * canvas  = createCanvas(canvasName,*cc);
   setProperties(h,*gc);
   h->GetXaxis()->SetTitle(xTitle);
   h->GetYaxis()->SetTitle(yTitle);
   h->GetZaxis()->SetTitle(zTitle);
-  h->SetMinimum(zMin);
-  h->SetMaximum(zMax);
-  h->GetXaxis()->SetRangeUser(xMin,xMax);
-  h->GetYaxis()->SetRangeUser(yMin,yMax);
-  h->Draw(_plotOption);
+
+  if (xMin < xMax)
+    {
+    //cout << "Setting x range: " << xMin << " to: " << xMax << endl;
+    h->GetXaxis()->SetRangeUser(xMin,xMax);
+    }
+  if (yMin < yMax)
+    {
+    //cout << "Setting y range: " << yMin << " to: " << yMax << endl;
+    h->GetYaxis()->SetRangeUser(yMin,yMax);
+    }
+
+  if (zMin < zMax)
+    {
+    //cout << "Setting z range: " << zMin << " to: " << zMax << endl;
+    h->SetMinimum(zMin);
+    h->SetMaximum(zMax);
+    }
+  h->DrawCopy(gc->plotOption);
   return canvas;
 }
 
@@ -98,7 +112,7 @@ TCanvas *  Plotter::plot(int nGraphs, TString  canvasName, CanvasConfiguration *
     {
     min =  1.0E100;
     max = -1.0E100;
-    cout << "Histo: " << h[0]->GetTitle() << endl;
+    //cout << "Histo: " << h[0]->GetTitle() << endl;
     for (int iGraph=0; iGraph<nGraphs; iGraph++)
       {
       double vMax = h[iGraph]->GetBinContent(h[iGraph]->GetMaximumBin());
@@ -106,7 +120,7 @@ TCanvas *  Plotter::plot(int nGraphs, TString  canvasName, CanvasConfiguration *
       double vMin = h[iGraph]->GetBinContent(h[iGraph]->GetMinimumBin());
       if (vMin<min){min = vMin;}
       }
-    cout << "Found min : " << min << " max : " << max << endl;
+    //cout << "Found min : " << min << " max : " << max << endl;
     if (max>min)
       {
       if (yMax<0.0)
@@ -138,7 +152,7 @@ TCanvas *  Plotter::plot(int nGraphs, TString  canvasName, CanvasConfiguration *
       max =  1.0;
       }
     }
-  cout << "Setting min to : " << min << " max to: " << max << endl;
+ // cout << "Setting min to : " << min << " max to: " << max << endl;
   h[0]->SetMinimum(min);
   h[0]->SetMaximum(max);
 
@@ -149,15 +163,14 @@ TCanvas *  Plotter::plot(int nGraphs, TString  canvasName, CanvasConfiguration *
     }
 
   TString plotOption;
-
   setProperties(h[0],*gc[0]);
   plotOption = gc[0]->plotOption;
-  h[0]->Draw(plotOption);
+  h[0]->DrawCopy(plotOption);
   for (int iGraph=1; iGraph<nGraphs; iGraph++)
     {
     setProperties(h[iGraph],*gc[iGraph]);
     plotOption = gc[iGraph]->plotOption;
-    h[iGraph]->Draw(plotOption+" SAME");
+    h[iGraph]->DrawCopy(plotOption+" SAME");
     }
   if (nGraphs<6)
     createLegend(nGraphs,h,legendTexts,xMinLeg, yMinLeg, xMaxLeg, yMaxLeg,0, legendSize);

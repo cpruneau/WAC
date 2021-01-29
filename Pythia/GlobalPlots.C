@@ -44,8 +44,8 @@ int GlobalPlots()
 
   cout << "<I> GlobalPlots() Configurations setup." << endl;
 
-  TString inputPath  = "/Users/claudeapruneau/Documents/GitHub/WAC/InputFiles/";
-  TString outputPath = "/Users/claudeapruneau/Documents/GitHub/WAC/OutputFiles/";
+  TString inputPath  = "/Users/claudeapruneau/Documents/GitHub/WAC-Data//InputFiles/PYTHIA_pp_7TeV_softOnHardOff/Global/";
+  TString outputPath = "/Users/claudeapruneau/Documents/GitHub/WAC-Data//InputFiles/PYTHIA_pp_7TeV_softOnHardOff/Global/";
   ///  /Users/claudeapruneau/Documents/GitHub/run/PythiaStudies/PYTHIA_softOnHardOff_Singles_Wide_MB.root
 
   TFile ** inputFiles  = new TFile*[12];
@@ -163,13 +163,13 @@ int GlobalPlots()
                   "TPC n", 0.0, 200.0,
                   "V0M n", 0.0, 200.0,
                   "Yield", 1.0E-7, 2.0,
-                  histograms[0][8], "COLZ");
+                  (TH2*) histograms[0][8]);
 
     plotter->plot(canvasNameBase+"TPC_q_Vs_V0M_q",canvasConfigurationLogZ,graphConfigurations[0],
                   "TPC q", -25.0, 25.0,
                   "V0M q",-25.0, 25.0,
                   "Yield", 1.0E-7, 2.0,
-                  histograms[0][9], "COLZ");
+                  (TH2*) histograms[0][9]);
 
     histos[0] = histograms[0][3];
     histos[1] = (TH1*) inputFiles[1]->Get("V0vsTPC_90_100_V0MnGeq0Lt2__V0MPtGeq50Lt1000000_n");

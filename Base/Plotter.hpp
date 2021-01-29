@@ -28,14 +28,14 @@
 class Plotter : public CanvasCollection, public MessageLogger
 {
 public:
-  
-  TString plotOption;
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // CTOR
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////
   Plotter();
   virtual ~Plotter();
 
+  // ================================================================================================
+  // Function to plot a single 1D histogram
+  // h       : pointer  to one histograms
+  // legends : label  used as legend in the body of the plot
+  // ================================================================================================
   TCanvas *  plot(TString   canvasName, CanvasConfiguration * cc, GraphConfiguration * gc,
                   TString   xTitle,  double xMin, double xMax,
                   TString   yTitle,  double yMin, double yMax,
@@ -44,20 +44,26 @@ public:
                   double xMinLeg, double yMinLeg, double xMaxLeg, double yMaxLeg,
                   double legendSize);
 
+  // ================================================================================================
+  // Function to plot a single 2D histogram
+  // ================================================================================================
   TCanvas *  plot(TString   canvasName, CanvasConfiguration * cc, GraphConfiguration * gc,
                   TString   xTitle,  double xMin, double xMax,
                   TString   yTitle,  double yMin, double yMax,
                   TString   zTitle,  double zMin, double zMax,
-                  TH1 * h,  const TString & plotOption);
+                  TH2 * h);
 
-
-
-  TCanvas *  plot(int nGraphs, TString  canvasName, CanvasConfiguration * cc, GraphConfiguration ** gc,
-                   TString   xTitle,  double xMin, double xMax,
-                   TString   yTitle,  double yMin, double yMax,
-                   TH1 ** h,
-                   TString ** hLegend,
-                   double xMinLeg, double yMinLeg, double xMaxLeg, double yMaxLeg,
+  // ================================================================================================
+  // Function to plot nHists 1D histogram
+  // h       : array of nHists pointers to histograms
+  // legends : array of nHists pointers to labels used as legends in the body of the plot
+  // ================================================================================================
+  TCanvas *  plot(int nHists, TString  canvasName, CanvasConfiguration * cc, GraphConfiguration ** gc,
+                  TString   xTitle,  double xMin, double xMax,
+                  TString   yTitle,  double yMin, double yMax,
+                  TH1 ** h,
+                  TString ** legends,
+                  double xMinLeg, double yMinLeg, double xMaxLeg, double yMaxLeg,
                   double legendSize);
 
   ////////////////////////////////////////////////////////////////////////

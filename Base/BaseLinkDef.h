@@ -90,8 +90,8 @@
 #pragma link C++ class NuDynPlotter+;
 #pragma link C++ class NuDynConfiguration+;
 
-#pragma link C++ class PTCorrelator+;
-#pragma link C++ class PTHistos+;
+//#pragma link C++ class PTCorrelator+;
+//#pragma link C++ class PTHistos+;
 
 
 #pragma link C++ class SubSampleStatCalculator+;
@@ -119,6 +119,9 @@
 
 #pragma link C++ class  ParticleFilterAliceV0+;
 
+#pragma link C++ class  BidimGaussFitResult+;
+#pragma link C++ class  BidimGaussFitConfiguration+;
+#pragma link C++ class  BidimGaussFitter+;
 
 //#pragma link C++ class  RadialBoostConfiguration+;
 //#pragma link C++ class  RadialBoostHistos+;
