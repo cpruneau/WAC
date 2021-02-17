@@ -13,6 +13,7 @@
 #include "CanvasConfiguration.hpp"
 #include "GraphConfiguration.hpp"
 #include "MessageLogger.hpp"
+#include "TStyle.h"
 #include "TH1.h"
 #include "TH1F.h"
 #include "TH1D.h"
@@ -85,6 +86,7 @@ public:
                          float x1, float y1, float x2, float y2, int fontType, float fontSize, bool doDraw=true);
   TLine   * createLine(float x1, float y1, float x2, float y2, int style, int color, int width, bool doDraw=true);
   TArrow  * createArrow(float x1, float y1, float x2, float y2, float arrowSize, Option_t* option, int style, int color, int width, bool doDraw=true);
+  void setDefaultOptions(bool color);
 
     ClassDef(Plotter,0)
 };

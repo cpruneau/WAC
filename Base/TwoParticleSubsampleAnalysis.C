@@ -29,7 +29,6 @@ int TwoParticleSubsampleAnalysis()
   gSystem->Load(includesPath+"TaskCollection.hpp");
   gSystem->Load(includesPath+"Property.hpp");
   gSystem->Load(includesPath+"MessageLogger.hpp");
-  gSystem->Load(includesPath+"AnalysisConfiguration.hpp");
   gSystem->Load(includesPath+"Event.hpp");
   gSystem->Load(includesPath+"EventFilter.hpp");
   gSystem->Load(includesPath+"EventHistos.hpp");
@@ -50,6 +49,7 @@ int TwoParticleSubsampleAnalysis()
 
   TString inputPathName  = getenv("WAC_INPUT_PATH");
   TString outputPathName = getenv("WAC_OUTPUT_PATH");
+
   int nFiles;
   TString ** fileNameBase = new TString*[20];
 
@@ -74,7 +74,8 @@ int TwoParticleSubsampleAnalysis()
     // 7 TeV, charged hadrons, inclusive and by x-section slice
     // Claude: Dec 18,2020.
     nFiles = 10;
-    inputPathName  =  "/Users/claudeapruneau/Documents/GitHub/WAC-DATA/InputFiles/PYTHIA_pp_7TeV_softOnHardOff/Pairs/";
+    //inputPathName  =  "/Users/claudeapruneau/Documents/GitHub/WAC-DATA/InputFiles/PYTHIA_pp_7TeV_softOnHardOff/Pairs/";
+    inputPathName = "/Users/claudeapruneau/Documents/GitHub/WAC-DATA/InputFiles/PYTHIA_pp_7TeV_softOnHardOff/Pairs/ByCentrality/Partials/";
     fileNameBase[0] = new TString("PYTHIA_pp_7TeV_softOnHardOff_Pairs_Narrow_HPHM_0_5_V0MnGeq66Lt1000__");
     fileNameBase[1] = new TString("PYTHIA_pp_7TeV_softOnHardOff_Pairs_Narrow_HPHM_5_10_V0MnGeq53Lt66__");
     fileNameBase[2] = new TString("PYTHIA_pp_7TeV_softOnHardOff_Pairs_Narrow_HPHM_10_20_V0MnGeq38Lt53__");
@@ -88,7 +89,8 @@ int TwoParticleSubsampleAnalysis()
     fileNameBase[10] = new TString("PYTHIA_pp_7TeV_softOnHardOff_Pairs_Narrow_HPHM_90_100_V0MnGeq0Lt2__");
     fileNameBase[11] = new TString("PYTHIA_pp_7TeV_softOnHardOff_Pairs_Narrow_HPHM_0_100_MB__");
 
-    for (int iClass=0; iClass<12; iClass++)
+    //for (int iClass=0; iClass<12; iClass++)
+    for (int iClass=8; iClass<9; iClass++)
     {
     doPair(inputPathName, nFiles, *fileNameBase[iClass],   outputPathName, *fileNameBase[iClass]+"Sum_0_9");
     }

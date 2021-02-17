@@ -20,8 +20,8 @@
 ClassImp(ParticleAnalyzerConfiguration);
 
 ParticleAnalyzerConfiguration::ParticleAnalyzerConfiguration(const TString & name,
-                                             const TString & type,
-                                             const TString & version)
+                                                             const TString & type,
+                                                             const TString & version)
 :
 TaskConfiguration(name,type,version),
 nBins_pt(40),           min_pt(0.0),    max_pt(2.0),   range_pt(2.0),

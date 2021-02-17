@@ -637,10 +637,24 @@ void BidimGaussFitter::fullFit(TH2 *data, BidimGaussFitConfiguration & fitConfig
   yLowBin  = dataHist->GetYaxis()->FindBin( yLow);
   yHighBin = dataHist->GetYaxis()->FindBin( yHigh);
 
+  int nx = dataHist->GetNbinsX();
+  int ny = dataHist->GetNbinsY();
+  double error;
+
   flowFitOnlyHist = cloneAndReset(dataHist, histBaseName+"_flowOnlyHist");
   flowFitOnlyHist->GetXaxis()->SetRange(xLowBin,xHighBin);
   flowFitOnlyHist->GetYaxis()->SetRange(yLowBin,yHighBin);
   flowFitOnlyHist->Eval(flowFitFct,"A");
+
+  for (int iEta=1; iEta<=nx; iEta++)
+    {
+    for (int iPhi=1; iPhi<=ny; iPhi++)
+      {
+      error = dataHist->GetBinError(iEta,iPhi);
+      flowFitOnlyHist->SetBinError(iEta,iPhi,0,0);
+      }
+    }
+
   plot(histBaseName+"_flowOnlyHist2D",canvasConfig2DLinear, graphConfigs2D[0],
        fitConfig.xTitle,xLow,xHigh,
        fitConfig.yTitle,yLow,yHigh,
@@ -653,16 +667,22 @@ void BidimGaussFitter::fullFit(TH2 *data, BidimGaussFitConfiguration & fitConfig
   // ================================
   // Prepare the full fit
   // ================================
-  // Exclude the (0,0) region from the fit...
-//  for (int iEta=14; iEta<=18; iEta++)
-//  {
-//  for (int iPhi=14; iPhi<=18; iPhi++)
+//  for (int iEta=1; iEta<=nx; iEta++)
 //    {
-//    dataHist->SetBinError(iEta,iPhi,1.0E10);
+//    for (int iPhi=1; iPhi<=ny; iPhi++)
+//      {
+//      error = dataHist->GetBinError(iEta,iPhi);
+//      dataHist->SetBinError(iEta,iPhi,0.05*error);
+//      }
 //    }
-//  }
-
-
+  //Exclude the (0,0) region from the fit...
+  for (int iEta=14; iEta<=18; iEta++)
+  {
+  for (int iPhi=14; iPhi<=18; iPhi++)
+    {
+    dataHist->SetBinError(iEta,iPhi,1.0E10);
+    }
+  }
 
   dataHist->GetXaxis()->SetRange(xLowBin,xHighBin);
   dataHist->GetYaxis()->SetRange(yLowBin,yHighBin);

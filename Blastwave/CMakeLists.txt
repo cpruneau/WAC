@@ -9,9 +9,8 @@ ROOT_GENERATE_DICTIONARY(G__Blastwave  BWModelConfiguration.hpp BWModelEventGene
 # Create a shared library with geneated dictionary
 ################################################################################################
 add_library(Blastwave SHARED  BWModelConfiguration.cpp BWModelEventGenerator.cpp G__Blastwave.cxx)
-target_link_libraries(Blastwave Base EGLib PythiaLib EGPythiaLib  ${ROOT_LIBRARIES} ${EXTRA_LIBS} )
+target_link_libraries(Blastwave Base  ${ROOT_LIBRARIES} ${EXTRA_LIBS} )
 target_include_directories(Blastwave  PUBLIC Base Blastwave ${EXTRA_INCLUDES} ) 
-
 
 # RunBWModelSimulation app
 add_executable(RunBWModelSimulation RunBWModelSimulation.cpp)

@@ -91,7 +91,7 @@ int G2Width()
   double chi2Ndf[10];
 
   TString fileName;
-  for (int iFile=0;iFile<8;iFile++)
+  for (int iFile=0;iFile<1;iFile++)
   {
   fileName = inputPath+*inputFileNames[iFile];
   inputFiles[iFile] = new TFile(fileName,"OLD");
@@ -127,7 +127,7 @@ int G2Width()
   fitter->printAllCanvas(outputPath);
 
   cout << "================================================================================ " << endl;
-  for (int iFile=0;iFile<8;iFile++)
+  for (int iFile=0;iFile<1;iFile++)
   {
   cout << iFile
   << "  ETA: " << sigmaEta[iFile] <<  " +- " << sigmaEtaErr[iFile]

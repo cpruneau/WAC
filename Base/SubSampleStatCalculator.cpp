@@ -84,7 +84,7 @@ void SubSampleStatCalculator::execute()
     {
     collection = new HistogramCollection(inputFileName,400);;
     collection->loadCollection(inputFile);
-    collectionAvg->squareDifferenceCollection(*collection, sumWeights, weight, (iFile==(nFiles-1)) ? nFiles : 0);
+    collectionAvg->squareDifferenceCollection(*collection, sumWeights, weight, (iFile==(nFiles-1)) ? nFiles : -iFile);
     sumWeights += weight;
     delete collection;
     delete inputFile;

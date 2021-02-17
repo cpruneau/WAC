@@ -360,3 +360,21 @@ void Plotter::setProperties(TGraph * g, const GraphConfiguration & graphConfigur
   TAxis * yAxis = (TAxis *) g->GetYaxis();
   yAxis->SetTitle(yTitle);
 }
+
+
+// ======================================================================
+// Set Default Style for Plots
+// ======================================================================
+void Plotter::setDefaultOptions(bool color)
+{
+  if (color)
+    gStyle->SetPalette(1,0);
+  else
+    gStyle->SetPalette(7,0);
+  gStyle->SetOptStat(0);
+  gStyle->SetOptFit(0);
+  gStyle->SetOptDate(0);
+  gStyle->SetOptTitle(0);
+  gStyle->SetPadBorderMode(0);
+
+}

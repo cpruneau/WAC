@@ -8,6 +8,7 @@
 #ifndef WAC_HistogramCollection
 #define WAC_HistogramCollection
 #include <stdio.h>
+#include "TROOT.h"
 #include "TClass.h"
 #include "TH1D.h"
 #include "TH1F.h"
