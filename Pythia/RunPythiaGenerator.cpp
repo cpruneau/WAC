@@ -18,8 +18,8 @@
 int main()
 {
   EventLoop * eventLoop = new EventLoop("RunPythiaGenerator");
-  eventLoop->setNEventRequested(10000000);
-  eventLoop->setNEventReported(1000000);
+  eventLoop->setNEventRequested(1000000);
+  eventLoop->setNEventReported(10000);
   //eventLoop->setReportLevel(MessageLogger::Debug);
   Event * event = nullptr; //Event::getEvent();
   // ==========================
@@ -42,7 +42,7 @@ int main()
                                                      pythiaOptions);
   pc->dataOutputUsed = true;
   pc->dataConversionToWac = false;
-  pc->dataOutputFileName = "Pythia_pp_7000_10million.root";
+  pc->dataOutputFileName = "Pythia_pp_7000_1million.root";
   pc->dataOutputTreeName = "PythiaTree";
   pc->dataOutputPath     = getenv("WAC_OUTPUT_DATA_PATH");
   EventFilter     * eventFilterGen    = nullptr;// new EventFilter(EventFilter::MinBias,0.0,0.0);

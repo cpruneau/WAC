@@ -25,7 +25,7 @@ int main()
   EventLoop * eventLoop = new EventLoop("RunPythiaSimulationSingleParticle");
   MessageLogger::LogLevel messageLevel = MessageLogger::Info;
   eventLoop->setNEventRequested(10000000);
-  eventLoop->setNEventReported(1000000);
+  eventLoop->setNEventReported(100);
   eventLoop->setReportLevel(messageLevel);
   eventLoop->setNEventPartialSave(1000000);
   eventLoop->setPartialSave(true);
@@ -99,12 +99,12 @@ int main()
   pc->dataOutputUsed = false;
   pc->dataConversionToWac = true;
   
-  eventLoop->addTask( new PythiaEventGenerator("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
+  //eventLoop->addTask( new PythiaEventGenerator("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
   
   pc->dataInputFileName = "Pythia_pp_7000.root";
   pc->dataInputTreeName = "PythiaTree";
-  pc->dataInputPath     = getenv("WAC_INPUT_DATA_PATH");
-  //eventLoop->addTask( new PythiaEventReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
+  pc->dataInputPath     = getenv("WAC_OUTPUT_DATA_PATH");
+  eventLoop->addTask( new PythiaEventReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
 
   eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM", ac, event, eventFilter, particleFilters, messageLevel) );
   eventLoop->run();
