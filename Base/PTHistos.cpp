@@ -103,10 +103,10 @@ PTHistos::~PTHistos()
 	delete[] reorder;
 	delete[] orders;
 
-	for(int i = 0; i < totEvents; i++)
+	/*for(int i = 0; i < totEvents; i++)
 	{
-		delete[] SValues[i];
-	}
+		delete[] SValues[i];// already deleted
+	}*/
 	delete[] SValues;
 	if (reportDebug())  cout << "PTHistos::DTOR(...) Completed" << endl;
 }
@@ -538,30 +538,46 @@ void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments,double ** 
 	//fill SValues normalized by counts and average pT's
 	for(int iEvent = 0; iEvent < ac.totEvents;iEvent++)
 	{
+		SValues[iEvent] = new double [size]();
+		int bin = pT[0]->FindBin(mults[iEvent]);
+		calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent, numParticles[iEvent],pT );//calculate the deviation using this bin of the average transverse momentum
 		for(int iHisto = 0; iHisto <size; iHisto++)
 		{
 			if(yields[iEvent][iHisto] != 0)
 			{
-				SValues[iEvent] = new double [size]();
-				int bin = pT[0]->FindBin(mults[iEvent]);
-				calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent, numParticles[iEvent],pT );//calculate the deviation using this bin of the average transverse momentum
 				hS[0][iHisto]->Fill(mults[iEvent],  SValues[iEvent][iHisto], 1.0);//weight is always 1.0
-				if (ac.ptCorrelatorVsMult)	
+			}
+		}
+
+		if (ac.ptCorrelatorVsMult)	
+		{
+			bin = pT_vsMult[0]->FindBin(mults[iEvent]);
+			calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent, numParticles[iEvent],pT_vsMult);
+			for(int iHisto = 0; iHisto <size; iHisto++)
+			{
+				if(yields[iEvent][iHisto] != 0)
 				{
-					bin = pT_vsMult[0]->FindBin(mults[iEvent]);
-					calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent, numParticles[iEvent],pT_vsMult);
 					hS_vsMult[0][iHisto]->Fill(mults[iEvent], SValues[iEvent][iHisto] , 1.0);
 				}
-				if (ac.ptCorrelatorVsCent)	
+			}	
+		}
+
+		if (ac.ptCorrelatorVsCent)	
+		{
+			bin = pT_vsCent[0]->FindBin(cents[iEvent]);
+			calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent, numParticles[iEvent],pT_vsCent);
+			for(int iHisto = 0; iHisto <size; iHisto++)
+			{
+				if(yields[iEvent][iHisto] != 0)
 				{
-					bin = pT_vsCent[0]->FindBin(cents[iEvent]);
-					calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent,  numParticles[iEvent],pT_vsCent);
 					hS_vsCent[0][iHisto]->Fill(cents[iEvent], SValues[iEvent][iHisto] , 1.0);
 				}
-			}
-
+			}	
 		}
+		delete SValues[iEvent]; // not needed after this
 	}
+
+
 	for(int iHisto = 0; iHisto < size; iHisto++)
 	{
 		hS[1][iHisto]->Add(hS[0][iHisto]);
@@ -903,7 +919,7 @@ void PTHistos::calculatePTDeviationMoments(double *** transverseMomentumMoments,
 	for(int iFilter = 0; iFilter < ac.numTypes ; iFilter++)
 	{
 		//Use the pT moments, stored from each event to calculate the pT deviation moments
-		//These equations come simply from binomial theorem
+		//These equations come simply from expanding the deviation using binomial theorem, and then splitting the sum into separate sums
 		nParticles = yields[iEvent][reorder2[iFilter]];
 		n1[iFilter]= transverseMomentumMoments[iEvent][iFilter][0] - nParticles * pTHisto[iFilter]->GetBinContent(bin);
 		if(maxOrder > 1) n2[iFilter]= transverseMomentumMoments[iEvent][iFilter][1] - 2 * transverseMomentumMoments[iEvent][iFilter][0] * pTHisto[iFilter]->GetBinContent(bin) + nParticles * pTHisto[iFilter]->GetBinContent(bin) * pTHisto[iFilter]->GetBinContent(bin);
@@ -1002,6 +1018,8 @@ void PTHistos::calculatePTDeviationMoments(double *** transverseMomentumMoments,
 	{
 		SValues[iEvent][iHisto] = tempSValues[reorder[iHisto]];
 	}
+
+	delete [] tempSValues;
 
 	if (reportDebug())  cout << "PTHistos::calculatePTDeviationMoments(...) Completed." << endl;
 }
