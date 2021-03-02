@@ -25,7 +25,7 @@ int main()
   EventLoop * eventLoop = new EventLoop("RunPythiaSimulationPtCorrelation");
   MessageLogger::LogLevel messageLevel = MessageLogger::Info;
   eventLoop->setNEventRequested(10000000);
-  eventLoop->setNEventReported(100);
+  eventLoop->setNEventReported(10000);
   eventLoop->setReportLevel(messageLevel);
   eventLoop->setNEventPartialSave(1000000);
   eventLoop->setPartialSave(true);
@@ -50,11 +50,11 @@ int main()
   ac->rootOuputFileName =  "/Pythia";
   ac->nBins_mult   = 100;
   ac->min_mult     = 0.0;
-  ac->max_mult     = 400.0;
+  ac->max_mult     = 50.0;
   ac->nBins_cent   = 100;
   ac->min_cent     = 0.0;
-  ac->max_cent     = 400.0;
-  ac->ptCorrelatorVsCent     = false;
+  ac->max_cent     = 1.0;
+  ac->ptCorrelatorVsCent     = true;
   ac->ptCorrelatorVsMult     = true;
   ac->totEvents = eventLoop->getNEventRequested();
   ac->maxOrder = 4;
@@ -90,6 +90,7 @@ int main()
   pythiaOptions[nOptions++] = new TString("Next:numberShowProcess = 0");         // print process record n times
   pythiaOptions[nOptions++] = new TString("Next:numberShowEvent = 0");
   pythiaOptions[nOptions++] = new TString("SoftQCD:all = on");                   // Allow total sigma = elastic/SD/DD/ND
+  //pythiaOptions[nOptions++] = new TString("HardQCD:all = on");                   // Allow total sigma = elastic/SD/DD/ND
                                                                                  //pythiaOptions[nOptions++] = new TString("HardQCD:all = on");   
   PythiaConfiguration * pc = new PythiaConfiguration(2212 /* p */,
                                                      2212 /* p */,
@@ -99,12 +100,12 @@ int main()
   pc->dataOutputUsed = false;
   pc->dataConversionToWac = true;
   
-  eventLoop->addTask( new PythiaEventGenerator("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
+  //eventLoop->addTask( new PythiaEventGenerator("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
   
   pc->dataInputFileName = "Pythia_pp_7000.root";
   pc->dataInputTreeName = "PythiaTree";
   pc->dataInputPath     = getenv("WAC_OUTPUT_DATA_PATH");
-  //eventLoop->addTask( new PythiaEventReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
+  eventLoop->addTask( new PythiaEventReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
 
   eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM", ac, event, eventFilter, particleFilters, messageLevel) );
   eventLoop->run();

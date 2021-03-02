@@ -231,7 +231,7 @@ void PTHistos::createHistograms()
 		{
 			hS[iFunc][iHisto] = createProfile( names[iFunc][iHisto], 1, ac.min_mult , ac.max_mult ,"mult",titles[iFunc][iHisto] + "}" );
 			if (ac.ptCorrelatorVsMult)	hS_vsMult[iFunc][iHisto] = createProfile(names[iFunc][iHisto] + "_vsMult",ac.nBins_mult,ac.min_mult, ac.max_mult, "mult", titles[iFunc][iHisto] + "}");
-			if (ac.ptCorrelatorVsCent)	hS_vsCent[iFunc][iHisto] = createProfile(names[iFunc][iHisto] + "_vsCent",ac.nBins_mult,ac.min_mult, ac.max_mult , "cent", titles[iFunc][iHisto] + "}");
+			if (ac.ptCorrelatorVsCent)	hS_vsCent[iFunc][iHisto] = createProfile(names[iFunc][iHisto] + "_vsCent",ac.nBins_cent,ac.min_cent, ac.max_cent , "cent", titles[iFunc][iHisto] + "}");
 		}
 	}
 	for(int iHisto = 0; iHisto < size; iHisto++)
@@ -240,7 +240,7 @@ void PTHistos::createHistograms()
 		{
 			hC[i][iHisto] = createProfile( names2[i][iHisto], 1, ac.min_mult, ac.max_mult,"mult",titles2[i][iHisto] + "}" );
 			if (ac.ptCorrelatorVsMult)	hC_vsMult[i][iHisto] = createProfile(names2[i][iHisto] + "_vsMult",ac.nBins_mult,ac.min_mult , ac.max_mult , "mult", titles2[i][iHisto] + "}");
-			if (ac.ptCorrelatorVsCent)	hC_vsCent[i][iHisto] = createProfile(names2[i][iHisto] + "_vsCent",ac.nBins_cent,ac.min_mult , ac.max_mult , "cent", titles2[i][iHisto] + "}");
+			if (ac.ptCorrelatorVsCent)	hC_vsCent[i][iHisto] = createProfile(names2[i][iHisto] + "_vsCent",ac.nBins_cent,ac.min_cent , ac.max_cent , "cent", titles2[i][iHisto] + "}");
 		}
 	}
 	histoIndex = 0;
@@ -577,7 +577,6 @@ void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments,double ** 
 		delete SValues[iEvent]; // not needed after this
 	}
 
-
 	for(int iHisto = 0; iHisto < size; iHisto++)
 	{
 		hS[1][iHisto]->Add(hS[0][iHisto]);
@@ -594,7 +593,6 @@ void PTHistos::fillDerivedHistos(double *** transverseMomentumMoments,double ** 
 			hS_vsCent[1][iHisto]->Divide(h_counts_vsCent[iHisto]);
 		} 
 	}
-
 	histoIndex = 0;
 	fillNormalizedPTValues(maxOrder - 1, 0, hS[0][0], hS[0], pT, hS[2]);//hS[0][0] has no meaning, the pointer is reset in the function anyways
 
@@ -691,7 +689,7 @@ void PTHistos::fillNormalizedPTValues( int depth, int partIndex, TProfile * prod
 		{
 			//Use a unique name for the histogram so that there are no naming conflicts and therefore no memory leaks
 			//(histograms with the same name as an existing histogram overwrite the existing histogram)
-			newProduct = new TProfile( s + (histoIndex ) + "s", s + (histoIndex ) + "s", product->GetNbinsX() ,ac.min_mult, ac.max_mult,  "mult");
+			newProduct = new TProfile( s + (histoIndex +product->GetXaxis()->GetXmax()) + "s", s + (histoIndex+product->GetXaxis()->GetXmax() ) + "s", product->GetNbinsX() ,product->GetXaxis()->GetXmin(), product->GetXaxis()->GetXmax(),  "mult");
 			newProduct->Add(product);
 			h1 = newProduct->ProjectionX();
 			h2 = pTHistos[i]->ProjectionX();
@@ -703,7 +701,7 @@ void PTHistos::fillNormalizedPTValues( int depth, int partIndex, TProfile * prod
 			//if depth is maxOrder - 1, product is bogus pointer. 
  			//We would like to multiply histograms, but there is no "identity" histogram, like "1" is the identity number for multiplication
  			//If these were numbers, productC would start as 1, and there would be no need to differentiate here
-			newProduct = new TProfile(s + histoIndex  , s + histoIndex ,pTHistos[i]->GetNbinsX() ,ac.min_mult, ac.max_mult,  "mult");
+			newProduct = new TProfile(s + (histoIndex+product->GetXaxis()->GetXmax())  , s + (histoIndex+product->GetXaxis()->GetXmax()) ,pTHistos[i]->GetNbinsX() ,pTHistos[i]->GetXaxis()->GetXmin(), pTHistos[i]->GetXaxis()->GetXmax(),  "mult");
 			newProduct->Add(pTHistos[i]);
 		}	
 
@@ -762,8 +760,8 @@ void PTHistos::calculateCumulants(TProfile ** SHistos, TProfile **CHistos, int n
 
 		//Use a unique name for the histogram so that there are no naming conflicts and therefore no memory leaks
 		//(histograms with the same name as an existing histogram overwrite the existing histogram)
-		CHistos[iHisto] = new TProfile(name + (nBins * size + iHisto), name + (nBins * size + iHisto), nBins, min, max);
-		TProfile * sum = new TProfile(name + (nBins * size + iHisto) +"s", name  + (nBins * size + iHisto) + "s", nBins, min, max);
+		CHistos[iHisto] = new TProfile(name + (nBins * max * size + iHisto), name + (nBins * size + iHisto), nBins, min, max);
+		TProfile * sum = new TProfile(name + (nBins * max * size + iHisto) +"s", name  + (nBins * size + iHisto) + "s", nBins, min, max);
 
 		calcRecSum( CHistos, ind, set, len, set, len, sum, used, curInd, 1, sum,0 );//the first "sum" has no meaning, the pointer is reset in the function anyways			
 		CHistos[iHisto]->Add(newSHistos[iHisto], sum, 1, -1);
@@ -827,14 +825,14 @@ void PTHistos::calcRecSum(TProfile **CHistos,  int* iHisto, int* Subset, int len
 				TString s1 = CHistos[iSub]->GetTitle();
 				//Use a unique name for the histogram so that there are no naming conflicts and therefore no memory leaks
 				//(histograms with the same name as an existing histogram overwrite the existing histogram)
-				tempProduct = new TProfile( s1 + depth, s1 + depth, CHistos[iSub]->GetNbinsX() ,ac.min_mult, ac.max_mult,  "mult");
+				tempProduct = new TProfile( s1 + depth, s1 + depth, CHistos[iSub]->GetNbinsX() ,CHistos[iSub]->GetXaxis()->GetXmin(), CHistos[iSub]->GetXaxis()->GetXmax(),  "mult");
 				tempProduct->Add(CHistos[iSub]);
 
 			}
 			else
 			{
 				TString s1 = CHistos[iSub]->GetTitle();
-				tempProduct = new TProfile( s1+ depth, s1 + depth, CHistos[iSub]->GetNbinsX() ,ac.min_mult, ac.max_mult,  "mult");
+				tempProduct = new TProfile( s1+ depth, s1 + depth, CHistos[iSub]->GetNbinsX() ,CHistos[iSub]->GetXaxis()->GetXmin(), CHistos[iSub]->GetXaxis()->GetXmax(),  "mult");
 				tempProduct->Add(productC);
 				h1 = tempProduct->ProjectionX();
 				h2 = CHistos[iSub]->ProjectionX();
@@ -850,14 +848,14 @@ void PTHistos::calcRecSum(TProfile **CHistos,  int* iHisto, int* Subset, int len
 			if(!depth)
 			{
 				TString s1 = CHistos[iSub]->GetTitle();
-				tempProduct2 = new TProfile( s1 + "s" + depth, s1 + "s" + depth, CHistos[iSub]->GetNbinsX() ,ac.min_mult, ac.max_mult,  "mult");
+				tempProduct2 = new TProfile( s1 + "s" + depth, s1 + "s" + depth, CHistos[iSub]->GetNbinsX() ,CHistos[iSub]->GetXaxis()->GetXmin(), CHistos[iSub]->GetXaxis()->GetXmax(),  "mult");
 				tempProduct2->Add(CHistos[iComp]);
 
 			}
 			else
 			{
 				TString s1 = CHistos[iSub]->GetTitle();
-				tempProduct2 = new TProfile( s1 + "s" + depth, s1 + "s" + depth, CHistos[iSub]->GetNbinsX() ,ac.min_mult, ac.max_mult,  "mult");
+				tempProduct2 = new TProfile( s1 + "s" + depth, s1 + "s" + depth, CHistos[iSub]->GetNbinsX() ,CHistos[iSub]->GetXaxis()->GetXmin(), CHistos[iSub]->GetXaxis()->GetXmax(),  "mult");
 				tempProduct2->Add(productC);
 				h1 = tempProduct2->ProjectionX();
 				h2 = CHistos[iComp]->ProjectionX();

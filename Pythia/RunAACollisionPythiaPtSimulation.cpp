@@ -93,7 +93,7 @@ int main()
   ac->max_mult     = 1000000.0;
   ac->nBins_cent   = 100;
   ac->min_cent     = 0.0;
-  ac->max_cent     = 400.0;
+  ac->max_cent     = 1.0;
   ac->ptCorrelatorVsCent     = false;
   ac->ptCorrelatorVsMult     = true;
   ac->totEvents = eventLoop->getNEventRequested();
@@ -181,10 +181,10 @@ int main()
   geometryConfiguration->bMaxR = 8.0;
 
 
-  geometryConfiguration->nnCrossSection = 6.9;  // in fm^2 -- Config C
+  geometryConfiguration->nnCrossSection = 4.5;  // in fm^2 -- Config C
   geometryConfiguration->nBins_b = 120;
   geometryConfiguration->min_b   = 0.0;
-  geometryConfiguration->max_b   = 24.0;
+  geometryConfiguration->max_b   = 18.0;
   geometryConfiguration->nBins_nPart = 100;
   geometryConfiguration->min_nPart   = 0;
   geometryConfiguration->max_nPart   = 500;
