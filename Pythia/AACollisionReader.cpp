@@ -30,87 +30,100 @@ AACollisionReader::~AACollisionReader()
 }
 void AACollisionReader::initialize()
 {
-  if (reportStart("void AACollisionReader::initialize()",getTaskName(),"initialize()"))  ;
-  PythiaConfiguration * pc = (PythiaConfiguration*) getTaskConfiguration();
+  if (reportStart("void AACollisionReader::initialize()", getTaskName(), "initialize()"))
+    ;
+  PythiaConfiguration *pc = (PythiaConfiguration *)getTaskConfiguration();
   removePhotons = pc->removePhotons;
   TString inputFileName = pc->dataInputPath;
   inputFileName += "/";
   inputFileName += pc->dataInputFileName;
-  if (reportInfo("PythiaEventReader",getTaskName(),"initialize()")) cout << "Opening file: " << inputFileName << endl;
-    inputDataFile = TFile::Open(inputFileName);
-    if (inputDataFile)
-      {
-      if (reportFatal("PythiaEventReader",getTaskName(),"initialize()")) cout << "Unable to open file: " << inputFileName <<endl;
-      postTaskFatal();
-      return;
-      }
+  if (reportInfo("AACollisionReader", getTaskName(), "initialize()"))
+    cout << "Opening file: " << inputFileName << endl;
+  inputDataFile = TFile::Open(inputFileName);
+  if (!inputDataFile)
+  {
+    if (reportFatal("AACollisionReader", getTaskName(), "initialize()"))
+      cout << "Unable to open file: " << inputFileName << endl;
+    postTaskFatal();
+    return;
+  }
   for (int i = 0; i < 3; i++)
   {
-    TTree * inputTree = nullptr;
-    inputDataFile->GetObject(pc->ppdataInputTreeName[i],inputTree);
+    TTree *inputTree = nullptr;
+    inputDataFile->GetObject(pc->ppdataInputTreeName[i], inputTree);
     if (!inputTree)
+    {
+      if (!ppOnly && i > 0)
       {
-        if( !ppOnly && i >0)
-        {
-          if (reportFatal("PythiaEventReader",getTaskName(),"initialize()"))
+        if (reportFatal("AACollisionReader", getTaskName(), "initialize()"))
           cout << "No inputTree named: " << pc->ppdataInputTreeName[i] << " in file: " << inputFileName << endl;
-          postTaskFatal();
-        }
-      return;
+        postTaskFatal();
+        return;
       }
+      continue;
+    }
     Init(i, inputTree);
   }
-  
-  
-  if (reportDebug("PythiaEventReader",getTaskName(),"initialize()")) cout << "PythiaEventReader::initialize() Completed" << endl;
-  
-  Factory<Particle> * particleFactory = Particle::getFactory();
-  particleFactory -> initialize(Particle::factorySize * 2000);
+
+  if (reportDebug("AACollisionReader", getTaskName(), "initialize()"))
+    cout << "AACollisionReader::initialize() Completed" << endl;
+
+  Factory<Particle> *particleFactory = Particle::getFactory();
+  particleFactory->initialize(Particle::factorySize * 2000);
 }
 
 void AACollisionReader::execute()
 {
-  Factory<Particle> * particleFactory = Particle::getFactory();
+  Factory<Particle> *particleFactory = Particle::getFactory();
   event->reset();
   //particleFactory->reset();
   int thePid;
   double charge, mass, p_x, p_y, p_z, p_e;
-  Particle * particle;
+  Particle *particle;
   Particle aParticle;
   int nParticles;
   int particleAccepted = 0;
   int particleCounted = 0;
   int nCollisions = collisionGeometry->nBinary; //get the number of binary collisions
-  int pp = 0; // corresponds to pp,pn,np,or nn collision
-  if (reportDebug("AACollisionPythiaGenerator",getTaskName(),"execute()")) cout << "nCollisions:" << nCollisions << endl;
+  int pp = 0;                                   // corresponds to pp,pn,np,or nn collision
+  if (reportDebug("AACollisionPythiaGenerator", getTaskName(), "execute()"))
+    cout << "nCollisions:" << nCollisions << endl;
   for (int iCollision = 0; iCollision < nCollisions; iCollision++)
   {
     if (!ppOnly)
     {
-    CollisionGeometry::NucleonNucleonType nnType = collisionGeometry->getNNTpye(iCollision);
-    switch (nnType)
+      CollisionGeometry::NucleonNucleonType nnType = collisionGeometry->getNNTpye(iCollision);
+      switch (nnType)
       {
-        case CollisionGeometry::ProtonProton   : pp = 0; break;
-        case CollisionGeometry::ProtonNeutron  : pp = 1; break;
-        case CollisionGeometry::NeutronProton  : pp = 2; break;
-        case CollisionGeometry::NeutronNeutron : pp = 3; break;
+      case CollisionGeometry::ProtonProton:
+        pp = 0;
+        break;
+      case CollisionGeometry::ProtonNeutron:
+        pp = 1;
+        break;
+      case CollisionGeometry::NeutronProton:
+        pp = 2;
+        break;
+      case CollisionGeometry::NeutronNeutron:
+        pp = 3;
+        break;
       }
     }
 
-  bool seekingEvent = true;
-  while (seekingEvent)
+    bool seekingEvent = true;
+    while (seekingEvent)
     {
       //if (reportDebug("AACollisionReader",getTaskName(),"execute()")) cout << "jentry:" << jentry << endl;
       // load another event from the root file/TTree
-      Long64_t ientry = LoadTree(pp,ppjentry[pp]++);
+      Long64_t ientry = LoadTree(pp, ppjentry[pp]++);
       //if (reportDebug("AACollisionReader",getTaskName(),"execute()")) cout << "ientry:" << ientry << endl;
-      
+
       /*if (ientry < 0) // returning a null point is an indication that there are no more events in the file or stack of files.
       {
         postTaskEod(); // end of data
         return;
       }*/
-      if(ientry < 0)
+      if (ientry < 0)
       {
         ppjentry[pp] = 0; // move back to the start of the file
       }
@@ -124,14 +137,17 @@ void AACollisionReader::execute()
     double eventAngle = TMath::TwoPi() * gRandom->Rndm();
     double cosPhi = cos(eventAngle);
     double sinPhi = sin(eventAngle);
-    if (reportDebug("AACollisionReader",getTaskName(),"execute()")) cout << "Starting copy loop into event..." << endl;
+    if (reportDebug("AACollisionReader", getTaskName(), "execute()"))
+      cout << "Starting copy loop into event..." << endl;
     for (int iParticle = 0; iParticle < nParticles; iParticle++)
     {
       int ist = particles_fStatusCode[iParticle];
-      if (ist <= 0) continue;
+      if (ist <= 0)
+        continue;
       int pdg = particles_fPdgCode[iParticle];
       mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
-      if ( mass < 0.0001) continue; // no photons, electrons...
+      if (mass < 0.0001)
+        continue; // no photons, electrons...
       charge = TDatabasePDG::Instance()->GetParticle(pdg)->Charge() / 3.0;
       double px = particles_fPx[iParticle];
       double py = particles_fPy[iParticle];
@@ -149,7 +165,8 @@ void AACollisionReader::execute()
         baryon = -baryon;
       aParticle.baryon = baryon;
       particleCounted++;
-      if (!particleFilter->accept(aParticle))continue;
+      if (!particleFilter->accept(aParticle))
+        continue;
       particle = particleFactory->getNextObject();
       *particle = aParticle;
       particleAccepted++;
@@ -160,30 +177,34 @@ void AACollisionReader::execute()
     nEventProcessed++;
     nEventAccepted++;
 
-      if (reportDebug("AACollisionReader",getTaskName(),"execute()"))
-        {
-        cout << "No of accepted Particles : "<< particleAccepted<<endl;
-        cout << " No of counted Particles : "<< particleCounted <<endl;
-        }
+    if (reportDebug("AACollisionReader", getTaskName(), "execute()"))
+    {
+      cout << "No of accepted Particles : " << particleAccepted << endl;
+      cout << " No of counted Particles : " << particleCounted << endl;
+    }
   }
 }
 
 Long64_t AACollisionReader::LoadTree(int i, Long64_t entry)
 {
   // Set the environment to read one entry
-  if (!ppfChain[i]) return -5;
+  if (!ppfChain[i])
+    return -5;
   Long64_t centry = ppfChain[i]->LoadTree(entry);
-  if (centry < 0) return centry;
-  if (ppfChain[i]->GetTreeNumber() != ppfCurrent[i]) {
+  if (centry < 0)
+    return centry;
+  if (ppfChain[i]->GetTreeNumber() != ppfCurrent[i])
+  {
     ppfCurrent[i] = ppfChain[i]->GetTreeNumber();
     Notify();
   }
   return centry;
 }
 
-void AACollisionReader::Init(int i,TTree *tree)
+void AACollisionReader::Init(int i, TTree *tree)
 {
-  if (!tree) return;
+  if (!tree)
+    return;
   ppfChain[i] = tree;
   ppfCurrent[i] = -1;
   ppfChain[i]->SetMakeClass(1);
