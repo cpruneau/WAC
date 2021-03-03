@@ -68,6 +68,8 @@ public:
   int    nOptions;
   TString ** options;
 
+  TString  ppdataInputTreeName[4];
+
 
 ClassDef(PythiaConfiguration,0)
 };

@@ -70,7 +70,7 @@ void AACollisionPythiaGenerator::initialize()
     nnPythia->Initialize(neutronId, neutronId, pc->energy);
     }
   Factory<Particle> * particleFactory = Particle::getFactory();
-  particleFactory -> initialize(Particle::factorySize * 5000);
+  particleFactory -> initialize(Particle::factorySize * 2000);
   if (reportEnd("AACollisionPythiaGenerator",getTaskName(),"initialize()"))
     ;
 }
@@ -79,7 +79,7 @@ void AACollisionPythiaGenerator::execute()
 {
   Factory<Particle> * particleFactory = Particle::getFactory();
   event->reset();
-  particleFactory->reset();
+  //particleFactory->reset();
   int thePid;
   double charge, mass, p_x, p_y, p_z, p_e;
   Particle * particle;
@@ -129,7 +129,7 @@ void AACollisionPythiaGenerator::execute()
     if (ist <= 0) continue;
     int pdg = part.GetPdgCode();
     mass = TDatabasePDG::Instance()->GetParticle(pdg)->Mass();
-    if (removePhotons && mass<0.002) continue;
+    if (removePhotons && mass<0.0001) continue;
     charge = TDatabasePDG::Instance()->GetParticle(pdg)->Charge();
     p_x  = cosPhi*part.Px() - sinPhi*part.Py();
     p_y  = sinPhi*part.Px() + cosPhi*part.Py();
@@ -143,10 +143,10 @@ void AACollisionPythiaGenerator::execute()
     *particle = aParticle;
     particleAccepted++;
     }
-  event->nParticles   += particleAccepted;
-  event->multiplicity += particleCounted;
   //if (reportDebug()) cout << "Generated Event " << eventsProcessed + 1 << ":" << i + 1 << endl;
   }
+  event->nParticles   += particleAccepted;
+  event->multiplicity += particleCounted;
   incrementEventProcessed();
   //if (!eventFilter->accept(*event)) return;
   incrementEventAccepted(); // count events used to fill histograms and for scaling at the end...

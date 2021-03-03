@@ -80,6 +80,7 @@ void CollisionGeometryGenerator::reset()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void CollisionGeometryGenerator::execute()
 {
+  reset();
   if (reportStart("CollisionGeometryGenerator",getTaskName(),"CTOR()"))
     ;
   Nucleus * nucleusA = collisionGeometry->getNucleusA();

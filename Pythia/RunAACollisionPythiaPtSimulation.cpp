@@ -28,7 +28,7 @@ int main()
   MessageLogger::LogLevel messageLevel = MessageLogger::Info;
 
   EventLoop * eventLoop = new EventLoop("RunAACollisionPythiaPtSimulation");
-  eventLoop->setNEventRequested(1000000);
+  eventLoop->setNEventRequested(20);
   eventLoop->setNEventReported(100000);
   eventLoop->setReportLevel(messageLevel);
   eventLoop->setNEventPartialSave(-1);
@@ -69,6 +69,14 @@ int main()
                                                      true,     // only pp
                                                      true,     // remove photons
                                                      10000);
+  pc->dataOutputUsed = false;
+  pc->dataConversionToWac = true;
+  
+  //eventLoop->addTask( new PythiaEventGenerator("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
+  
+  pc->dataInputFileName = "Pythia_pp_7000.root";
+  pc->ppdataInputTreeName[0] = "PythiaTree";
+  pc->dataInputPath     = getenv("WAC_OUTPUT_DATA_PATH");
 
 
 
@@ -90,7 +98,7 @@ int main()
   ac->rootOuputFileName =  "/Pythia";
   ac->nBins_mult   = 100;
   ac->min_mult     = 0.0;
-  ac->max_mult     = 1000000.0;
+  ac->max_mult     = 80000.0;
   ac->nBins_cent   = 100;
   ac->min_cent     = 0.0;
   ac->max_cent     = 1.0;
@@ -111,7 +119,7 @@ int main()
   // Radial Boost Configuration
   ///////////////////////////////////////////////////////////////////////////////
   RadialBoostConfiguration * rc = new RadialBoostConfiguration("PYTHIARadialBoost", "PYTHIARadialBoost", "1.0");
-  rc->param_a = 0.9;
+  rc->param_a = 0.1;//0.1 hardboost, 0.05 soft boost
   rc->param_b = 1.0;
   rc->nBins_phi = 72;
   rc->min_phi = 0.0;
@@ -162,7 +170,7 @@ int main()
   geometryConfiguration->rootOuputFileName =  "/CollisionGeometry";
   geometryConfiguration->histoBaseName     =  "geom";
   geometryConfiguration->minB = 0.0;
-  geometryConfiguration->maxB = 21.0;
+  geometryConfiguration->maxB = 18.0;
 
   // NucleusGenerator::WoodsSaxon, 6.62 , 0.546, 0.0, 11000,0.0,11.0);
   // NucleusGenerator::WoodsSaxon, 6.62 , 0.546, 0.0, 11000,0.0,11.0);
@@ -190,7 +198,7 @@ int main()
   geometryConfiguration->max_nPart   = 500;
   geometryConfiguration->nBins_nBinary = 600;
   geometryConfiguration->min_nBinary   = 0;
-  geometryConfiguration->max_nBinary   = 3000;
+  geometryConfiguration->max_nBinary   = 2000;
   geometryConfiguration->calculateDerivedHistograms = true;
 
   // ========================================================================================================
@@ -201,15 +209,10 @@ int main()
 
   eventLoop->addTask( collisionGeometryGenerator );
   eventLoop->addTask( collisionGeometryAnalyzer );
-  eventLoop->addTask( new AACollisionPythiaGenerator("AAPYTHIA",pc, collisionGeometry, event,eventFilter,particleFilter, messageLevel) );
-  pc->dataInputFileName = "Pythia_pp_7000.root";
-  pc->dataInputTreeName = "PythiaTree";
-  pc->dataInputPath     = getenv("WAC_OUTPUT_DATA_PATH");
-  Factory<Particle> * particleFactory = Particle::getFactory();
-  particleFactory -> initialize(Particle::factorySize * 5000);
-  //eventLoop->addTask( new AACollisionReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel, collisionGeometry) );
+  //eventLoop->addTask( new AACollisionPythiaGenerator("AAPYTHIA",pc, collisionGeometry, event,eventFilter,particleFilter, messageLevel) );
+  eventLoop->addTask( new AACollisionReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel, collisionGeometry) );
   eventLoop->addTask( new RadialBoostTask("PYTHIA_RADIALBOOST",rc, collisionGeometry, event, messageLevel) );
-  eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM", ac, event, eventFilter, particleFilters, messageLevel) );
+  eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM_PbPb", ac, event, eventFilter, particleFilters, messageLevel) );
   eventLoop->run();
 }
 
