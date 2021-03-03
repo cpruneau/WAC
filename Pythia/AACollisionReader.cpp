@@ -171,8 +171,9 @@ void AACollisionReader::execute()
       *particle = aParticle;
       particleAccepted++;
     }
+  }
 
-    event->nParticles += particleAccepted;
+  event->nParticles += particleAccepted;
     event->multiplicity += particleCounted;
     nEventProcessed++;
     nEventAccepted++;
@@ -182,7 +183,6 @@ void AACollisionReader::execute()
       cout << "No of accepted Particles : " << particleAccepted << endl;
       cout << " No of counted Particles : " << particleCounted << endl;
     }
-  }
 }
 
 Long64_t AACollisionReader::LoadTree(int i, Long64_t entry)
