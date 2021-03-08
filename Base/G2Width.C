@@ -91,7 +91,7 @@ int G2Width()
   double chi2Ndf[10];
 
   TString fileName;
-  for (int iFile=0;iFile<1;iFile++)
+  for (int iFile=0;iFile<11;iFile++)
   {
   fileName = inputPath+*inputFileNames[iFile];
   inputFiles[iFile] = new TFile(fileName,"OLD");
