@@ -23,35 +23,35 @@ set(WAC_ROOT "${WAC_ROOT}")
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 
 #---Locate the ROOT package and defines a number of variables (e.g. ROOT_INCLUDE_DIRS)
-find_package(ROOT REQUIRED COMPONENTS MathCore RIO Hist Tree Net )
-find_library(EG EG )
+find_package(ROOT REQUIRED COMPONENTS MathCore MathMore RIO Hist Tree Net EG)
+find_library(EG PATHS $ENV{ROOT_LIBS} )
 find_library(PYTHIA8_LIB pythia8 PATHS $ENV{PYTHIA8}/lib)
 find_library(EGPYTHIA8 EGPythia8)
 
 
 #---Define useful ROOT functions and macros (e.g. ROOT_GENERATE_DICTIONARY)
 include(${ROOT_USE_FILE})
-include_directories(${CMAKE_SOURCE_DIR} ${ROOT_INCLUDE_DIRS} "Base" "Cluster" "CollisionGeometry" "Ampt" "Epos" "WacPythia" "Eccentricity" "Blastwave" 
+include_directories(${CMAKE_SOURCE_DIR} ${ROOT_INCLUDE_DIRS} "Base" "Cluster" "CollisionGeometry" "HadronGas" "Ampt" "Epos" "WacPythia" "Eccentricity" "Blastwave" 
 "$ENV{ROOTSYS}/include" 
 "$ENV{PYTHIA8}/include" 
 "$ENV{PYTHIA8}/include/Pythia8")
 add_definitions(${ROOT_CXX_FLAGS})
 
 add_library(EG SHARED IMPORTED)
-add_library(PYTHIA8 SHARED IMPORTED)
 add_library(EGPYTHIA8 SHARED IMPORTED)
-add_library(EGLib SHARED IMPORTED)
-add_library(PythiaLib SHARED IMPORTED)
-add_library(EGPythiaLib SHARED IMPORTED)
-set_target_properties(EGLib PROPERTIES IMPORTED_LOCATION ${EG})
-set_target_properties(PythiaLib PROPERTIES IMPORTED_LOCATION ${PYTHIA8_LIB})
-set_target_properties(EGPythiaLib PROPERTIES IMPORTED_LOCATION ${EGPYTHIA8})
+add_library(PYTHIA8_LIB SHARED IMPORTED)
+##add_library(EGLib SHARED IMPORTED)
+##add_library(PythiaLib SHARED IMPORTED)
+##add_library(EGPythiaLib SHARED IMPORTED)
+set_target_properties(EG PROPERTIES IMPORTED_LOCATION ${EG})
+set_target_properties(PYTHIA8_LIB PROPERTIES IMPORTED_LOCATION ${PYTHIA8_LIB})
+set_target_properties(EGPYTHIA8 PROPERTIES IMPORTED_LOCATION ${EGPYTHIA8})
 
 
 add_subdirectory(Base)
+add_subdirectory(HadronGas)
 #add_subdirectory(Cluster)
-#add_subdirectory(CollisionGeometry)
-add_subdirectory(WacPythia)
+#add_subdirectory(WacPythia)
 #add_subdirectory(Ampt)
 add_subdirectory(Blastwave)
 #add_subdirectory(Eccentricity)

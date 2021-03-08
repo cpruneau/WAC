@@ -65,6 +65,10 @@ int RunHadronGas()
   config.maxT         = 0.200;
   config.nTypes       = 319;
   config.nStableTypes = 23;
+  config.nMass        = 120;
+  config.minMass      = 0.0;
+  config.maxMass      = 3.0;
+
   HadronGas hadronGas(pdgDataTable.Data());
   hadronGas.printParticleBasicProperties(std::cout);
 
@@ -96,6 +100,7 @@ int RunHadronGas()
   hgph[iT] ->fill(hadronGas);
   hgph[iT] ->calculateDerivedHistograms();
   }
+  CanvasConfiguration * canvasConfigurationPort = new CanvasConfiguration(CanvasConfiguration::Portrait,CanvasConfiguration::Linear);
   CanvasConfiguration * canvasConfiguration = new CanvasConfiguration(CanvasConfiguration::Landscape,CanvasConfiguration::Linear);
   CanvasConfiguration * canvasConfigurationLogY = new CanvasConfiguration(CanvasConfiguration::Landscape,CanvasConfiguration::LogY);
   CanvasConfiguration * canvasConfigurationLogZ = new CanvasConfiguration(CanvasConfiguration::Landscape,CanvasConfiguration::LogZ);
@@ -159,42 +164,79 @@ int RunHadronGas()
 
   int nX = hgph[0]->h_stableThermalYields->GetNbinsX();
 
-  for (int iX=1; iX<=23; iX++)
+  for (int iT=0;iT<config.nT;iT++)
   {
-  cout << " iX:" << iX << "    Label:" << partLabel[iX-1]->Data() << endl;
-  hgph[0]->h_stableThermalYields->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
-  hgph[0]->h_stableDecayYields->GetXaxis()  ->SetBinLabel(iX,partLabel[iX-1]->Data());
-  hgph[0]->h_stableDecayToThermalRatio->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
-  hgph[2]->h_stableThermalYields->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
-  hgph[2]->h_stableDecayYields->GetXaxis()  ->SetBinLabel(iX,partLabel[iX-1]->Data());
-  hgph[2]->h_stableDecayToThermalRatio->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
-  hgph[4]->h_stableThermalYields->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
-  hgph[4]->h_stableDecayYields->GetXaxis()  ->SetBinLabel(iX,partLabel[iX-1]->Data());
-  hgph[4]->h_stableDecayToThermalRatio->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
+  for (int iX=1; iX<=23; iX++)
+    {
+    //cout << " iX:" << iX << "    Label:" << partLabel[iX-1]->Data() << endl;
+    hgph[iT]->h_stableThermalYields->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
+    hgph[iT]->h_stableDecayYields->GetXaxis()  ->SetBinLabel(iX,partLabel[iX-1]->Data());
+    hgph[iT]->h_stableDecayToThermalRatio->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
+    hgph[iT]->h_stableDecayCorrelatedPairsYields->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
+    hgph[iT]->h_stableDecayCorrelatedPairsYields->GetYaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
+    hgph[iT]->h_stableDecayCorrelatedPairsNorm->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
+    hgph[iT]->h_stableDecayCorrelatedPairsNorm->GetYaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
 
-  hgph[4]->h_stableDecayCorrelatedPairsYields->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
-  hgph[4]->h_stableDecayCorrelatedPairsYields->GetYaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
+    hgph[iT]->h_rho2->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
+    hgph[iT]->h_rho2->GetYaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
 
-  hgph[4]->h_stableDecayCorrelatedPairsNorm->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
-  hgph[4]->h_stableDecayCorrelatedPairsNorm->GetYaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
+    hgph[iT]->h_rho1rho1->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
+    hgph[iT]->h_rho1rho1->GetYaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
 
- }
+    hgph[iT]->h_rho1thrho1th->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
+    hgph[iT]->h_rho1thrho1th->GetYaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
+
+    hgph[iT]->h_C2->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
+    hgph[iT]->h_C2->GetYaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
+
+    hgph[iT]->h_R2->GetXaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
+    hgph[iT]->h_R2->GetYaxis()->SetBinLabel(iX,partLabel[iX-1]->Data());
+    }
+
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(1,"#pi^{-} | #pi^{+}");
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(2,"K^{-} | #pi^{+}");
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(3,"#bar p | #pi^{+}");
+
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(4,"#pi^{+} | #pi^{-}");
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(5,"K^{+} | #pi^{-}");
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(6,"p | #pi^{-}");
+
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(7,"#pi^{-} | K^{+}");
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(8,"K^{-} | K^{+}");
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(9,"#bar p | K^{+}");
+
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(10,"#pi^{+} | K^{-}");
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(11,"K^{+} | K^{-}");
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(12,"p | K^{-}");
+
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(13,"#pi^{-} | p");
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(14,"K^{-} | p");
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(15,"#bar p | p");
+
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(16,"#pi^{+} | #bar p");
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(17,"K^{+} | #bar p");
+  hgph[iT]->h_stableChargeBF->GetXaxis()->SetBinLabel(18,"p | #bar p");
+
+
+
+
+  }
 
   plotter->plot("HGM_AllYields", canvasConfigurationLogY, graphConfigurations[0],
                 "Species",  0.0, 400.0,
                 "Yield",minYield,maxYield,
                 hgph[2]->h_allYields,
-                "Thermal Yields",0.22, 0.7, 0.4, 0.76, 0.055);
+                "n_{i}^{Th}",0.22, 0.7, 0.4, 0.76, 0.055);
   plotter->plot("HGM_StableThermalYields", canvasConfigurationLogY, graphConfigurations[0],
                 "Species",  0.0, 23.0,
                 "Yield",minYield,maxYield,
                 hgph[2]->h_stableThermalYields,
-                "Thermal Yields",0.2, 0.20, 0.45, 0.45, 0.055);
+                "n_{i}^{Th}",0.2, 0.20, 0.45, 0.45, 0.055);
   plotter->plot("HGM_StableDecayYields", canvasConfigurationLogY, graphConfigurations[0],
                 "Species",  0.0, 23.0,
                 "Yield",minYield,maxYield,
                 hgph[2]->h_stableDecayYields,
-                "Yields w/ Decays",0.2, 0.20, 0.45, 0.45, 0.055);
+                "n_{i}^{Th+Decay}",0.2, 0.20, 0.45, 0.45, 0.055);
 
   int nGraphs = 5;
   TString ** legends = new TString*[nGraphs];
@@ -207,8 +249,8 @@ int RunHadronGas()
   histograms[4] = hgph[8]->h_stableThermalYields; legends[4] = tempLabels[8];
 
   plotter->plot(nGraphs, "HGM_StableThermalYieldsVsT",canvasConfigurationLogY,graphConfigurations,
-                        "Species", 0.0, 23.0,
-                        "Thermal Yield", minYield,maxYield,
+                        "Species", 0.0, 18.0,
+                        "n_{i}^{Th}", minYield,maxYield,
                         histograms,legends,0.2, 0.20, 0.45, 0.45, 0.04);
 
   histograms[0] = hgph[0]->h_stableDecayYields; legends[0] = tempLabels[0];
@@ -219,7 +261,7 @@ int RunHadronGas()
 
   plotter->plot(nGraphs, "HGM_StableDecayYieldsVsT",canvasConfigurationLogY,graphConfigurations,
                         "Species", 0.0, 23.0,
-                        "Thermal + Decay Yield", minYield,maxYield,
+                        "n_{i}^{Th+Dec}", minYield,maxYield,
                         histograms,legends,0.2, 0.20, 0.45, 0.45, 0.04);
 
 
@@ -230,7 +272,7 @@ int RunHadronGas()
   histograms[4] = hgph[8]->h_stableDecayToThermalRatio; legends[4] = tempLabels[8];
   plotter->plot(nGraphs, "HGM_StableDecayToThermalVsT",canvasConfigurationLogY,graphConfigurations,
                         "Species", 0.0, 23.0,
-                        "Decay/Thermal", 0.9,20.0,
+                        "n_{i}^{Th+Dec}/n_{i}^{Th}", 0.5,10.0,
                         histograms,legends,0.7, 0.60, 0.85, 0.85, 0.04);
 
 
@@ -245,33 +287,101 @@ int RunHadronGas()
   canvasConfigurationLogZ->theta =  35.0;
   canvasConfigurationLogZ->phi   = -125.0;
   graphConfiguration2D->plotOption = "LEGO2";
-  hgph[4]->h_stableDecayCorrelatedPairsYields->GetXaxis()->SetNdivisions(23);
-  hgph[4]->h_stableDecayCorrelatedPairsYields->GetYaxis()->SetNdivisions(23);
+
+  int jt = 9;
+
+  hgph[jt]->h_stableDecayCorrelatedPairsYields->GetXaxis()->SetNdivisions(23);
+  hgph[jt]->h_stableDecayCorrelatedPairsYields->GetYaxis()->SetNdivisions(23);
   plotter->plot("HGM_StableDecayCorrelatedPairYields",canvasConfigurationLogZ,graphConfiguration2D,
                "Species 1", 0.0, 23.0,
                "Species 2", 0.0, 23.0,
-               "Yield", 1E-7, 1.0,
-               hgph[4]->h_stableDecayCorrelatedPairsYields);
+               "n_{ij}", 1E-7, 1.0,
+               hgph[jt]->h_stableDecayCorrelatedPairsYields);
 
 
-  hgph[4]->h_stableDecayPairsYields->GetXaxis()->SetNdivisions(23);
-  hgph[4]->h_stableDecayPairsYields->GetYaxis()->SetNdivisions(23);
+  hgph[jt]->h_stableDecayPairsYields->GetXaxis()->SetNdivisions(23);
+  hgph[jt]->h_stableDecayPairsYields->GetYaxis()->SetNdivisions(23);
   plotter->plot("HGM_StableDecayPairYields",canvasConfigurationLogZ,graphConfiguration2D,
                "Species 1", 0.0, 23.0,
                "Species 2", 0.0, 23.0,
-               "Yield", 1E-10, 10.0,
-               hgph[4]->h_stableDecayPairsYields);
+               "n_{ij}", 1E-10, 10.0,
+               hgph[jt]->h_stableDecayPairsYields);
 
 
 
 
-  hgph[4]->h_stableDecayPairsYields->GetXaxis()->SetNdivisions(23);
-  hgph[4]->h_stableDecayPairsYields->GetYaxis()->SetNdivisions(23);
+  hgph[jt]->h_stableDecayPairsYields->GetXaxis()->SetNdivisions(23);
+  hgph[jt]->h_stableDecayPairsYields->GetYaxis()->SetNdivisions(23);
   plotter->plot("HGM_StableDecayCorrelatedPairNorm",canvasConfigurationLogZ,graphConfiguration2D,
                "Trigger Species", 0.0, 23.0,
                "Associate Species", 0.0, 23.0,
                "Conditional Yield", 1E-10, 1.0,
-               hgph[4]->h_stableDecayCorrelatedPairsNorm);
+               hgph[jt]->h_stableDecayCorrelatedPairsNorm);
+
+
+//  plotter->plot("HGM_AllYieldsVsMass", canvasConfigurationLogY, graphConfigurations[0],
+//                "Mass (GeV/c^{2})",  0.0, 3.0,
+//                "Yield",1.0E-7,1.0E1,
+//                hgph[jt]->h_allYieldsVsMass,
+//                "Thermal Yields",0.22, 0.7, 0.4, 0.76, 0.055);
+
+  histograms[0] = hgph[0]->h_allYieldsVsMass; legends[0] = tempLabels[0];
+  histograms[1] = hgph[2]->h_allYieldsVsMass; legends[1] = tempLabels[2];
+  histograms[2] = hgph[4]->h_allYieldsVsMass; legends[2] = tempLabels[4];
+  histograms[3] = hgph[6]->h_allYieldsVsMass; legends[3] = tempLabels[6];
+  histograms[4] = hgph[8]->h_allYieldsVsMass; legends[4] = tempLabels[8];
+  plotter->plot(nGraphs,"HGM_AllYieldsVsMassVsT",canvasConfigurationLogY,graphConfigurations,
+                        "Mass (GeV/c^{2})", 0.0, 2.50,
+                        "n_{i}^{Th}/g", 1.0E-7,1.0E0,
+                        histograms,legends,0.7, 0.60, 0.85, 0.85, 0.04);
+
+
+  histograms[0] = hgph[0]->h_stableThermalVsMass; legends[0] = tempLabels[0];
+  histograms[1] = hgph[2]->h_stableThermalVsMass; legends[1] = tempLabels[2];
+  histograms[2] = hgph[4]->h_stableThermalVsMass; legends[2] = tempLabels[4];
+  histograms[3] = hgph[6]->h_stableThermalVsMass; legends[3] = tempLabels[6];
+  histograms[4] = hgph[8]->h_stableThermalVsMass; legends[4] = tempLabels[8];
+  plotter->plot(nGraphs,"HGM_StableThermalYieldsVsMassVsT",canvasConfigurationLogY,graphConfigurations,
+                        "Mass (GeV/c^{2})", 0.0, 2.50,
+                        "n_{i}/g", 1.0E-7,1.0E0,
+                        histograms,legends,0.7, 0.60, 0.85, 0.85, 0.04);
+
+
+  graphConfigurations[0]->xLabelSize = 0.04;
+  graphConfigurations[0]->plotOption = "COLZ";
+  plotter->plot("HGM_BF_10", canvasConfigurationLogZ, graphConfigurations[0],
+                "",  0.0, 18.0,
+                "BF",-0.1, 0.45,
+                hgph[jt]->h_stableChargeBF,
+                "BF Integrals",0.65, 0.8, 0.8, 0.86, 0.035);
+
+  plotter->plot("HGM_Rho2_10", canvasConfigurationLogZ, graphConfigurations[0],
+                "Trigger Species", 0.0, 23.0,
+                "Associate Species", 0.0, 23.0,
+                "#rho_{2}^{ij}", 1E-10, 1.0,
+                hgph[jt]->h_rho2);
+
+  plotter->plot("HGM_rho1rho1_10", canvasConfigurationLogZ, graphConfigurations[0],
+                "Trigger Species", 0.0, 23.0,
+                "Associate Species", 0.0, 23.0,
+                "#rho_{1}^{i}#rho_{1}^{j}", 1E-10, 1.0,
+                hgph[jt]->h_rho1rho1);
+
+  plotter->plot("HGM_rho1thrho1th_10", canvasConfigurationLogZ, graphConfigurations[0],
+                "Trigger Species", 0.0, 23.0,
+                "Associate Species", 0.0, 23.0,
+                "#rho_{1}^{i,th}#rho_{1}^{j,th}", 1E-10, 1.0,
+                hgph[jt]->h_rho1rho1);
+  plotter->plot("HGM_C2_10", canvasConfigurationLogZ, graphConfigurations[0],
+                "Trigger Species", 0.0, 23.0,
+                "Associate Species", 0.0, 23.0,
+                "C_{2}^{ij}", -1.0, 1.0,
+                hgph[jt]->h_C2);
+  plotter->plot("HGM_R2_10", canvasConfigurationLogZ, graphConfigurations[0],
+                "Trigger Species", 0.0, 23.0,
+                "Associate Species", 0.0, 23.0,
+                "R_{2}^{ij}", -1.0, 1.0,
+                hgph[jt]->h_R2);
 
   plotter->printAllCanvas(outputPath);
  return 0;

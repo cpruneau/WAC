@@ -33,12 +33,15 @@ public:
   // Data Members - Histograms
   ////////////////////////////////////////////////////////////////////////////
   TH1 * h_allYields;
+  TProfile * h_allYieldsVsMass;
   TH1 * h_allYieldsToPion;
   TH1 * h_allToAntiRatio;
   TH1 * h_stableThermalYields;
+  TProfile * h_stableThermalVsMass;
   TH1 * h_stableThermalYieldsToPion;
   TH1 * h_stableThermalToAntiRatio;
   TH1 * h_stableDecayYields;
+  TProfile * h_stableDecayVsMass;
   TH1 * h_stableDecayYieldsToPion;
   TH1 * h_stableDecayToAntiRatio;
   TH1 * h_stableDecayToThermalRatio;
@@ -46,6 +49,13 @@ public:
   TH2 * h_stableDecayPairsYields;
   TH2 * h_stableDecayCorrelatedPairsYields;
   TH2 * h_stableDecayCorrelatedPairsNorm;
+  TH1 * h_stableChargeBF;
+
+  TH2 * h_rho2;
+  TH2 * h_rho1rho1;
+  TH2 * h_rho1thrho1th;
+  TH2 * h_C2;
+  TH2 * h_R2;
 
 
     ClassDef(HadronGasParticleHistograms,0)

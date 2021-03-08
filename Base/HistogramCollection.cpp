@@ -1044,7 +1044,14 @@ void HistogramCollection::squareDifferenceHistos(TH1 *hAvg, TH1 *h, double sumWe
         evAvg   = n>0 ? sqrt(evSqAvg)/sqrtN : sqrt(evSqAvg);
         hAvg->SetBinContent(ix,iy, vAvg);
         hAvg->SetBinError(ix,iy,evAvg);
-        }
+        if ( ix==1 && iy==1)
+          {
+          TString check = h->GetName();
+          if (check.Contains("70_80_V0MnGeq7Lt10_HPHMCI_G2_DetaDphi_shft"))
+          cout << check << "weight:" << weight << " sumWeights: " << sumWeights << " rw:" << rw << " rwn:" << rwn  << " vAvg:" << vAvg << "   dv: " << dv << "  evAvg:" << evAvg << endl;
+
+          }
+        } // G2_DyDphi_shft
       }
     }
   else if (h->IsA()==TH3::Class() || h->IsA()==TH3F::Class() || h->IsA()==TH3D::Class() || h->IsA()==TH3I::Class() )

@@ -33,17 +33,20 @@ fi
 echo "========================================================================================"
 echo "Setting up WAC environment variables"
 echo "========================================================================================"
+export ROOT_SELECTED_VERSION="/usr/local/Cellar/root/6.22.06_2"
+export ROOT_LIBS="$ROOT_SELECTED_VERSION/lib/root"
 export WAC_ROOT=`pwd`
+export WAC_DATA="$WAC_ROOT/../WAC-DATA"
 export WAC_SOURCE="$WAC_ROOT"
 export WAC_BIN="$WAC_ROOT/bin"
 export WAC_LIB="$WAC_ROOT/lib"
 export PATH="$WAC_BIN:$PATH"
 export DYLD_LIBRARY_PATH="$WAC_LIB:$DYLD_LIBRARY_PATH"
 export LD_LIBRARY_PATH="$WAC_LIB:$LD_LIBRARY_PATH"
-export WAC_INPUT_PATH="$WAC_ROOT/InputFiles/"
-export WAC_OUTPUT_PATH="$WAC_ROOT/OutputFiles/"
-export WAC_INPUT_DATA_PATH="$WAC_ROOT/InputDataFiles/"
-export WAC_OUTPUT_DATA_PATH="$WAC_ROOT/OutputDataFiles/"
+export WAC_INPUT_PATH="$WAC_DATA/InputFiles/"
+export WAC_OUTPUT_PATH="$WAC_DATA/OutputFiles/"
+export WAC_INPUT_DATA_PATH="$WAC_DATA/InputDataFiles/"
+export WAC_OUTPUT_DATA_PATH="$WAC_DATA/OutputDataFiles/"
 cd build
 cmake ../
 make install

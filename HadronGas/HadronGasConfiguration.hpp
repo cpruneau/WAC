@@ -21,11 +21,12 @@ public:
   ostream & printConfiguration(ostream & os);
 
   bool plotSystemProperties;
-  int nT;    double minT,   maxT;
-  int nMu;   double minMu,  maxMu;
-  int nMuB;  double minMuB, maxMuB;
-  int nMuS;  double minMuS, maxMuS;
-  int nMuQ;  double minMuQ, maxMuQ;
+  int nT;    double minT,    maxT;
+  int nMass; double minMass, maxMass;
+  int nMu;   double minMu,   maxMu;
+  int nMuB;  double minMuB,  maxMuB;
+  int nMuS;  double minMuS,  maxMuS;
+  int nMuQ;  double minMuQ,  maxMuQ;
 
   bool plotParticleProperties;
   int nTypes;
