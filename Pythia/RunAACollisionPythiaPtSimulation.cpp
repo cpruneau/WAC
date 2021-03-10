@@ -28,8 +28,8 @@ int main()
   MessageLogger::LogLevel messageLevel = MessageLogger::Info;
 
   EventLoop * eventLoop = new EventLoop("RunAACollisionPythiaPtSimulation");
-  eventLoop->setNEventRequested(20);
-  eventLoop->setNEventReported(1000000);
+  eventLoop->setNEventRequested(1000000);
+  eventLoop->setNEventReported(10000);
   eventLoop->setReportLevel(messageLevel);
   eventLoop->setNEventPartialSave(-1);
   eventLoop->setPartialSave(false);
