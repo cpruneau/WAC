@@ -26,7 +26,7 @@ int main()
   cout << "<INFO> PYTHIA Model Analysis - Transverse Momentum Correlation Histograms" << endl;
   EventLoop * eventLoop = new EventLoop("RunPythiaSimulationPtCorrelation");
   MessageLogger::LogLevel messageLevel = MessageLogger::Info;
-  eventLoop->setNEventRequested(1000);
+  eventLoop->setNEventRequested(10000000);
   eventLoop->setNEventReported(10000);
   eventLoop->setReportLevel(messageLevel);
   eventLoop->setNEventPartialSave(1000000);
