@@ -29,7 +29,7 @@ int main()
 
   EventLoop * eventLoop = new EventLoop("RunAACollisionPythiaPtSimulation");
   eventLoop->setNEventRequested(20);
-  eventLoop->setNEventReported(100000);
+  eventLoop->setNEventReported(1000000);
   eventLoop->setReportLevel(messageLevel);
   eventLoop->setNEventPartialSave(-1);
   eventLoop->setPartialSave(false);
@@ -74,7 +74,7 @@ int main()
   
   //eventLoop->addTask( new PythiaEventGenerator("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
   
-  pc->dataInputFileName = "Pythia_pp_7000.root";
+  pc->dataInputFileName = "Pythia_pp_2760_10million.root";
   pc->ppdataInputTreeName[0] = "PythiaTree";
   pc->dataInputPath     = getenv("WAC_OUTPUT_DATA_PATH");
 
@@ -142,20 +142,21 @@ int main()
   int nParticleFilters = 12;
   ParticleFilter  *  particleFilter  = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
   ParticleFilter  ** particleFilters = new ParticleFilter*[nParticleFilters];
-  particleFilters[0]   = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
-  particleFilters[1]   = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Positive,  minPt, maxPt, minEta, maxEta, minY, maxY);
-  particleFilters[2]   = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Negative,  minPt, maxPt, minEta, maxEta, minY, maxY);
-  particleFilters[3]   = new ParticleFilter(ParticleFilter::Pion,   ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
-  particleFilters[4]   = new ParticleFilter(ParticleFilter::Pion,   ParticleFilter::Positive,  minPt, maxPt, minEta, maxEta, minY, maxY);
-  particleFilters[5]   = new ParticleFilter(ParticleFilter::Pion,   ParticleFilter::Negative,  minPt, maxPt, minEta, maxEta, minY, maxY);
-  particleFilters[6]   = new ParticleFilter(ParticleFilter::Kaon,   ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
-  particleFilters[7]   = new ParticleFilter(ParticleFilter::Kaon,   ParticleFilter::Positive,  minPt, maxPt, minEta, maxEta, minY, maxY);
-  particleFilters[8]   = new ParticleFilter(ParticleFilter::Kaon,   ParticleFilter::Negative,  minPt, maxPt, minEta, maxEta, minY, maxY);
-  particleFilters[9]   = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
-  particleFilters[10]  = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Positive,  minPt, maxPt, minEta, maxEta, minY, maxY);
-  particleFilters[11]  = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Negative,  minPt, maxPt, minEta, maxEta, minY, maxY);
+  particleFilters[8]   = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
+  particleFilters[0]   = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Positive,  minPt, maxPt, minEta, maxEta, minY, maxY);
+  particleFilters[1]   = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Negative,  minPt, maxPt, minEta, maxEta, minY, maxY);
+  particleFilters[9]   = new ParticleFilter(ParticleFilter::Pion,   ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
+  particleFilters[2]   = new ParticleFilter(ParticleFilter::Pion,   ParticleFilter::Positive,  minPt, maxPt, minEta, maxEta, minY, maxY);
+  particleFilters[3]   = new ParticleFilter(ParticleFilter::Pion,   ParticleFilter::Negative,  minPt, maxPt, minEta, maxEta, minY, maxY);
+  particleFilters[10]   = new ParticleFilter(ParticleFilter::Kaon,   ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
+  particleFilters[4]   = new ParticleFilter(ParticleFilter::Kaon,   ParticleFilter::Positive,  minPt, maxPt, minEta, maxEta, minY, maxY);
+  particleFilters[5]   = new ParticleFilter(ParticleFilter::Kaon,   ParticleFilter::Negative,  minPt, maxPt, minEta, maxEta, minY, maxY);
+  particleFilters[11]   = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
+  particleFilters[6]  = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Positive,  minPt, maxPt, minEta, maxEta, minY, maxY);
+  particleFilters[7]  = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Negative,  minPt, maxPt, minEta, maxEta, minY, maxY);
 
 
+ 
   /////////////////////////////////////////////////////////////////////////////////////////////////////
   // Collision Geometry Configuration Parameters
   ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -211,8 +212,8 @@ int main()
   eventLoop->addTask( collisionGeometryAnalyzer );
   //eventLoop->addTask( new AACollisionPythiaGenerator("AAPYTHIA",pc, collisionGeometry, event,eventFilter,particleFilter, messageLevel) );
   eventLoop->addTask( new AACollisionReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel, collisionGeometry) );
-  eventLoop->addTask( new RadialBoostTask("PYTHIA_RADIALBOOST",rc, collisionGeometry, event, messageLevel) );
-  eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM_PbPb", ac, event, eventFilter, particleFilters, messageLevel) );
+  //eventLoop->addTask( new RadialBoostTask("PYTHIA_RADIALBOOST",rc, collisionGeometry, event, messageLevel) );
+  eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM_PbPb2760_NoBoost", ac, event, eventFilter, particleFilters, messageLevel) );
   eventLoop->run();
 }
 
