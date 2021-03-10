@@ -18,8 +18,8 @@
 #include "PTCorrelator.hpp"
 #include "RadialBoostTask.hpp"
 #include "RadialBoostConfiguration.hpp"
-#include "Factory.hpp"
-#include "Particle.hpp"
+#include "ParticleAnalyzer.hpp"
+#include "ParticleAnalyzerConfiguration.hpp"
 #include "TMath.h"
 
 
@@ -106,7 +106,7 @@ int main()
   ac->ptCorrelatorVsMult     = true;
   ac->totEvents = eventLoop->getNEventRequested();
   ac->maxOrder = 4;
-  ac->numTypes = 4;
+  ac->numTypes = 8;
 
   double minPt  = 0.2;
   double maxPt  = 2.0;
@@ -203,6 +203,42 @@ int main()
   geometryConfiguration->calculateDerivedHistograms = true;
 
   // ========================================================================================================
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Particle Analyzer Configuration Parameters
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  ParticleAnalyzerConfiguration * particleConfiguration = new ParticleAnalyzerConfiguration("PYTHIAParticleAnalyzer","PYTHIAParticleAnalyzer","1.0");
+  particleConfiguration->outputPath        = getenv("WAC_OUTPUT_PATH");
+  
+  //particleConfiguration->nBins_pt;
+  particleConfiguration->min_pt = minPt;
+  particleConfiguration->max_pt = maxPt;
+  particleConfiguration->range_pt = maxPt - minPt;
+
+  //particleConfiguration->nBins_eta;
+  particleConfiguration->min_eta = minEta;
+  particleConfiguration->max_eta = maxEta;
+  particleConfiguration->range_eta = maxEta - minEta;
+
+  //particleConfiguration->nBins_y;
+  particleConfiguration->min_y = minY;
+  particleConfiguration->max_y = maxY;
+  particleConfiguration->range_y = maxY - minY;
+
+  //particleConfiguration->nBins_phi;
+  //particleConfiguration->min_phi = minPhi;
+  //particleConfiguration->max_phi = maxPhi;
+  //particleConfiguration->range_phi = maxPhi - minPhi;
+
+  //particleConfiguration->nBins_phiEta;
+  //particleConfiguration->nBins_phiEtaPt;
+  //particleConfiguration->nBins_phiY;
+  //particleConfiguration->nBins_phiYPt;
+
+  // ========================================================================================================
+
   Event * event = Event::getEvent();
   CollisionGeometryGenerator * collisionGeometryGenerator = new CollisionGeometryGenerator("PbPbWSGen",      geometryConfiguration, messageLevel);
   CollisionGeometry * collisionGeometry = collisionGeometryGenerator->getCollisionGeometry();
@@ -213,6 +249,7 @@ int main()
   //eventLoop->addTask( new AACollisionPythiaGenerator("AAPYTHIA",pc, collisionGeometry, event,eventFilter,particleFilter, messageLevel) );
   eventLoop->addTask( new AACollisionReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel, collisionGeometry) );
   //eventLoop->addTask( new RadialBoostTask("PYTHIA_RADIALBOOST",rc, collisionGeometry, event, messageLevel) );
+  eventLoop->addTask( new ParticleAnalyzer("PYTHIA_ParticleAnalyzer_HPHMPiPPiMKPKMPrPPrN_PbPb2760_NoBoost",particleConfiguration, event, eventFilter,ac->numTypes, particleFilters  , messageLevel) );
   eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM_PbPb2760_NoBoost", ac, event, eventFilter, particleFilters, messageLevel) );
   eventLoop->run();
 }

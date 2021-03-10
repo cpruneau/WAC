@@ -15,6 +15,8 @@
 #include "PythiaEventGenerator.hpp"
 #include "PythiaEventReader.hpp"
 #include "PTCorrelator.hpp"
+#include "ParticleAnalyzer.hpp"
+#include "ParticleAnalyzerConfiguration.hpp"
 
 
 int main()
@@ -24,7 +26,7 @@ int main()
   cout << "<INFO> PYTHIA Model Analysis - Transverse Momentum Correlation Histograms" << endl;
   EventLoop * eventLoop = new EventLoop("RunPythiaSimulationPtCorrelation");
   MessageLogger::LogLevel messageLevel = MessageLogger::Info;
-  eventLoop->setNEventRequested(10000000);
+  eventLoop->setNEventRequested(1000);
   eventLoop->setNEventReported(10000);
   eventLoop->setReportLevel(messageLevel);
   eventLoop->setNEventPartialSave(1000000);
@@ -54,11 +56,11 @@ int main()
   ac->nBins_cent   = 100;
   ac->min_cent     = 0.0;
   ac->max_cent     = 1.0;
-  ac->ptCorrelatorVsCent     = true;
+  ac->ptCorrelatorVsCent     = false;
   ac->ptCorrelatorVsMult     = true;
   ac->totEvents = eventLoop->getNEventRequested();
   ac->maxOrder = 4;
-  ac->numTypes = 4;
+  ac->numTypes = 8;
 
   double minPt  = 0.2;
   double maxPt  = 2.0;
@@ -66,6 +68,7 @@ int main()
   double maxEta =  2.0;
   double minY   = -2.0;
   double maxY   =  2.0;
+  //================================================================================================
 
   EventFilter     * eventFilter      = new EventFilter(EventFilter::MinBias,0.0,0.0);
   ParticleFilter  * particleFilters[8];
@@ -80,7 +83,7 @@ int main()
   particleFilters[nParticleFilters++]  = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Positive,minPt, maxPt, minEta, maxEta, minY, maxY );
   particleFilters[nParticleFilters++]  = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Negative,minPt, maxPt, minEta, maxEta, minY, maxY );
 
-
+  //=================================================================================================
   int nOptions = 0;
   TString ** pythiaOptions = new TString* [50];
   pythiaOptions[nOptions++] = new TString("Init:showChangedSettings = on");      // list changed settings
@@ -99,15 +102,51 @@ int main()
                                                      pythiaOptions);
   pc->dataOutputUsed = false;
   pc->dataConversionToWac = true;
-  
-  //eventLoop->addTask( new PythiaEventGenerator("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
-  
-  pc->dataInputFileName = "Pythia_pp_7000.root";
+  pc->dataInputFileName = "Pythia_pp_7000_10million.root";
   pc->dataInputTreeName = "PythiaTree";
   pc->dataInputPath     = getenv("WAC_OUTPUT_DATA_PATH");
-  eventLoop->addTask( new PythiaEventReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
+  //=================================================================================================
 
-  eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM", ac, event, eventFilter, particleFilters, messageLevel) );
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Particle Analyzer Configuration Parameters
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  ParticleAnalyzerConfiguration * particleConfiguration = new ParticleAnalyzerConfiguration("PYTHIAParticleAnalyzer","PYTHIAParticleAnalyzer","1.0");
+  particleConfiguration->outputPath        = getenv("WAC_OUTPUT_PATH");
+  particleConfiguration->scaleHistograms  = true;
+  particleConfiguration->forceHistogramsRewrite  = true;
+  
+  //particleConfiguration->nBins_pt;
+  particleConfiguration->min_pt = minPt;
+  particleConfiguration->max_pt = maxPt;
+  particleConfiguration->range_pt = maxPt - minPt;
+
+  //particleConfiguration->nBins_eta;
+  particleConfiguration->min_eta = minEta;
+  particleConfiguration->max_eta = maxEta;
+  particleConfiguration->range_eta = maxEta - minEta;
+
+  //particleConfiguration->nBins_y;
+  particleConfiguration->min_y = minY;
+  particleConfiguration->max_y = maxY;
+  particleConfiguration->range_y = maxY - minY;
+
+  //particleConfiguration->nBins_phi;
+  //particleConfiguration->min_phi = minPhi;
+  //particleConfiguration->max_phi = maxPhi;
+  //particleConfiguration->range_phi = maxPhi - minPhi;
+
+  //particleConfiguration->nBins_phiEta;
+  //particleConfiguration->nBins_phiEtaPt;
+  //particleConfiguration->nBins_phiY;
+  //particleConfiguration->nBins_phiYPt;
+
+  // ========================================================================================================
+  
+  //eventLoop->addTask( new PythiaEventGenerator("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
+  eventLoop->addTask( new PythiaEventReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
+  eventLoop->addTask( new ParticleAnalyzer("PYTHIA_ParticleAnalyzer_HPHMPiPPiMKPKMPrPPrN_pp7000",particleConfiguration, event, eventFilter,ac->numTypes, particleFilters  , messageLevel) );
+  eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator__HPHMPiPPiMKPKMPrPPrN_pp7000", ac, event, eventFilter, particleFilters, messageLevel) );
   eventLoop->run();
   t->stop();
   t->print(cout);
