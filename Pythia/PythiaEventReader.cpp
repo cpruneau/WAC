@@ -169,8 +169,8 @@ void PythiaEventReader::execute()
   particleAccepted++;
   //if (reportDebug("PythiaEventReader",getTaskName(),"execute()")) cout << "particleAccepted: " << particleAccepted << endl;
 }
-  event->nParticles   = particleCounted;
-  event->multiplicity = particleAccepted;
+  event->nParticles   = particleAccepted;
+  event->multiplicity = particleCounted ;
 //  if (reportDebug("PythiaEventReader",getTaskName(),"execute()"))
 //    {
 //    cout << endl;

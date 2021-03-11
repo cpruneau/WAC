@@ -164,8 +164,8 @@ void PythiaEventGenerator::execute()
       //      }
       }
 
-    event->nParticles   = particleCounted;
-    event->multiplicity = particleAccepted;
+    event->nParticles   = particleAccepted;
+    event->multiplicity = particleCounted ;
     if (reportDebug()) cout << "PythiaEventGenerator::execute() No of accepted Particles : "<< particleAccepted<<endl;
     if (reportDebug()) cout << "PythiaEventGenerator::execute() No of counted Particles : "<< particleCounted <<endl;
     }

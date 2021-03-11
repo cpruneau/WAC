@@ -174,7 +174,7 @@ void ParticleAnalyzer::execute()
   totalEnergy[iFilter] = 0.0;
   }
 
-  for (int iParticle=0; iParticle<event->multiplicity; iParticle++)
+  for (int iParticle=0; iParticle<event->nParticles; iParticle++)
   {
   Particle & particle = * event->getParticleAt(iParticle);
   for (int iFilter=0; iFilter<nParticleFilters; iFilter++ )

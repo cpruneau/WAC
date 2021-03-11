@@ -25,10 +25,10 @@
 
 int main()
 {
-  MessageLogger::LogLevel messageLevel = MessageLogger::Info;
+  MessageLogger::LogLevel messageLevel = MessageLogger::Debug;
 
   EventLoop * eventLoop = new EventLoop("RunAACollisionPythiaPtSimulation");
-  eventLoop->setNEventRequested(1000000);
+  eventLoop->setNEventRequested(10);
   eventLoop->setNEventReported(10000);
   eventLoop->setReportLevel(messageLevel);
   eventLoop->setNEventPartialSave(-1);
@@ -106,7 +106,7 @@ int main()
   ac->ptCorrelatorVsMult     = true;
   ac->totEvents = eventLoop->getNEventRequested();
   ac->maxOrder = 4;
-  ac->numTypes = 8;
+  ac->numTypes = 4;
 
   double minPt  = 0.2;
   double maxPt  = 2.0;
@@ -142,18 +142,18 @@ int main()
   int nParticleFilters = 12;
   ParticleFilter  *  particleFilter  = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
   ParticleFilter  ** particleFilters = new ParticleFilter*[nParticleFilters];
-  particleFilters[8]   = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
   particleFilters[0]   = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Positive,  minPt, maxPt, minEta, maxEta, minY, maxY);
   particleFilters[1]   = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Negative,  minPt, maxPt, minEta, maxEta, minY, maxY);
-  particleFilters[9]   = new ParticleFilter(ParticleFilter::Pion,   ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
   particleFilters[2]   = new ParticleFilter(ParticleFilter::Pion,   ParticleFilter::Positive,  minPt, maxPt, minEta, maxEta, minY, maxY);
   particleFilters[3]   = new ParticleFilter(ParticleFilter::Pion,   ParticleFilter::Negative,  minPt, maxPt, minEta, maxEta, minY, maxY);
-  particleFilters[10]   = new ParticleFilter(ParticleFilter::Kaon,   ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
   particleFilters[4]   = new ParticleFilter(ParticleFilter::Kaon,   ParticleFilter::Positive,  minPt, maxPt, minEta, maxEta, minY, maxY);
   particleFilters[5]   = new ParticleFilter(ParticleFilter::Kaon,   ParticleFilter::Negative,  minPt, maxPt, minEta, maxEta, minY, maxY);
-  particleFilters[11]   = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
   particleFilters[6]  = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Positive,  minPt, maxPt, minEta, maxEta, minY, maxY);
   particleFilters[7]  = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Negative,  minPt, maxPt, minEta, maxEta, minY, maxY);
+  particleFilters[8]   = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
+  particleFilters[9]   = new ParticleFilter(ParticleFilter::Pion,   ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
+  particleFilters[10]   = new ParticleFilter(ParticleFilter::Kaon,   ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
+  particleFilters[11]   = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Charged,   minPt, maxPt, minEta, maxEta, minY, maxY);
 
 
  
@@ -246,11 +246,11 @@ int main()
 
   eventLoop->addTask( collisionGeometryGenerator );
   eventLoop->addTask( collisionGeometryAnalyzer );
-  //eventLoop->addTask( new AACollisionPythiaGenerator("AAPYTHIA",pc, collisionGeometry, event,eventFilter,particleFilter, messageLevel) );
-  eventLoop->addTask( new AACollisionReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel, collisionGeometry) );
+  eventLoop->addTask( new AACollisionPythiaGenerator("AAPYTHIA",pc, collisionGeometry, event,eventFilter,particleFilter, messageLevel) );
+  //eventLoop->addTask( new AACollisionReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel, collisionGeometry) );
   //eventLoop->addTask( new RadialBoostTask("PYTHIA_RADIALBOOST",rc, collisionGeometry, event, messageLevel) );
-  eventLoop->addTask( new ParticleAnalyzer("PYTHIA_ParticleAnalyzer_HPHMPiPPiMKPKMPrPPrN_PbPb2760_NoBoost",particleConfiguration, event, eventFilter,ac->numTypes, particleFilters  , messageLevel) );
-  eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM_PbPb2760_NoBoost", ac, event, eventFilter, particleFilters, messageLevel) );
+  eventLoop->addTask( new ParticleAnalyzer("PYTHIA_ParticleAnalyzer_test",particleConfiguration, event, eventFilter,ac->numTypes, particleFilters  , messageLevel) );
+  eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_test", ac, event, eventFilter, particleFilters, messageLevel) );
   eventLoop->run();
 }
 
