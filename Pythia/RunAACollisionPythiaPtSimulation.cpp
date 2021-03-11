@@ -25,10 +25,10 @@
 
 int main()
 {
-  MessageLogger::LogLevel messageLevel = MessageLogger::Debug;
+  MessageLogger::LogLevel messageLevel = MessageLogger::Info;
 
   EventLoop * eventLoop = new EventLoop("RunAACollisionPythiaPtSimulation");
-  eventLoop->setNEventRequested(10);
+  eventLoop->setNEventRequested(1000000);
   eventLoop->setNEventReported(10000);
   eventLoop->setReportLevel(messageLevel);
   eventLoop->setNEventPartialSave(-1);
@@ -106,7 +106,7 @@ int main()
   ac->ptCorrelatorVsMult     = true;
   ac->totEvents = eventLoop->getNEventRequested();
   ac->maxOrder = 4;
-  ac->numTypes = 4;
+  ac->numTypes = 8;
 
   double minPt  = 0.2;
   double maxPt  = 2.0;
@@ -246,11 +246,11 @@ int main()
 
   eventLoop->addTask( collisionGeometryGenerator );
   eventLoop->addTask( collisionGeometryAnalyzer );
-  eventLoop->addTask( new AACollisionPythiaGenerator("AAPYTHIA",pc, collisionGeometry, event,eventFilter,particleFilter, messageLevel) );
-  //eventLoop->addTask( new AACollisionReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel, collisionGeometry) );
+  //eventLoop->addTask( new AACollisionPythiaGenerator("AAPYTHIA",pc, collisionGeometry, event,eventFilter,particleFilter, messageLevel) );
+  eventLoop->addTask( new AACollisionReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel, collisionGeometry) );
   //eventLoop->addTask( new RadialBoostTask("PYTHIA_RADIALBOOST",rc, collisionGeometry, event, messageLevel) );
-  eventLoop->addTask( new ParticleAnalyzer("PYTHIA_ParticleAnalyzer_test",particleConfiguration, event, eventFilter,ac->numTypes, particleFilters  , messageLevel) );
-  eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_test", ac, event, eventFilter, particleFilters, messageLevel) );
+  eventLoop->addTask( new ParticleAnalyzer("PYTHIA_ParticleAnalyzer_HPHMPiPPiMKPKMPrPPrN_PbPb2760_NoBoost",particleConfiguration, event, eventFilter,ac->numTypes, particleFilters  , messageLevel) );
+  eventLoop->addTask( new PTCorrelator("PYTHIA_PTCorrelator_HPHMPiPPiM_PbPb2760_NoBoost", ac, event, eventFilter, particleFilters, messageLevel) );
   eventLoop->run();
 }
 
