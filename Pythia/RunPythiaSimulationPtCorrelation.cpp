@@ -143,8 +143,8 @@ int main()
 
   // ========================================================================================================
 
-  eventLoop->addTask(new PythiaEventGenerator("PYTHIA", pc, event, eventFilter, particleFilter, messageLevel));
-  //eventLoop->addTask( new PythiaEventReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
+  //eventLoop->addTask(new PythiaEventGenerator("PYTHIA", pc, event, eventFilter, particleFilter, messageLevel));
+  eventLoop->addTask( new PythiaEventReader("PYTHIA",pc, event,eventFilter,particleFilter, messageLevel) );
   eventLoop->addTask(new ParticleAnalyzer("PYTHIA_ParticleAnalyzer_PiPPiMKPKMPPPN_pp7000", particleConfiguration, event, eventFilter, ac->numTypes, particleFilters, messageLevel));
   eventLoop->addTask(new PTCorrelator("PYTHIA_PTCorrelator__PiPPiMKPKMPPPN_pp7000", ac, event, eventFilter, particleFilters, messageLevel));
   eventLoop->run();
