@@ -30,10 +30,10 @@ public:
   virtual void loadHistogramRec(TString * baseName, int depth, int partIndex, TFile * inputFile);
   virtual void fillEventHistos(double mult, double cent, double weight);
   virtual void fillTransverseMomentumHistos(double transverseMomentum, int filter, double mult, double cent, double weight);
-  virtual void fillNormalizedPTValues( int depth, int partIndex, TProfile * product, TProfile **OldSHistos, TProfile** pTHistos, TProfile **newSHistos);
+  virtual void fillNormalizedPTValues(int depth, int partIndex, double product, double relerrpt, int bin, TH1 **OldHistos, TProfile **pTHistos, TH1 **newHistos);
   //virtual void fillNormalizedPTValues( int depth, int partIndex, double product, TH1 *** values, int* reorder, int*  nBin);
-  virtual void calculateCumulants(TProfile ** Shistos, TProfile **CHistos, int nBins, double min, double max);
-  virtual void calcRecSum(TProfile **CHistos,  int* iHisto, int* Subset, int len,  int * set, int lenSet, TProfile * productC, double* used, int& curInd, int productS, TProfile *  sum, int depth);
+  virtual void calculateCumulants(TH1 ** Shistos, TH1 **CHistos, int nBins, double min, double max);
+  virtual void calcRecSum(TH1 **CHistos, int *iHisto, int iBin, int *Subset, int len, int *set, int lenSet, double productC, double *used, int &curInd, int productS, double &sum, double &sumError, double relErr, int depth);
   virtual void calculatePTDeviationMoments(double *** transverseMomentumMoments, int bin, int iEvent, int nParticles, TProfile ** pTHisto);
 
   ////////////////////////////////////////////////////////////////////////////
@@ -90,9 +90,13 @@ public:
   // in the order S, s, s*, C, c, c*
   TH1 * h_events;
 
+  TProfile ** S; 
+	TProfile ** S_vsMult;
+	TProfile ** S_vsCent;
+
   //first index is function index(S, s, s*), second index is histo index
-  TProfile *** hS;
-  TProfile *** hC;
+  TH1 *** hS;
+  TH1 *** hC;
 
 
 
@@ -101,16 +105,16 @@ public:
   TH1 * h_events_vsMult;
 
   //first index is function index(S, s, s*), second index is histo index
-  TProfile *** hS_vsMult;
-  TProfile *** hC_vsMult;
+  TH1 *** hS_vsMult;
+  TH1 *** hC_vsMult;
 
 
   // vs Centrality NOT IN ORDER (They are in "recursive order")
   // in the order S, s, s*, C, c, c*
   TH1 * h_events_vsCent;
   //first index is function index(S, s, s*), second index is histo index
-  TProfile *** hS_vsCent;
-  TProfile *** hC_vsCent;
+  TH1 *** hS_vsCent;
+  TH1 *** hC_vsCent;
 
 
   //number of pairs, triples ... NOT IN ORDER (They are in "recursive order")
