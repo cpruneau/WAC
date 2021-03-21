@@ -52,7 +52,7 @@ int main()
   ac->rootOuputFileName = "/Pythia";
   ac->nBins_mult = 100;
   ac->min_mult = 0.0;
-  ac->max_mult = 50.0;
+  ac->max_mult = 300.0;
   ac->nBins_cent = 100;
   ac->min_cent = 0.0;
   ac->max_cent = 1.0;
@@ -80,8 +80,7 @@ int main()
   particleFilters[nParticleFilters++] = new ParticleFilter(ParticleFilter::Kaon, ParticleFilter::Negative, minPt, maxPt, minEta, maxEta, minY, maxY);
   particleFilters[nParticleFilters++] = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Positive, minPt, maxPt, minEta, maxEta, minY, maxY);
   particleFilters[nParticleFilters++] = new ParticleFilter(ParticleFilter::Proton, ParticleFilter::Negative, minPt, maxPt, minEta, maxEta, minY, maxY);
-  particleFilters[nParticleFilters++] = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Positive, minPt, maxPt, minEta, maxEta, minY, maxY);
-  particleFilters[nParticleFilters++] = new ParticleFilter(ParticleFilter::Hadron, ParticleFilter::Negative, minPt, maxPt, minEta, maxEta, minY, maxY);
+  
 
   //=================================================================================================
   int nOptions = 0;
