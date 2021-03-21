@@ -86,6 +86,11 @@ PTHistos::~PTHistos()
 		delete[] names2[i];
 		delete[] titles2[i];
 	}
+	delete[] S;
+	if (ac.ptCorrelatorVsMult)
+		delete[] S_vsMult;
+	if (ac.ptCorrelatorVsCent)
+		delete[] S_vsCent;
 	delete[] hS;
 	if (ac.ptCorrelatorVsMult)
 		delete[] hS_vsMult;
@@ -583,6 +588,14 @@ void PTHistos::fillDerivedHistos(double ***transverseMomentumMoments, double **c
 	{
 		for (int iHisto = 0; iHisto < size; iHisto++)
 		{
+			if (iEvent == 0) // this is to ensure that we don't double count things because of the partial saves
+			{
+				h_counts[iHisto]->Reset();
+				if (ac.ptCorrelatorVsMult)
+					h_counts_vsMult[iHisto]->Reset();
+				if (ac.ptCorrelatorVsCent)
+					h_counts_vsCent[iHisto]->Reset();
+			}
 			h_counts[iHisto]->Fill(mults[iEvent], yields[iEvent][iHisto], 1.0); //weight is always 1.0
 			if (ac.ptCorrelatorVsMult)
 				h_counts_vsMult[iHisto]->Fill(mults[iEvent], yields[iEvent][iHisto], 1.0);
@@ -599,6 +612,10 @@ void PTHistos::fillDerivedHistos(double ***transverseMomentumMoments, double **c
 		calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent, numParticles[iEvent], pT); //calculate the deviation using this bin of the average transverse momentum
 		for (int iHisto = 0; iHisto < size; iHisto++)
 		{
+			if (iEvent == 0) // this is to ensure that we don't double count things because of the partial saves
+			{
+				S[iHisto]->Reset();
+			}
 			if (yields[iEvent][iHisto] != 0)
 			{
 				S[iHisto]->Fill(mults[iEvent], SValues[iEvent][iHisto], 1.0); //weight is always 1.0
@@ -611,6 +628,10 @@ void PTHistos::fillDerivedHistos(double ***transverseMomentumMoments, double **c
 			calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent, numParticles[iEvent], pT_vsMult);
 			for (int iHisto = 0; iHisto < size; iHisto++)
 			{
+				if (iEvent == 0) // this is to ensure that we don't double count things because of the partial saves
+				{
+					S_vsMult[iHisto]->Reset();
+				}
 				if (yields[iEvent][iHisto] != 0)
 				{
 					S_vsMult[iHisto]->Fill(mults[iEvent], SValues[iEvent][iHisto], 1.0);
@@ -624,6 +645,10 @@ void PTHistos::fillDerivedHistos(double ***transverseMomentumMoments, double **c
 			calculatePTDeviationMoments(transverseMomentumMoments, bin, iEvent, numParticles[iEvent], pT_vsCent);
 			for (int iHisto = 0; iHisto < size; iHisto++)
 			{
+				if (iEvent == 0) // this is to ensure that we don't double count things because of the partial saves
+				{
+					S_vsCent[iHisto]->Reset();
+				}
 				if (yields[iEvent][iHisto] != 0)
 				{
 					S_vsCent[iHisto]->Fill(cents[iEvent], SValues[iEvent][iHisto], 1.0);
@@ -738,18 +763,18 @@ void PTHistos::fillDerivedHistos(double ***transverseMomentumMoments, double **c
 		}
 	}
 
-	TH1 ***newhCValues = new TH1 **[3];
+	/*TH1 ***newhCValues = new TH1 **[3];
 	for (int iHisto = 0; iHisto < 3; iHisto++)
 	{
 		newhCValues[iHisto] = new TH1 *[size];
-	}
-	calculateCumulants(hS[0], newhCValues[0], 1, ac.min_mult, ac.max_mult);
+	}*/
+	calculateCumulants(hS[0], hC[0], 1, ac.min_mult, ac.max_mult);
 	if (ac.ptCorrelatorVsMult)
-		calculateCumulants(hS_vsMult[0], newhCValues[1], ac.nBins_mult, ac.min_mult, ac.max_mult);
+		calculateCumulants(hS_vsMult[0], hC_vsMult[0], ac.nBins_mult, ac.min_mult, ac.max_mult);
 	if (ac.ptCorrelatorVsCent)
-		calculateCumulants(hS_vsCent[0], newhCValues[2], ac.nBins_cent, ac.min_cent, ac.max_cent);
+		calculateCumulants(hS_vsCent[0], hC_vsCent[0], ac.nBins_cent, ac.min_cent, ac.max_cent);
 
-	for (int iHisto = 0; iHisto < size; iHisto++)
+	/*for (int iHisto = 0; iHisto < size; iHisto++)
 	{
 		for (int i = 1; i <= 1; i++)
 		{
@@ -772,7 +797,7 @@ void PTHistos::fillDerivedHistos(double ***transverseMomentumMoments, double **c
 				hC_vsCent[0][iHisto]->SetBinError(i, newhCValues[2][reorder[iHisto]]->GetBinError(i));
 			}
 		}
-	}
+	}*/
 
 	for (int iHisto = 0; iHisto < size; iHisto++)
 	{
@@ -854,7 +879,7 @@ void PTHistos::fillDerivedHistos(double ***transverseMomentumMoments, double **c
 		}
 	}
 
-	for (int iHisto = 0; iHisto < 2; iHisto++)
+	/*for (int iHisto = 0; iHisto < 2; iHisto++)
 	{
 		for (int i = 0; i < size; i++)
 		{
@@ -862,7 +887,7 @@ void PTHistos::fillDerivedHistos(double ***transverseMomentumMoments, double **c
 		}
 		delete[] newhCValues[iHisto];
 	}
-	delete[] newhCValues;
+	delete[] newhCValues;*/
 
 	if (reportDebug())
 		cout << "PTHistos::fillDerivedHistos(...) Completed." << endl;
@@ -946,16 +971,12 @@ void PTHistos::calculateCumulants(TH1 **SHistos, TH1 **CHistos, int nBins, doubl
 				set[i] = i + 1;
 			}
 
-			TString name = nBins * size + iHisto;
-			if (iBin == 1)
-				CHistos[iHisto] = new TH1F(name, name, nBins, min, max);
-
 			double sum = 0;
 			double sumErr = 0;
 
 			calcRecSum(CHistos, ind, iBin, set, len, set, len, 1, used, curInd, 1, sum, sumErr, 0, 0);
-			CHistos[iHisto]->SetBinContent(iBin, newSHistos[iHisto]->GetBinContent(iBin) - sum);
-			CHistos[iHisto]->SetBinError(iBin, TMath::Sqrt(newSHistos[iHisto]->GetBinError(iBin) * newSHistos[iHisto]->GetBinError(iBin) + sumErr * sumErr));
+			CHistos[reorder2[iHisto]]->SetBinContent(iBin, newSHistos[iHisto]->GetBinContent(iBin) - sum);
+			CHistos[reorder2[iHisto]]->SetBinError(iBin, TMath::Sqrt(newSHistos[iHisto]->GetBinError(iBin) * newSHistos[iHisto]->GetBinError(iBin) + sumErr * sumErr));
 
 			//ind is now uneccesary
 			delete[] ind;
