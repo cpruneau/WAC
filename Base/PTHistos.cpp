@@ -1032,8 +1032,8 @@ void PTHistos::calcRecSum(TH1 **CHistos, int *iHisto, int iBin, int *Subset, int
 			compSubset = getComplementarySubset(bin, iHisto, len, lenCompSub);
 			int iComp = convert(compSubset, lenCompSub);
 
-			double tempProduct2 = productC * CHistos[iComp]->GetBinContent(iBin);
-			double absErrTempProduct2 = TMath::Sqrt(absErrProductC * absErrProductC * CHistos[iComp]->GetBinContent(iBin) * CHistos[iComp]->GetBinContent(iBin) + CHistos[iComp]->GetBinError(iBin) * CHistos[iComp]->GetBinError(iBin) * productC * productC);
+			double tempProduct2 = tempProduct * CHistos[iComp]->GetBinContent(iBin);
+			double absErrTempProduct2 = TMath::Sqrt(absErrTempProduct * absErrTempProduct * CHistos[iComp]->GetBinContent(iBin) * CHistos[iComp]->GetBinContent(iBin) + CHistos[iComp]->GetBinError(iBin) * CHistos[iComp]->GetBinError(iBin) * tempProduct * tempProduct);
 
 			int tempProduct3 = productS * getSubsetNumber(subset, lenSub, set, lenSet);
 			int tempProduct4 = tempProduct3 * getSubsetNumber(comp, lenCompSub, set, lenSet);
@@ -1231,7 +1231,7 @@ int PTHistos::convert(int *num, int len)
 
 //////////////////////////////////////
 // convert the index of the moment (represented by num) into a base ac->numTypes integer
-// ex: for 4th order correlations, the function {1,2,3} is index 19 in the array (1, 2, 3, 4, 11, 12 ... 44, 111, ... 123)
+// ex: for 4th order correlations, the function {1,2,3} is index 19 in the array (1, 2, 3, 4, 11, 12 ... 44, 111, ... 123)Note:this array is indexed starting at 0
 //////////////////////////////////////
 int *PTHistos::convert(int num, int &len)
 {
