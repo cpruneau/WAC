@@ -28,7 +28,8 @@ TaskConfiguration(name,type,version),
  param_a(0.9),    param_b(1.0),
  nBins_phi(72),   min_phi(0.0),  max_phi( TMath::TwoPi() ),
  nBins_r(100),    min_r(0.0),    max_r(1.0),
- nBins_beta(100), min_beta(0.0), max_beta(1.0)
+ nBins_beta(100), min_beta(0.0), max_beta(1.0),
+ nBins_mult(100), min_mult(0.0), max_mult(1.0)
 {
   // no  ops
 }
@@ -39,7 +40,8 @@ TaskConfiguration( source ),
 param_a(source.param_a),       param_b(source.param_b),
 nBins_phi(source.nBins_phi),   min_phi(source.min_phi),   max_phi(source.max_phi),
 nBins_r(source.nBins_r),       min_r(source.min_r),       max_r(source.max_r),
-nBins_beta(source.nBins_beta), min_beta(source.min_beta), max_beta(source.max_beta)
+nBins_beta(source.nBins_beta), min_beta(source.min_beta), max_beta(source.max_beta),
+nBins_mult(source.nBins_mult), min_mult(source.min_mult), max_mult(source.max_mult)
 {
   // no  ops
 }
@@ -60,6 +62,9 @@ RadialBoostConfiguration & RadialBoostConfiguration::operator=(const RadialBoost
     nBins_beta = source.nBins_beta;
     min_beta   = source.min_beta;
     max_beta   = source.max_beta;
+    nBins_mult = source.nBins_mult;
+    min_mult   = source.min_mult;
+    max_mult   = source.max_mult;
     }
   return *this;
 }
@@ -85,5 +90,8 @@ void RadialBoostConfiguration::printConfiguration(ostream & os)
   << "                    max_r: " << max_r << endl
   << "               nBins_beta: " << nBins_beta << endl
   << "                 min_beta: " << min_beta << endl
-  << "                 max_beta: " << max_beta << endl;
+  << "                 max_beta: " << max_beta << endl
+  << "               nBins_mult: " << nBins_mult << endl
+  << "                 min_mult: " << min_mult << endl
+  << "                 max_mult: " << max_mult << endl;
 }

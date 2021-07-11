@@ -27,7 +27,7 @@ int main()
   MessageLogger::LogLevel messageLevel = MessageLogger::Info;
 
   EventLoop *eventLoop = new EventLoop("RunAACollisionPythiaPtSimulation");
-  eventLoop->setNEventRequested(1000000);
+  eventLoop->setNEventRequested(1000);
   eventLoop->setNEventReported(10000);
   eventLoop->setReportLevel(messageLevel);
   eventLoop->setNEventPartialSave(-1);
@@ -104,8 +104,8 @@ int main()
   ac->maxOrder = 4;
   ac->numTypes = 6;
 
-  double minPt = 0.2;
-  double maxPt = 2.0;
+  double minPt = 0.1;
+  double maxPt = 5.0;
   double minEta = -2.0;
   double maxEta = 2.0;
   double minY = -2.0;
@@ -115,7 +115,12 @@ int main()
   // Radial Boost Configuration
   ///////////////////////////////////////////////////////////////////////////////
   RadialBoostConfiguration *rc = new RadialBoostConfiguration("PYTHIARadialBoost", "PYTHIARadialBoost", "1.0");
-  rc->param_a = 0.1; //0.1 hardboost, 0.05 soft boost
+  rc->outputPath = getenv("WAC_OUTPUT_PATH");
+  rc->rootOuputFileName = "RadialBoost";
+  rc->forceHistogramsRewrite = true;
+  //rc->param_a = 0.7; //0.1 hardboost, 0.05 soft boost
+  rc->param_a_mean = 0.7; //0.1 hardboost, 0.05 soft boost
+  rc->param_a_sigma = 0.1; //0.1 hardboost, 0.05 soft boost
   rc->param_b = 1.0;
   rc->nBins_phi = 72;
   rc->min_phi = 0.0;
@@ -125,7 +130,10 @@ int main()
   rc->max_r = 1.0;
   rc->nBins_beta = 100;
   rc->min_beta = 0.0;
-  rc->max_beta = 1.0;
+  rc->max_beta = 0.999999;
+  rc->nBins_mult = ac->nBins_mult;
+  rc->min_mult = ac->min_mult;
+  rc->max_mult = ac->max_mult;
 
   //////////////////////////////////////////////////////////////////////////////
   // Particle and Event Filters
@@ -235,10 +243,10 @@ int main()
 
   eventLoop->addTask(collisionGeometryGenerator);
   eventLoop->addTask(collisionGeometryAnalyzer);
-  //eventLoop->addTask( new AACollisionPythiaGenerator("AAPYTHIA",pc, collisionGeometry, event,eventFilter,particleFilter, messageLevel) );
-  eventLoop->addTask(new AACollisionReader("PYTHIA", pc, event, eventFilter, particleFilter, messageLevel, collisionGeometry));
-  //eventLoop->addTask( new RadialBoostTask("PYTHIA_RADIALBOOST",rc, collisionGeometry, event, messageLevel) );
-  eventLoop->addTask(new ParticleAnalyzer("PYTHIA_ParticleAnalyzer_PiPPiMKPKMPPPN_PbPb2760_NoBoost", particleConfiguration, event, eventFilter, ac->numTypes, particleFilters, messageLevel));
-  eventLoop->addTask(new PTCorrelator("PYTHIA_PTCorrelator_PiPPiMKPKMPPPN_PbPb2760_NoBoost", ac, event, eventFilter, particleFilters, messageLevel));
+  eventLoop->addTask( new AACollisionPythiaGenerator("AAPYTHIA",pc, collisionGeometry, event,eventFilter,particleFilter, messageLevel) );
+  //eventLoop->addTask(new AACollisionReader("PYTHIA", pc, event, eventFilter, particleFilter, messageLevel, collisionGeometry));
+  eventLoop->addTask( new RadialBoostTask("PYTHIA_RADIALBOOST_PbPb2760_1000E_0_7Boost",rc, collisionGeometry, event, messageLevel) );
+  eventLoop->addTask(new ParticleAnalyzer("PYTHIA_ParticleAnalyzer_PiPPiMKPKMPPPN_PbPb2760_1000E_0_7Boost", particleConfiguration, event, eventFilter, ac->numTypes, particleFilters, messageLevel));
+  //eventLoop->addTask(new PTCorrelator("PYTHIA_PTCorrelator_PiPPiMKPKMPPPN_PbPb2760_NoBoost", ac, event, eventFilter, particleFilters, messageLevel));
   eventLoop->run();
 }

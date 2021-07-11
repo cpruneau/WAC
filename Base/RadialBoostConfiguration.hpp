@@ -34,6 +34,8 @@ public:
   int nBins_phi;  double min_phi;  double max_phi;
   int nBins_r;    double min_r;    double max_r;
   int nBins_beta; double min_beta; double max_beta;
+  int nBins_mult; double min_mult; double max_mult;
+
 
   ClassDef(RadialBoostConfiguration,0)
 };

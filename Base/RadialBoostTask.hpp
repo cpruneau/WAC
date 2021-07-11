@@ -39,6 +39,8 @@ public:
 
   double param_b;
   double param_a;
+  double param_a_mean;
+  double param_a_sigma;
   double max_beta;
 
   ClassDef(RadialBoostTask,0)

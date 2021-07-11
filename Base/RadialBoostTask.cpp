@@ -115,14 +115,17 @@ void RadialBoostTask::execute()
       phi = 0.0;
     else
       phi = atan2(ry,rx);
+    param_a= TMath::Max(gRandom->Gaus(param_a_mean,param_a_sigma),0);
     beta = param_a * TMath::Power(r, param_b);
     if (beta > max_beta) beta = max_beta;
     betax = beta * cos(phi);
     betay = beta * sin(phi);
-    radialBoostHistos->fill(r,phi,beta,1.0);
+    radialBoostHistos->fill(r,phi,beta, event->multiplicity, 1.0);
     }
   particle.boost(betax,betay,0.0);
   }
+  nEventAccepted++;
+  nEventProcessed++;
   //if (reportEnd("RadialBoostTask",getTaskName(),"execute()"));
 }
 
