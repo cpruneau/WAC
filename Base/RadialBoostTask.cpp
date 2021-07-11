@@ -44,7 +44,8 @@ void RadialBoostTask::createHistograms()
   RadialBoostConfiguration * ac = (RadialBoostConfiguration *) getTaskConfiguration();
   LogLevel debugLevel = getReportLevel();
   param_b  = ac->param_b; // exponent of order 1
-  param_a  = ac->param_a;
+  param_a_mean  = ac->param_a_mean;
+  param_a_sigma  = ac->param_a_sigma;
   max_beta = ac->max_beta;
   TString prefixName  = getTaskName(); prefixName += "_";
   radialBoostHistos   = new RadialBoostHistos(prefixName,ac,debugLevel);
@@ -115,7 +116,7 @@ void RadialBoostTask::execute()
       phi = 0.0;
     else
       phi = atan2(ry,rx);
-    param_a= TMath::Max(gRandom->Gaus(param_a_mean,param_a_sigma),0);
+    param_a= TMath::Max(gRandom->Gaus(param_a_mean,param_a_sigma),0.0);
     beta = param_a * TMath::Power(r, param_b);
     if (beta > max_beta) beta = max_beta;
     betax = beta * cos(phi);

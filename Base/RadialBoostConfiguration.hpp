@@ -29,6 +29,8 @@ public:
   void printConfiguration(ostream & os);
 
   double param_a;
+  double param_a_mean;
+  double param_a_sigma;
   double param_b;
 
   int nBins_phi;  double min_phi;  double max_phi;
